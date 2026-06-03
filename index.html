@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Nova Battle - Master Final v1.0.4</title>
+    
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { 
+            --glass: #ffffff; 
+            --border: #e2e8f0; 
+            --primary: #7c3aed; 
+            --accent: #7c3aed; 
+            --bg: #ffffff; 
+            --text: #0f172a; 
+            --text-muted: #64748b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        * { box-sizing: border-box; font-family: 'Outfit', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            /* CRITICAL FIX: Disables overscroll stretching on iOS and Android WebViews */
+            overscroll-behavior: none; 
+            -webkit-overflow-scrolling: auto;
+        }
+
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            padding-top: env(safe-area-inset-top);
+
+            /* FEATURE: Disable Text Selection for Native App Feel */
+            -webkit-user-select: none; 
+            -moz-user-select: none;    
+            -ms-user-select: none;     
+            user-select: none;         
+            -webkit-touch-callout: none; 
+        }
+
+        /* FEATURE: Allow selection in Input and Textarea only */
+        input, textarea, [contenteditable="true"] {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+        }
+
+        /* Global Loader CSS */
+        #global-loader {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            z-index: 99999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f1f5f9;
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Room Notice CSS */
+        .room-notice {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-left: 4px solid var(--accent);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #1e40af;
+            margin-bottom: 12px;
+            line-height: 1.4;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        /* FIX: Changed from sticky to fixed to prevent visual dragging lag */
+        .header { 
+            position: fixed; 
+            top: 0; 
+            left: 0;
+            z-index: 100; 
+            background: #ffffff; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 15px 20px; 
+            margin: 0; 
+            border-bottom: 1px solid var(--border); 
+            width: 100%;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            height: 65px;
+        }
+
+        /* FIX: Screens are now individually bound to control internal scroll container only */
+        .screen { 
+            display: none; 
+            height: 100vh; 
+            width: 100%; 
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch; /* Fast smooth inertia scroll */
+            overscroll-behavior-y: contain; /* Blocks layout bubble up */
+            padding: 65px 0 100px 0; /* 65px top offset for Header, 100px for Navigation space */
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+        }
+        
+        .screen-content { 
+            padding: 20px 20px 0 20px; 
+        }
+
+        .active { display: block !important; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+
+        .glass-card { 
+            background: #ffffff; 
+            border: 1px solid var(--border); 
+            border-radius: 20px; 
+            padding: 18px; 
+            margin-bottom: 15px; 
+            box-shadow: var(--shadow);
+        }
+        
+        input, textarea { 
+            width: 100%; 
+            background: #f1f5f9; 
+            border: 1px solid var(--border); 
+            padding: 14px 15px; 
+            border-radius: 12px; 
+            color: var(--text); 
+            outline: none; 
+            transition: 0.3s; 
+            margin-bottom: 15px; 
+            font-size: 14px; 
+        }
+        input:focus { border-color: var(--accent); background: #ffffff; box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+        input::placeholder { color: #94a3b8; }
+        input:read-only { background: #f8fafc; cursor: not-allowed; border-style: dashed; }
+        
+        .eye-icon { 
+            position: absolute; 
+            right: 15px; 
+            top: 18px; 
+            cursor: pointer; 
+            color: #94a3b8; 
+            z-index: 10; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .eye-icon:active { transform: scale(1.3); color: var(--accent); }
+        .eye-active { color: var(--accent) !important; transform: rotate(360deg); }
+
+        .btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.5); }
+        .btn-p { background: linear-gradient(135deg, var(--primary), #a855f7); color: white; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2); }
+        .btn-p:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-joined { background: #f1f5f9; color: #64748b; pointer-events: none; border: 1px solid #e2e8f0; }
+        .btn-completed { background: #e2e8f0; color: #94a3b8; pointer-events: none; }
+        
+        /* PLAY NOW Active Play Button Custom CSS Style - Updated to App's Deep Purple Accent Look */
+        .btn-play-now { background: linear-gradient(135deg, #7c3aed, #5b21b6); color: white; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4); pointer-events: auto !important; }
+        .btn-play-now:active { transform: scale(0.98); opacity: 0.9; }
+
+        /* Custom Small Card View for Team Type - Updated to Match Deep Purple Theme */
+        .team-type-badge {
+            display: inline-block;
+            background: #f5f3ff;
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            border: 1px solid #ddd6fe;
+            text-transform: uppercase;
+            width: fit-content;
+        }
+
+        .squad-list { margin-top: 15px; border-top: 1px solid var(--border); padding-top: 10px; }
+        .squad-member { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: var(--text-muted); }
+        .leader-flag { color: #eab308; margin-right: 5px; }
+        .team-code-box { background: #f5f3ff; color: var(--primary); padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 11px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid #ddd6fe; }
+        .action-btn { font-size: 16px; cursor: pointer; transition: 0.2s; }
+        .action-btn:active { transform: scale(0.8); }
+
+        .p-bar-container { background: #f1f5f9; height: 10px; border-radius: 10px; margin: 10px 0 15px 0; overflow: hidden; border: 1px solid #e2e8f0; }
+        .p-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #a855f7); transition: width 0.5s ease; }
+
+        #splash { position: fixed; inset: 0; background: #ffffff; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #splash img { width: 110px; height: 110px; border-radius: 25px; box-shadow: 0 10px 25px rgba(124, 58, 237, 0.2); margin-bottom: 20px; opacity: 0; transform: scale(0.8); transition: 0.8s; }
+        #splash img.loaded { opacity: 1; transform: scale(1); animation: logoPulse 2s infinite ease-in-out; }
+        #splash h1 { color: #0f172a; }
+        @keyframes logoPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        
+        #ban-overlay { position: fixed; inset: 0; background: #ffffff; z-index: 9000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+
+        #update-modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 20000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); }
+        .update-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 25px; padding: 30px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+
+        .cat-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .cat-bar::-webkit-scrollbar { display: none; }
+        .cat-btn { background: #ffffff; padding: 10px 18px; border-radius: 20px; border: 1px solid var(--border); font-size: 13px; white-space: nowrap; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .active-cat { background: var(--primary); border-color: var(--primary); color: white; font-weight: bold; }
+        
+        .slider-container { 
+            width: 100%; 
+            height: 180px; 
+            border-radius: 24px; 
+            overflow: hidden; 
+            position: relative; 
+            margin-bottom: 20px; 
+            border: 1px solid var(--border); 
+            background: #f1f5f9; 
+            touch-action: pan-y; 
+            cursor: grab;
+            box-shadow: var(--shadow);
+        }
+        .slider-container:active { cursor: grabbing; }
+        .slider-wrapper { 
+            display: flex; 
+            width: 100%; 
+            height: 100%; 
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); 
+            user-select: none;
+        }
+        .slide-img { min-width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+
+        .m-card { padding: 0; overflow: hidden; background: #ffffff; }
+        .m-img { width: 100%; height: 175px; object-fit: cover; }
+        .m-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px; color: var(--text-muted); margin: 15px 0; }
+        .m-grid i { color: var(--primary); width: 15px; text-align: center; }
+        .m-grid b { color: var(--text); font-size: 13px; }
+
+        .copy-box { background:#f1f5f9; padding:12px; border-radius:12px; color:var(--text); font-size:12px; margin-bottom:12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0; }
+        .copy-box i { cursor: pointer; font-size: 16px; transition: 0.2s; margin-left: 10px; color: var(--primary); }
+
+        /* FIX: Absolute bottom locking layout with overscroll handler */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0 25px 0; z-index: 500; box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05); height: 75px; }
+        .nav-item { text-align: center; color: #94a3b8; font-size: 11px; flex: 1; cursor: pointer; transition: 0.3s; }
+        .nav-item.active-nav { color: var(--primary); }
+        .nav-item i { font-size: 22px; margin-bottom: 4px; }
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); z-index: 1000; align-items: center; justify-content: center; padding: 25px; backdrop-filter: blur(4px); }
+        .modal-content { background: #ffffff; border-radius: 28px; padding: 25px; width: 100%; max-width: 400px; border: 1px solid #e2e8f0; max-height: 85vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2); }
+        .modal-content h3 { color: var(--text); margin-top: 0; }
+        
+        #txn-list { background: transparent; border: none; }
+        .txn-item { 
+            display: flex; 
+            flex-direction: column; 
+            padding: 16px; 
+            background: #ffffff; 
+            border-radius: 18px; 
+            margin-bottom: 12px; 
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .txn-item:active { transform: scale(0.98); background: #f8fafc; }
+        .txn-main { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; }
+        .txn-reason { 
+            font-size: 11px; 
+            color: #64748b; 
+            margin-top: 8px; 
+            padding-top: 8px; 
+            border-top: 1px solid #f1f5f9;
+            font-style: italic; 
+        }
+        .status-badge { 
+            padding: 5px 12px; 
+            border-radius: 20px; 
+            font-size: 10px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            margin-top: 6px; 
+            display: inline-block; 
+            letter-spacing: 0.5px;
+        }
+        
+        .dp-box { position: relative; width: 95px; height: 95px; margin: 0 auto 15px; }
+        .dp-box img { width: 100%; height: 100%; border-radius: 50%; border: 3px solid #f1f5f9; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .dp-edit { position: absolute; bottom: 0; right: 0; background: var(--primary); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; border: 3px solid #ffffff; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        #custom-dialog-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 30000; align-items: center; justify-content: center; padding: 30px; backdrop-filter: blur(4px); }
+        .dialog-box { background: #ffffff; border-radius: 20px; padding: 25px; width: 100%; max-width: 320px; text-align: left; animation: dialogPop 0.2s ease-out; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        @keyframes dialogPop { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .dialog-msg { font-size: 15px; color: var(--text); line-height: 1.5; margin-bottom: 25px; }
+        .dialog-actions { display: flex; justify-content: flex-end; gap: 15px; }
+        .dialog-btn { background: none; border: none; color: var(--primary); font-weight: 700; cursor: pointer; font-size: 13px; text-transform: uppercase; padding: 8px 12px; border-radius: 8px; }
+        .dialog-btn:hover { background: #f5f3ff; }
+
+        .otp-timer-box { margin-top: 15px; font-size: 13px; color: var(--text-muted); }
+        #resend-otp-btn { background: none; border: none; color: var(--primary); text-decoration: underline; font-weight: 600; cursor: pointer; display: none; }
+        #timer-text-display { color: var(--primary); font-weight: bold; }
+
+        .fp-link { text-align: right; font-size: 12px; color: var(--primary); margin-bottom: 15px; cursor: pointer; margin-top: -5px; display: block; width: 100%; font-weight: 600; }
+
+        #u-coins-box { background: #f5f3ff; border: 1px solid #ddd6fe; color: var(--primary); padding: 8px 16px; border-radius: 24px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        
+        .admin-logo { border: 1px solid #e2e8f0; }
+
+        /* Premium Slot Grid Styling (Optimized) */
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+            min-height: 50px;
+        }
+        .slot-box {
+            position: relative; /* Green Tik mark alignment ke liye */
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            padding: 14px 10px;
+            text-align: center;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .slot-box:active {
+            transform: scale(0.92);
+        }
+        
+        /* FIX 4: IMPROVED CONTRAST AND GREEN TICK FOR TAKEN SLOTS */
+        .slot-box.taken {
+            background: #f1f5f9 !important;
+            color: #cbd5e1 !important;
+            cursor: not-allowed;
+            border: 1px solid #cbd5e1 !important;
+            opacity: 0.55 !important;
+            filter: grayscale(80%) !important;
+            box-shadow: none;
+            pointer-events: none !important;
+        }
+
+        /* 2. Occupied slots ke upar Green Tik (Checkmark) dikhane ke liye */
+        .slot-box.taken::after {
+            content: "✓" !important;
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            font-size: 16px !important;
+            font-weight: bold !important;
+            color: #ffffff !important;           /* White checkmark */
+            background-color: #28a745 !important;   /* Green circle background */
+            border-radius: 50% !important;
+            width: 24px !important;
+            height: 24px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
+            z-index: 99 !important;
+        }
+
+        .slot-box.selected {
+            background: linear-gradient(135deg, var(--primary), #a855f7);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 6px 12px rgba(124, 58, 237, 0.3);
+            transform: scale(1.05);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="global-loader">
+        <div class="loader-spinner"></div>
+        <p style="color: var(--primary); font-size: 14px; font-weight: 600;">Processing request...</p>
+    </div>
+
+    <div id="custom-dialog-overlay">
+        <div class="dialog-box">
+            <p id="dialog-msg" class="dialog-msg"></p>
+            <div class="dialog-actions">
+                <button id="dialog-cancel-btn" class="dialog-btn" style="color: #94a3b8;">CANCEL</button>
+                <button id="dialog-ok-btn" class="dialog-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="forgot-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="fp-title">Recover Password</h3>
+            <div id="fp-step-1">
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Enter your registered email to receive a recovery code.</p>
+                <input type="email" id="fp-email" placeholder="Registered Email">
+                <button class="btn btn-p" id="fp-send-otp-btn" onclick="handleFPSendOTP()">Send Recovery OTP</button>
+            </div>
+            <div id="fp-step-2" style="display:none">
+                <p style="font-size:12px; color:var(--primary); margin-bottom:15px;">Enter the 6-digit code sent to your email.</p>
+                <input type="number" id="fp-otp-input" placeholder="Enter OTP Code">
+                <button class="btn btn-p" id="fp-verify-otp-btn" onclick="handleFPVerifyOTP()">Verify Code</button>
+            </div>
+            
+            <div id="fp-step-3" style="display:none">
+                <p style="font-size:13px; color:var(--primary); font-weight:600; margin-bottom:15px; text-align:center;">Email Verified! Your registered password is shown below.</p>
+                <div class="glass-card" style="text-align: center; border: 1px dashed var(--primary); background: #f5f3ff; box-shadow: none;">
+                    <span id="user-existing-password" style="font-size: 22px; letter-spacing: 2px; font-weight: 700; color: var(--text);">********</span>
+                </div>
+                <button class="btn btn-p" id="fp-update-btn" onclick="handleFPUpdatePassword()"><i class="fa-solid fa-copy"></i> COPY PASSWORD</button>
+            </div>
+            <button class="btn" style="background:none; color: var(--text-muted);" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <div id="update-modal">
+        <div class="update-box">
+            <i class="fa-solid fa-cloud-arrow-up" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
+            <h2 style="margin: 0 0 10px 0; color: var(--text);">New Update!</h2>
+            <p id="update-desc" style="font-size: 14px; color: var(--text-muted); margin-bottom: 25px;">Nova battle update and try new features</p>
+            <button class="btn btn-p" id="update-now-btn" style="margin-bottom: 12px;"><i class="fa-solid fa-download"></i> Update Now</button>
+            <button class="btn" id="update-skip-btn" style="background: transparent; color: var(--text-muted); border: 1px solid #e2e8f0;" onclick="closeUpdateModal()">Skip for now</button>
+        </div>
+    </div>
+
+    <div id="splash">
+        <img id="splash-logo-img" src="" alt="">
+        <h1 style="letter-spacing: 4px; font-weight: 700;">NOVA BATTLE</h1>
+        <p style="color: var(--primary); font-size: 12px; font-weight: 600;">Connecting...</p>
+    </div>
+
+    <div id="ban-overlay">
+        <div class="glass-card" style="border-color: #fecaca; background: #fff1f2;">
+            <i class="fa-solid fa-user-slash" style="font-size: 55px; color: #ef4444; margin-bottom: 20px;"></i>
+            <h2 style="color: #ef4444; margin: 0 0 10px 0;">Your Account is BAN</h2>
+            <button class="btn btn-p" onclick="showInfo('support')" style="margin-bottom: 12px;"><i class="fa-solid fa-headset"></i> Customer Support</button>
+            <button class="btn" style="background:#ef4444; color:white;" onclick="logout()"><i class="fa-solid fa-power-off"></i> Logout</button>
+        </div>
+    </div>
+
+    <div id="auth-screen" class="screen">
+        <div class="screen-content">
+            <center><img class="admin-logo" src="" style="width:80px; margin: 40px 0 20px; border-radius:18px; box-shadow: var(--shadow);"></center>
+            <div class="glass-card">
+                <h2 id="auth-title" style="margin-top: 0;">Welcome Back</h2>
+                <div id="signup-fields" style="display:none;">
+                    <input type="text" id="reg-name" placeholder="Full Name (Required)">
+                    <input type="text" id="reg-ffname" placeholder="Free Fire Name (Required)">
+                    <input type="text" id="reg-ffuid" placeholder="Free Fire UID (Required)">
+                </div>
+                <div id="main-auth-inputs">
+                    <input type="email" id="auth-email" placeholder="Email Address (Required)">
+                    <div style="position:relative;">
+                        <input type="password" id="auth-pass" placeholder="Password (Min 8 characters)">
+                        <i id="eye-icon-auth" class="fa-solid fa-eye eye-icon" onclick="togglePass('auth-pass', this)"></i>
+                    </div>
+                    <span id="fp-link-btn" class="fp-link" onclick="openForgotModal()">Forgot Password?</span>
+                    <div id="refer-field" style="display:none;"><input type="text" id="reg-ref" placeholder="Referral Code (Optional)"></div>
+                </div>
+                <div id="otp-container" style="display:none; text-align:center; border-top:1px solid #f1f5f9; padding-top:15px; margin-top:10px;">
+                    <p style="font-size:12px; color:var(--primary); margin-bottom:15px; font-weight: 600;">Check your Gmail for the 6-digit OTP code.</p>
+                    <input type="number" id="auth-otp" placeholder="Enter 6-digit OTP">
+                </div>
+                
+                <button class="btn btn-p" id="auth-btn" onclick="handleAuth()"><i class="fa-solid fa-right-to-bracket"></i> <span id="auth-btn-txt">Login</span></button>
+                
+                <div id="otp-timer-box" class="otp-timer-box" style="display: none; text-align: center;">
+                    <span id="timer-label-text">Resend OTP in: <span id="timer-text-display">30</span>s</span>
+                    <button type="button" id="resend-otp-btn" onclick="resendOTP()">Resend OTP</button>
+                </div>
+
+                <p style="text-align:center; font-size:14px; margin-top:20px; cursor:pointer; color: var(--text-muted);" id="toggle-area" onclick="toggleAuthMode()">
+                    <span id="toggle-text">Don't have an account? <b style="color: var(--primary)">Sign up</b></span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="home-screen" class="screen">
+        <div class="header">
+            <div style="display:flex; align-items:center; gap:10px; font-weight: 800; color: var(--text);">
+                <img class="admin-logo" src="" width="32" style="border-radius: 8px;">
+                <span>Nova Battle</span>
+            </div>
+            <div id="u-coins-box" onclick="showScreen('wallet-screen')">
+                <span style="font-size: 16px; font-weight: 700;">₹</span> <span id="u-coins">0</span>
+            </div>
+        </div>
+        <div class="screen-content">
+            <div class="slider-container" id="slider-container">
+                <div class="slider-wrapper" id="slider-wrapper"></div>
+            </div>
+            
+            <div class="cat-bar">
+                <div class="cat-btn active-cat" id="cat-upcoming" onclick="setCategory('upcoming')"><i class="fa-solid fa-clock"></i> Upcoming</div>
+                <div class="cat-btn" id="cat-ongoing" onclick="setCategory('ongoing')"><i class="fa-solid fa-fire"></i> Ongoing</div>
+                <div class="cat-btn" id="cat-my" onclick="setCategory('my')"><i class="fa-solid fa-gamepad"></i> My Battles</div>
+                <div class="cat-btn" id="cat-completed" onclick="setCategory('completed')"><i class="fa-solid fa-circle-check"></i> Completed</div>
+            </div>
+            <h3 style="margin-bottom:15px; font-size:16px; color: var(--text);"><i class="fa-solid fa-trophy" style="color:var(--primary)"></i> Available Tournaments</h3>
+            <div id="match-container"></div>
+        </div>
+    </div>
+
+    <div id="wallet-screen" class="screen">
+        <div class="header"><i class="fa fa-chevron-left" style="color: var(--text)" onclick="showScreen('home-screen')"></i><span style="color: var(--text); font-weight: 700;">My Wallet</span><div></div></div>
+        <div class="screen-content">
+            <div class="glass-card" style="text-align:center; background:linear-gradient(135deg, #6366f1, #7c3aed); padding:35px 20px; border: none;">
+                <p style="color: rgba(255,255,255,0.8); margin: 0; font-size: 14px;">Total Balance</p>
+                <h1 style="font-size:42px; margin: 10px 0; color: white;">₹<span id="wall-bal">0</span></h1>
+                <div style="display:flex; gap:12px; margin-top:20px">
+                    <button class="btn" style="background:white; color:var(--primary); flex:1; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid rgba(124, 58, 237, 0.1);" onclick="showScreen('deposit-screen')"><i class="fa-solid fa-plus-circle"></i> Deposit</button>
+                    <button class="btn" style="background:white; color:var(--primary); flex:1; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid rgba(124, 58, 237, 0.1);" onclick="openWdModal()"><i class="fa-solid fa-money-bill-transfer"></i> Withdraw</button>
+                </div>
+            </div>
+            <h4 style="margin: 25px 0 15px; color: var(--text); font-weight: 700;"><i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i> Transaction History</h4>
+            <div id="txn-list"></div>
+        </div>
+    </div>
+
+    <div id="deposit-screen" class="screen">
+        <div class="header"><i class="fa fa-chevron-left" style="color: var(--text)" onclick="showScreen('wallet-screen')"></i><span style="color: var(--text); font-weight: 700;">Deposit Funds</span><div></div></div>
+        <div class="screen-content">
+            <div class="glass-card" style="text-align:center">
+                <input type="number" id="dep-amt" placeholder="Amount to Deposit (₹)" oninput="document.getElementById('dv').innerText=this.value">
+                <div style="background: #ffffff; padding: 15px; border-radius: 20px; border: 1px solid #e2e8f0; display: inline-block; margin-bottom: 15px;">
+                    <img id="admin-qr-img" src="" style="width:230px; height:230px; display: block;">
+                </div>
+                <p style="font-weight:700; color:var(--primary); font-size: 18px;">Payable: ₹<span id="dv">0</span></p>
+                <p style="font-size:12px; color:var(--text-muted); margin: 10px 0 20px; line-height: 1.5;">After making the payment, enter your Transaction ID / UTR Number below and click Submit.</p>
+                <input type="text" id="utr-input" placeholder="Enter 12-digit UTR / TXN ID">
+                <button class="btn btn-p" id="dep-submit-btn" onclick="submitDeposit()">Submit Payment Request</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="refer-screen" class="screen">
+        <div class="header"><i class="fa fa-chevron-left" style="color: var(--text)" onclick="showScreen('home-screen')"></i><span style="color: var(--text); font-weight: 700;">Refer & Earn</span><div></div></div>
+        <div class="screen-content">
+            <img id="refer-banner-img" src="" style="width:100%; border-radius:24px; margin-bottom:20px; height: 180px; object-fit: cover; box-shadow: var(--shadow);">
+            <div class="glass-card" style="display:flex; text-align:center; padding: 25px 15px;">
+                <div style="flex:1;">
+                    <p style="color: var(--text-muted); font-size: 12px; margin: 0;">Total Referrals</p>
+                    <h2 id="ref-total" style="margin:5px 0; color: var(--text);">0</h2>
+                </div>
+                <div style="flex:1; border-left:1px solid #f1f5f9;">
+                    <p style="color: var(--text-muted); font-size: 12px; margin: 0;">Total Earned</p>
+                    <h2 id="ref-success" style="margin:5px 0; color:var(--primary)">0</h2>
+                </div>
+            </div>
+            <div class="glass-card" style="text-align:center; border: 2px dashed #ddd6fe; background: #f5f3ff; box-shadow: none;" onclick="copyRef()">
+                <p style="font-size: 12px; font-weight: 700; color: var(--text-muted);">MY REFER CODE</p>
+                <h2 id="u-ref-code" style="letter-spacing:5px; color:var(--primary); margin:10px 0;">...</h2>
+                <p style="font-size: 11px; color: var(--primary);">Click to copy</p>
+            </div>
+            <div style="display:flex; justify-content:center; gap:25px; font-size:35px; margin: 25px 0;">
+                <i class="fab fa-whatsapp" style="color:#22c55e" onclick="share('wa')"></i>
+                <i class="fab fa-telegram" style="color:#3b82f6" onclick="share('tg')"></i>
+                <i class="fa-solid fa-share-nodes" style="color:var(--primary); transition: 0.2s;" onclick="share('more')"></i>
+            </div>
+            <div class="glass-card">
+                <h4 style="margin-top: 0;"><i class="fa-solid fa-list-check" style="color: var(--primary);"></i> Referral Terms</h4>
+                <p id="ref-tc-txt" style="font-size:12px; color:var(--text-muted); line-height:1.6;"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="profile-screen" class="screen">
+        <div class="header">
+            <span style="font-weight: 700; color: var(--text);">My Profile</span>
+            <div onclick="logout()" style="cursor:pointer; display: flex; align-items: center; color: #ef4444; font-weight: 700;">
+                <i class="fa fa-sign-out-alt"></i>
+                <span style="font-size: 14px; margin-left: 5px;">Logout</span>
+            </div>
+        </div>
+        <div class="screen-content">
+            <div class="glass-card" style="text-align:center; padding-top:25px; position: relative;">
+                <div class="dp-box">
+                    <img id="u-dp" src="https://via.placeholder.com/150">
+                    <label for="dp-file" class="dp-edit"><i class="fa fa-camera"></i></label>
+                    <input type="file" id="dp-file" style="display:none" onchange="uploadDP(this)">
+                </div>
+                <h2 id="u-name" style="margin:0; color: var(--text);">User</h2>
+                <p id="u-email" style="color:var(--text-muted); font-size:14px; margin-bottom: 15px;"></p>
+                <div style="background: #f8fafc; padding: 15px; border-radius: 16px; margin-top: 5px; font-size: 12px; text-align: left; display: inline-block; width: 100%; border: 1px solid #f1f5f9;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="color: var(--text);"><b>FF Name:</b> <span id="u-ffname-display" style="color: var(--primary)">...</span> <br><b>FF UID:</b> <span id="u-ffuid-display" style="color: var(--primary)">...</span></div>
+                        <i class="fa-solid fa-pen-to-square" style="color: var(--primary); cursor: pointer; font-size: 20px;" onclick="openProfileEdit()"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-card" style="padding:0; overflow: hidden;">
+                <div style="padding:16px; border-bottom:1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;" onclick="showInfo('support')">
+                    <span><i class="fa-solid fa-headset" style="color:var(--primary); width: 25px;"></i> Customer Support</span>
+                    <i class="fa fa-chevron-right" style="font-size: 12px; color: #cbd5e1;"></i>
+                </div>
+                <div style="padding:16px; border-bottom:1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;" onclick="showInfo('policy')">
+                    <span><i class="fa-solid fa-shield-halved" style="color:var(--primary); width: 25px;"></i> Privacy Policy</span>
+                    <i class="fa fa-chevron-right" style="font-size: 12px; color: #cbd5e1;"></i>
+                </div>
+                <div style="padding:16px; border-bottom:1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;" onclick="showInfo('faq')">
+                    <span><i class="fa-solid fa-circle-question" style="color:var(--primary); width: 25px;"></i> FAQ & Terms</span>
+                    <i class="fa fa-chevron-right" style="font-size: 12px; color: #cbd5e1;"></i>
+                </div>
+                <div style="padding:16px; display: flex; justify-content: space-between; align-items: center;" onclick="showInfo('about')">
+                    <span><i class="fa-solid fa-circle-info" style="color:var(--primary); width: 25px;"></i> About Us</span>
+                    <i class="fa fa-chevron-right" style="font-size: 12px; color: #cbd5e1;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="info-screen" class="screen">
+        <div class="header"><i class="fa fa-chevron-left" style="color: var(--text)" onclick="handleBack()"></i><span id="info-title" style="color: var(--text); font-weight: 700;">Details</span><div></div></div>
+        <div class="screen-content">
+            <div class="glass-card">
+                <div id="policy-date-container" style="display:none; font-size:12px; color:var(--primary); margin-bottom:15px; font-weight: 700; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">Last Update: <span id="policy-date"></span></div>
+                <div id="support-btns" style="display:none; text-align:center;">
+                    <button class="btn btn-p" style="margin-bottom:15px;" id="s-mail-btn"><i class="fa-solid fa-envelope"></i> Email Support</button>
+                    <button class="btn" style="background:#e4405f; color: white;" id="s-insta-btn"><i class="fa-brands fa-instagram"></i> Instagram Official</button>
+                </div>
+                <div id="info-text" style="line-height:1.7; color:var(--text); white-space: pre-wrap; font-size: 14px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="choice-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="choice-title">Select Join Mode</h3>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;" id="choice-desc">Choose how you want to enter this team match.</p>
+            <button class="btn btn-p" onclick="initiateCreateTeam()"><i class="fa-solid fa-users-plus"></i> Create New Team</button>
+            <div style="margin: 15px 0; font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center;">OR</div>
+            <button class="btn" style="background:#f1f5f9; color:var(--primary); border:1px solid #e2e8f0;" onclick="initiateJoinWithCode()"><i class="fa-solid fa-right-to-bracket"></i> Join with Team Code</button>
+            <button class="btn" style="background:none; color: var(--text-muted); margin-top: 10px;" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+
+    <div id="slot-modal" class="modal"><div class="modal-content">
+        <h3 id="slot-modal-title">Pick Your Position</h3>
+        <p id="slot-modal-desc" style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Select an available number from the grid below to join.</p>
+        <div class="slot-grid" id="slot-grid-container"></div>
+        <button class="btn btn-p" id="proceed-to-join-btn" disabled onclick="handleSlotProceed()">Proceed to Join</button>
+        <button class="btn" style="background:none; color: var(--text-muted); margin-top: 5px;" onclick="closeModal()">Cancel</button>
+    </div></div>
+
+    <div id="join-modal" class="modal"><div class="modal-content">
+        <h3 id="join-modal-title">Finalize Join</h3>
+        <p style="font-size:13px; font-weight:600; color:var(--primary); margin-bottom:15px; text-align:center;">Position Selected: Slot <span id="display-selected-slot">0</span></p>
+        <input type="text" id="ff-name" placeholder="Free Fire Username">
+        <input type="text" id="ff-uid" placeholder="Free Fire UID (10 Digits)">
+        
+        <div id="team-name-container" style="display:none;">
+            <input type="text" id="group-name-input" placeholder="Team Name (Strictly Required)">
+            <p style="text-align:center; font-size:11px; color:var(--text-muted); margin-top: -5px; margin-bottom: 15px;">Team Creation Fee: ₹<span id="g-cost">0</span></p>
+        </div>
+
+        <button class="btn btn-p" id="final-submit-btn" onclick="executeJoin()">Join Match Now</button>
+        <button class="btn" style="background:none; color: var(--text-muted); margin-top: 5px;" onclick="closeModal()">Cancel</button>
+    </div></div>
+
+    <div id="team-code-modal" class="modal"><div class="modal-content">
+        <h3>Join Existing Team</h3>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Enter the unique code shared by your team leader.</p>
+        <input type="text" id="team-code-input" placeholder="Enter Team Code">
+        <input type="text" id="teammate-ff-name" placeholder="Your Free Fire Name">
+        <input type="text" id="teammate-ff-uid" placeholder="Your Free Fire UID">
+        <button class="btn btn-p" id="confirm-team-join-btn" onclick="confirmJoinTeam()">Confirm & Join</button>
+        <button class="btn" style="background:none; color: var(--text-muted);" onclick="closeModal()">Close</button>
+    </div></div>
+
+    <div id="withdraw-modal" class="modal"><div class="modal-content">
+        <h3>Request Withdrawal</h3>
+        <input type="number" id="wd-amt" placeholder="Enter Amount (₹)">
+        <p style="font-size:12px; color:var(--primary); font-weight: 700; margin-top: -5px;">Minimum: ₹<span id="min-wd-txt">0</span></p>
+        <input type="text" id="wd-upi" placeholder="UPI ID (Ex: user@upi)">
+        <p id="wd-error" style="color:#ef4444; font-size:11px; margin-top:-10px; margin-bottom:15px; display:none;">Please enter a valid UPI ID to proceed</p>
+        <p style="font-size:11px; color:var(--text-muted); margin-top: 5px; line-height: 1.5;">Withdrawals are processed within 24 hours after admin verification.</p>
+        <button class="btn btn-p" id="wd-submit-btn" onclick="submitWithdraw()">Submit Withdrawal</button>
+        <button class="btn" style="background:none; color: var(--text-muted);" onclick="closeModal()">Close</button>
+    </div></div>
+
+    <div id="profile-edit-modal" class="modal"><div class="modal-content">
+        <h3>Edit Game Details</h3>
+        <input type="text" id="edit-ffname" placeholder="Free Fire Name">
+        <input type="text" id="edit-ffuid" placeholder="Free Fire UID">
+        <button class="btn btn-p" id="save-profile-btn" onclick="saveProfileChanges()">Save Changes</button>
+        <button class="btn" style="background:none; color: var(--text-muted);" onclick="closeModal()">Cancel</button>
+    </div></div>
+
+    <div id="rename-modal" class="modal"><div class="modal-content">
+        <h3>Rename Your Team</h3>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Fee to rename: ₹<span id="rename-cost-txt">0</span></p>
+        <input type="text" id="new-team-name" placeholder="Enter New Team Name">
+        <button class="btn btn-p" id="confirm-rename-btn">Update Name</button>
+        <button class="btn" style="background:none; color: var(--text-muted);" onclick="closeModal()">Cancel</button>
+    </div></div>
+
+    <div class="bottom-nav" id="bot-nav" style="display:none">
+        <div class="nav-item active-nav" onclick="showScreen('home-screen')"><i class="fa fa-home"></i><br>Home</div>
+        <div class="nav-item" onclick="showScreen('wallet-screen')"><i class="fa fa-wallet"></i><br>Wallet</div>
+        <div class="nav-item" onclick="showScreen('refer-screen')"><i class="fa fa-users-viewfinder"></i><br>Refer</div>
+        <div class="nav-item" onclick="showScreen('profile-screen')"><i class="fa-solid fa-circle-user"></i><br>Profile</div>
+    </div>
+
+    <script type="text/javascript">
+        window.addEventListener('contextmenu', function (e) {
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+            }
+        }, false);
+
+        window.customDialog = function(message, type = 'alert') {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('custom-dialog-overlay');
+                const msgBox = document.getElementById('dialog-msg');
+                const okBtn = document.getElementById('dialog-ok-btn');
+                const cancelBtn = document.getElementById('dialog-cancel-btn');
+                msgBox.innerText = message;
+                overlay.style.display = 'flex';
+                if(type === 'alert') { cancelBtn.style.display = 'none'; okBtn.innerText = 'OK'; } 
+                else { cancelBtn.style.display = 'block'; okBtn.innerText = 'OK'; }
+                okBtn.onclick = () => { overlay.style.display = 'none'; resolve(true); };
+                cancelBtn.onclick = () => { overlay.style.display = 'none'; resolve(false); };
+            });
+        };
+        window.alert = function(message) { window.customDialog(message, 'alert'); };
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword, updatePassword } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+        import { getDatabase, ref, set, get, onValue, push, update, remove } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+
+        (function() { emailjs.init("QCS7mVQ-X3I1MIbgG"); })();
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqJFFBsH_loBd0cdjX_f4YO32G3gr7rRg",
+            authDomain: "nova-battle-dd1ad.firebaseapp.com",
+            databaseURL: "https://nova-battle-dd1ad-default-rtdb.firebaseio.com",
+            projectId: "nova-battle-dd1ad",
+            storageBucket: "nova-battle-dd1ad.firebasestorage.app",
+            messagingSenderId: "25146881960",
+            appId: "1:25146881960:web:c8f4ed3c969df623960f9d"
+        };
+
+        const IMGBB_API = "6a5e44c73fa4ddd086cf78320ab9f484";
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const APP_VERSION = "1.0.4"; 
+
+        window.setGlobalLoading = (state, btnId = null) => {
+            const loader = document.getElementById('global-loader');
+            loader.style.display = state ? 'flex' : 'none';
+            if(btnId) {
+                const btn = document.getElementById(btnId);
+                if(btn) btn.disabled = state;
+            }
+        };
+
+        window.showScreen = (id) => {
+            if(userObj && userObj.isBanned && id !== 'info-screen' && id !== 'auth-screen' && id !== 'home-screen') return;
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(id);
+            if(target) target.classList.add('active');
+            const nav = document.getElementById('bot-nav');
+            if(id === 'auth-screen' || (userObj && userObj.isBanned)) {
+                nav.style.display = 'none';
+            } else if(['home-screen', 'wallet-screen', 'refer-screen', 'profile-screen'].includes(id)) {
+                nav.style.display = 'flex';
+            }
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+            if(id=='home-screen') document.querySelectorAll('.nav-item')[0]?.classList.add('active-nav');
+            if(id=='wallet-screen') document.querySelectorAll('.nav-item')[1]?.classList.add('active-nav');
+            if(id=='refer-screen') document.querySelectorAll('.nav-item')[2]?.classList.add('active-nav');
+            if(id=='profile-screen') document.querySelectorAll('.nav-item')[3]?.classList.add('active-nav');
+        };
+
+        let userObj = null, adminObj = {}, isSignUp = false, selectedMatch = null, activeCategory = 'upcoming', isOtpSent = false;
+        let fp_otp_generated = null;
+        let fp_email_stored = "";
+        let recovered_pass = ""; 
+        let selectedPosition = null;
+        let currentJoinMode = 'solo'; // solo, create, join
+
+        onAuthStateChanged(auth, (user) => {
+            if(user) {
+                onValue(ref(db, 'users/' + user.uid), (snap) => {
+                    userObj = snap.val();
+                    const banOverlay = document.getElementById('ban-overlay');
+                    if(userObj && userObj.isBanned) {
+                        banOverlay.style.display = 'flex';
+                        document.getElementById('bot-nav').style.display = 'none';
+                        showScreen('home-screen');
+                    } else if(userObj) {
+                        banOverlay.style.display = 'none';
+                        document.getElementById('u-coins').innerText = userObj.coins || 0;
+                        document.getElementById('wall-bal').innerText = userObj.coins || 0;
+                        document.getElementById('u-ref-code').innerText = userObj.referCode;
+                        document.getElementById('u-name').innerText = userObj.name || 'User';
+                        document.getElementById('u-email').innerText = userObj.email;
+                        document.getElementById('u-ffname-display').innerText = userObj.ffName || "Not set";
+                        document.getElementById('u-ffuid-display').innerText = userObj.ffUid || "Not set";
+                        if(userObj.profilePic) document.getElementById('u-dp').src = userObj.profilePic;
+                        document.getElementById('bot-nav').style.display = 'flex';
+                        updateReferralStats(userObj.referCode);
+                        loadHistory(user.uid);
+                        
+                        setCategory('upcoming');
+                        showScreen('home-screen');
+                    }
+                    setTimeout(() => { 
+                        document.getElementById('splash-logo-img').classList.add('loaded'); 
+                        checkUpdate(); 
+                        setTimeout(() => document.getElementById('splash').style.display = 'none', 1000); 
+                    }, 500);
+                });
+            } else {
+                document.getElementById('splash').style.display = 'none';
+                document.getElementById('bot-nav').style.display = 'none';
+                document.getElementById('ban-overlay').style.display = 'none';
+                showScreen('auth-screen');
+                checkUpdate();
+            }
+        });
+
+        window.openForgotModal = () => {
+            document.getElementById('forgot-modal').style.display = 'flex';
+            document.getElementById('fp-step-1').style.display = 'block';
+            document.getElementById('fp-step-2').style.display = 'none';
+            document.getElementById('fp-step-3').style.display = 'none';
+            document.getElementById('fp-email').value = "";
+            document.getElementById('fp-otp-input').value = "";
+            document.getElementById('user-existing-password').innerText = "********";
+        };
+
+        window.handleFPSendOTP = async () => {
+            const email = document.getElementById('fp-email').value.trim().toLowerCase();
+            if(!email) return alert("Please enter your email.");
+            setGlobalLoading(true, 'fp-send-otp-btn');
+            try {
+                const usersSnap = await get(ref(db, 'users'));
+                const users = usersSnap.val();
+                let userRecord = null;
+                for(let id in users) { 
+                    if(users[id].email === email) { 
+                        userRecord = users[id]; 
+                        break;
+                    } 
+                }
+                
+                if(!userRecord) {
+                    setGlobalLoading(false, 'fp-send-otp-btn');
+                    return alert("This email is not registered with us.");
+                }
+
+                recovered_pass = userRecord.pass || "N/A";
+                fp_otp_generated = Math.floor(100000 + Math.random() * 900000);
+                fp_email_stored = email;
+                
+                const expiry = new Date(Date.now() + 15 * 60000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const templateParams = { to_email: email, otp_code: fp_otp_generated, time: expiry };
+                await emailjs.send('service_cr17hun', 'template_gv02zkj', templateParams);
+                
+                alert("Recovery OTP sent to: " + email);
+                document.getElementById('fp-step-1').style.display = 'none';
+                document.getElementById('fp-step-2').style.display = 'block';
+            } catch (err) { alert("Failed to send OTP: " + err.message); }
+            setGlobalLoading(false, 'fp-send-otp-btn');
+        };
+
+        window.handleFPVerifyOTP = async () => {
+            const otp_input = document.getElementById('fp-otp-input').value.trim();
+            if(String(otp_input) === String(fp_otp_generated)) {
+                alert("OTP Verified!");
+                document.getElementById('fp-step-2').style.display = 'none';
+                document.getElementById('fp-step-3').style.display = 'block';
+                document.getElementById('user-existing-password').innerText = recovered_pass;
+            } else { alert("Invalid OTP code!"); }
+        };
+
+        window.handleFPUpdatePassword = async () => {
+            const passTxt = document.getElementById('user-existing-password').innerText;
+            if(passTxt && passTxt !== "********" && passTxt !== "N/A") {
+                navigator.clipboard.writeText(passTxt).then(() => {
+                    alert("Password copied to clipboard!");
+                    closeModal();
+                });
+            } else {
+                alert("Error recovering password. Please contact support.");
+            }
+        };
+
+        async function checkUpdate() {
+            const snap = await get(ref(db, 'admin_settings/app_update'));
+            const updateData = snap.val();
+            if(!updateData || !updateData.newVersion) return;
+            
+            if(updateData.newVersion.trim() > APP_VERSION.trim()) {
+                const modal = document.getElementById('update-modal');
+                const desc = document.getElementById('update-desc');
+                const updateBtn = document.getElementById('update-now-btn');
+                const skipBtn = document.getElementById('update-skip-btn');
+                
+                if(desc) desc.innerText = updateData.message || "Nova battle update and try new features";
+                if(updateBtn) updateBtn.onclick = () => window.open(updateData.link, "_blank");
+                
+                if (updateData.releaseDate) {
+                    const releaseDate = new Date(updateData.releaseDate);
+                    const today = new Date();
+                    const diffTime = Math.abs(today - releaseDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    if (diffDays > 7) { if(skipBtn) skipBtn.style.display = 'none'; } else { if(skipBtn) skipBtn.style.display = 'block'; }
+                }
+                if(modal) modal.style.display = 'flex';
+            }
+        }
+        window.closeUpdateModal = () => document.getElementById('update-modal').style.display = 'none';
+
+        const updateReferralStats = (code) => {
+            get(ref(db, 'users')).then(snap => {
+                const users = snap.val(); let total = 0;
+                if(!users) return;
+                for(let id in users) if(users[id].referredBy === code) total++;
+                document.getElementById('ref-total').innerText = total;
+                document.getElementById('ref-success').innerText = total;
+            });
+        };
+
+        onValue(ref(db, 'admin_settings'), (snap) => {
+            adminObj = snap.val() || {};
+            document.querySelectorAll('.admin-logo').forEach(i => i.src = adminObj.appLogo);
+            document.getElementById('splash-logo-img').src = adminObj.appLogo;
+            document.getElementById('admin-qr-img').src = adminObj.payQR;
+            document.getElementById('refer-banner-img').src = adminObj.referBanner || adminObj.bannerUrl;
+            document.getElementById('min-wd-txt').innerText = adminObj.minWithdraw || 0;
+            document.getElementById('ref-tc-txt').innerText = adminObj.referTerms || "No terms available.";
+            document.getElementById('g-cost').innerText = adminObj.groupCost || 0;
+            document.getElementById('rename-cost-txt').innerText = adminObj.renameFee || 0;
+            const wrapper = document.getElementById('slider-wrapper');
+            if(wrapper) {
+                wrapper.innerHTML = "";
+                const banners = adminObj.bannerUrl ? adminObj.bannerUrl.split(',') : [];
+                banners.forEach(url => wrapper.innerHTML += `<img src="${url.trim()}" class="slide-img">`);
+                initInteractiveSlider(banners.length);
+            }
+            loadMatchesData();
+        });
+
+        let slideIdx = 0;
+        let sliderTimer;
+        function initInteractiveSlider(count) {
+            const wrapper = document.getElementById('slider-wrapper');
+            const container = document.getElementById('slider-container');
+            if(count <= 1 || !wrapper) return;
+            let isDragging = false;
+            let startX = 0;
+            let currentTranslate = 0;
+            let prevTranslate = 0;
+            const startAutoSlide = () => { clearInterval(sliderTimer); sliderTimer = setInterval(() => { slideIdx = (slideIdx + 1) % count; updateSliderPosition(); }, 4000); };
+            const updateSliderPosition = () => { currentTranslate = slideIdx * -100; prevTranslate = currentTranslate; wrapper.style.transform = `translateX(${currentTranslate}%)`; };
+            container.addEventListener('mousedown', dragStart);
+            container.addEventListener('touchstart', dragStart);
+            container.addEventListener('mouseup', dragEnd);
+            container.addEventListener('touchend', dragEnd);
+            container.addEventListener('mousemove', dragMove);
+            container.addEventListener('touchmove', dragMove);
+            container.addEventListener('mouseenter', () => clearInterval(sliderTimer));
+            container.addEventListener('mouseleave', startAutoSlide);
+            function dragStart(e) { isDragging = true; startX = getPositionX(e); clearInterval(sliderTimer); wrapper.style.transition = 'none'; }
+            function dragMove(e) { if (!isDragging) return; const currentX = getPositionX(e); const diff = ((currentX - startX) / container.offsetWidth) * 100; wrapper.style.transform = `translateX(${prevTranslate + diff}%)`; }
+            function dragEnd() { isDragging = false; wrapper.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'; const movedBy = (parseFloat(wrapper.style.transform.replace('translateX(', '')) || 0) - prevTranslate; if (movedBy < -15 && slideIdx < count - 1) slideIdx++; else if (movedBy > 15 && slideIdx > 0) slideIdx--; updateSliderPosition(); startAutoSlide(); }
+            function getPositionX(e) { return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX; }
+            startAutoSlide();
+        }
+
+        window.setCategory = (cat) => { activeCategory = cat; document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active-cat')); document.getElementById('cat-' + cat)?.classList.add('active-cat'); loadMatchesData(); };
+        window.copyOne = (txt, label) => { if(!txt || txt == 'Wait') return alert("Available shortly"); navigator.clipboard.writeText(txt).then(() => alert(label + " Copied!")); };
+
+        function loadMatchesData() {
+            onValue(ref(db, 'matches'), (snap) => {
+                const container = document.getElementById('match-container'); if(!container) return;
+                container.innerHTML = ""; const data = snap.val(); 
+                
+                if(!data) { 
+                    container.innerHTML = `<div style="text-align:center; padding:60px 20px; color:#94a3b8;"><i class="fa-solid fa-ghost" style="font-size:40px; margin-bottom:15px; opacity:0.5;"></i><br><h3 style="margin:0; font-size:16px;">No matches available at the moment</h3><p style="font-size:12px;">Check back later for new tournaments!</p></div>`;
+                    return; 
+                }
+                
+                const sortedMatches = Object.keys(data).map(id => ({ id, ...data[id] })).sort((a, b) => {
+                    if (activeCategory === 'completed') {
+                        return b.id.localeCompare(a.id);
+                    }
+                    const statusA = (a.status || '').toLowerCase();
+                    const statusB = (b.status || '').toLowerCase();
+                    if (statusA === 'completed' && statusB !== 'completed') return 1;
+                    if (statusA !== 'completed' && statusB === 'completed') return -1;
+                    const countA = a.participants ? Object.keys(a.participants).length : 0;
+                    const countB = b.participants ? Object.keys(b.participants).length : 0;
+                    const fillRateA = countA / (a.totalSlots || 1);
+                    const fillRateB = countB / (b.totalSlots || 1);
+                    return fillRateB - fillRateA;
+                });
+
+                let matchCounter = 0;
+                sortedMatches.forEach(m => {
+                    const id = m.id; const participants = m.participants || {}; const joined = participants[auth.currentUser?.uid]; const count = Object.keys(participants).length;
+                    const mStatus = (m.status || 'upcoming').toLowerCase();
+
+                    if(activeCategory === 'ongoing' && mStatus !== 'started') return;
+                    if(activeCategory === 'upcoming' && (mStatus === 'completed' || mStatus === 'started')) return;
+                    if(activeCategory === 'my' && !joined) return;
+                    if(activeCategory === 'completed' && mStatus !== 'completed') return;
+
+                    matchCounter++;
+
+                    let btnTxt = "JOIN NOW", btnClass = "btn-p", clickAction = `handleJoinMatchFlow('${id}')`;
+                    
+                    if(mStatus === 'completed') { 
+                        btnTxt = "COMPLETED"; 
+                        btnClass = "btn-completed"; 
+                        clickAction = "";
+                    } 
+                    else if (mStatus === 'started') { 
+                        btnTxt = "STARTED"; 
+                        btnClass = "btn-joined"; 
+                        clickAction = "";
+                    } 
+                    else if(joined) { 
+                        // FEATURE 2 Integration: Joined user gets PLAY NOW if ID/PASS is shared
+                        if(m.roomId && m.roomId !== 'Wait' && m.roomId.trim() !== "") {
+                            btnTxt = "PLAY NOW";
+                            btnClass = "btn-play-now";
+                            clickAction = "window.open('https://play.google.com/store/apps/details?id=com.dts.freefiremax', '_blank')";
+                        } else {
+                            btnTxt = "JOINED"; 
+                            btnClass = 'btn-joined'; 
+                            clickAction = "";
+                        }
+                    } 
+                    else if(count >= m.totalSlots) { 
+                        btnTxt = "MATCH FULL"; 
+                        btnClass = "btn-joined"; 
+                        clickAction = "";
+                    }
+                    
+                    let roomUI = ""; let noticeUI = "";
+                    if(joined) { 
+                        roomUI = `<div class="copy-box"><span>ID: ${m.roomId || 'Wait'} <i class="fa-solid fa-copy" onclick="copyOne('${m.roomId}', 'Room ID')"></i></span><span style="border-left:1px solid #e2e8f0; padding-left:10px">PASS: ${m.password || 'Wait'} <i class="fa-solid fa-copy" onclick="copyOne('${m.password}', 'Password')"></i></span></div>`; 
+                        if(m.roomId === 'Wait' || !m.roomId) noticeUI = `<div class="room-notice"><i class="fa-solid fa-circle-info" style="margin-top: 2px;"></i> <span>You will get the Room ID and Password 10-15 minutes before the match starts.</span></div>`;
+                    }
+                    
+                    const fillPerc = Math.min((count / m.totalSlots) * 100, 100);
+                    let teamUI = "";
+                    if(m.teams) {
+                        teamUI += `<div class="squad-list">`;
+                        for(let tCode in m.teams) {
+                            const team = m.teams[tCode];
+                            const isMyTeam = team.members && team.members[auth.currentUser?.uid];
+                            const isLeader = team.leader === auth.currentUser?.uid;
+                            if(isMyTeam) {
+                                teamUI += `<div style="margin-bottom:12px; border-bottom:1px dashed #e2e8f0; padding-bottom:12px;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                        <div style="display:flex; flex-direction:column; gap:4px;">
+                                            <span style="font-size:13px; font-weight:700; color:var(--text);"><i class="fa fa-users" style="color:var(--primary)"></i> ${team.teamName || 'Untitled Team'}</span>
+                                            <span class="team-code-box" style="width:fit-content;" onclick="copyOne('${tCode}', 'Team Code')">CODE: ${tCode} <i class="fa-solid fa-copy" style="margin-left:5px; font-size:10px"></i></span>
+                                        </div>
+                                        <div style="display:flex; gap:8px; align-items:center;">
+                                            ${isLeader ? `<i class="fa-solid fa-pen-to-square action-btn" style="color:var(--primary); font-size:14px;" onclick="openRenameModal('${id}', '${tCode}')"></i> <i class="fa-solid fa-trash-can action-btn" style="color:#ef4444; font-size:14px;" onclick="dismissTeam('${id}', '${tCode}')"></i>` : ''}
+                                            <small style="color:var(--primary); font-weight:700;">Slot: ${team.slot || 'N/A'}</small>
+                                        </div>
+                                    </div>`;
+                                for(let mUid in team.members) {
+                                    const member = team.members[mUid];
+                                    teamUI += `<div class="squad-member">
+                                        <span>${mUid === team.leader ? '<i class="fa fa-flag leader-flag"></i>' : ''} ${member.ffName} <small style="color:#94a3b8">(${member.ffUid})</small></span>
+                                        <div style="display:flex; gap:10px;">
+                                            ${isLeader && mUid !== auth.currentUser.uid ? `<i class="fa-solid fa-user-minus action-btn" style="color:#ef4444" onclick="kickMember('${id}', '${tCode}', '${mUid}')"></i>` : ''}
+                                            ${mUid === auth.currentUser.uid ? `<i class="fa-solid fa-right-from-bracket action-btn" style="color:orange" onclick="leaveTeam('${id}', '${tCode}')"></i>` : ''}
+                                        </div>
+                                    </div>`;
+                                }
+                                teamUI += `</div>`;
+                            } else { 
+                                teamUI += `<div style="margin-bottom:10px; font-size:12px; color: var(--text-muted);"><i class="fa fa-users"></i> ${team.teamName || 'Team'} in Slot ${team.slot} (${Object.keys(team.members).length} Players)</div>`; 
+                            }
+                        }
+                        teamUI += `</div>`;
+                    }
+
+                    // FEATURE 1 & FEATURE 2 HTML Render Integration
+                    const currentTeamType = m.teamMode || 'Solo';
+                    
+                    container.innerHTML += `<div class="glass-card m-card"><img src="${m.image}" class="m-img"><div style="padding:15px"><div class="team-type-badge">${currentTeamType}</div><h3>${m.title}</h3><div class="m-grid"><span><i class="fa-solid fa-gamepad"></i> Mode: <b>${m.gameMode || 'Classic'}</b></span><span><i class="fa-solid fa-map-location-dot"></i> Map: <b>${m.map || 'Bermuda'}</b></span><span><i class="fa-solid fa-users-rectangle"></i> Team: <b>${m.teamMode || 'Solo'}</b></span><span><i class="fa-solid fa-trophy"></i> Win: <b>₹${m.prize}</b></span><span><i class="fa-solid fa-ticket"></i> Fee: <b>₹${m.fee}</b></span><span><i class="fa-solid fa-skull"></i> Kill: <b>₹${m.perKill || 0}</b></span><span style="grid-column: span 2;"><i class="fa-solid fa-clock"></i> Time: <b>${m.time || 'Check Details'}</b></span></div><div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b; margin-top:5px;"><span>Players Filled</span><span style="color:var(--primary); font-weight:700;">${count} / ${m.totalSlots}</span></div><div class="p-bar-container"><div class="p-bar-fill" style="width: ${fillPerc}%"></div></div>${roomUI}${noticeUI}<button class="btn ${btnClass}" onclick="${clickAction}">${btnTxt}</button>${teamUI}</div></div>`;
+                });
+
+                if (matchCounter === 0) {
+                    container.innerHTML = `<div style="text-align:center; padding:60px 20px; color:#94a3b8;"><i class="fa-solid fa-ghost" style="font-size:40px; margin-bottom:15px; opacity:0.5;"></i><br><h3 style="margin:0; font-size:16px;">No matches available at the moment</h3><p style="font-size:12px;">Check back later for new tournaments!</p></div>`;
+                }
+            });
+        }
+
+        window.handleJoinMatchFlow = async (id) => {
+            const snap = await get(ref(db, `matches/${id}`));
+            selectedMatch = { id, ...snap.val() };
+            if(parseInt(userObj.coins) < parseInt(selectedMatch.fee)) return alert("Low Balance! Please Deposit Funds.");
+            if(selectedMatch.teamMode === 'Solo') {
+                currentJoinMode = 'solo';
+                openPositionModal();
+            } else {
+                document.getElementById('choice-title').innerText = `Join ${selectedMatch.teamMode} Match`;
+                document.getElementById('choice-desc').innerText = `Start a new ${selectedMatch.teamMode} or join your teammates using a code.`;
+                document.getElementById('choice-modal').style.display = 'flex';
+            }
+        };
+
+        window.initiateCreateTeam = () => {
+            closeModal();
+            currentJoinMode = 'create';
+            openPositionModal();
+        };
+
+        window.initiateJoinWithCode = () => {
+            closeModal();
+            currentJoinMode = 'join';
+            document.getElementById('teammate-ff-name').value = userObj.ffName || "";
+            document.getElementById('teammate-ff-uid').value = userObj.ffUid || "";
+            document.getElementById('team-code-modal').style.display = 'flex';
+        };
+
+        window.openPositionModal = () => {
+            const grid = document.getElementById('slot-grid-container');
+            grid.innerHTML = "";
+            selectedPosition = null;
+            document.getElementById('proceed-to-join-btn').disabled = true;
+
+            const takenSlots = [];
+            const participants = selectedMatch.participants || {};
+            
+            if(selectedMatch.teamMode === 'Solo') {
+                for (let uid in participants) if (participants[uid].slot) takenSlots.push(parseInt(participants[uid].slot));
+            } else {
+                if (selectedMatch.teams) {
+                    for (let tCode in selectedMatch.teams) if(selectedMatch.teams[tCode].slot) takenSlots.push(parseInt(selectedMatch.teams[tCode].slot));
+                }
+            }
+
+            let slotLimit = selectedMatch.totalSlots || 48;
+            if(selectedMatch.teamMode === 'Duo') slotLimit = Math.ceil(selectedMatch.totalSlots / 2);
+            else if(selectedMatch.teamMode === 'Squad') slotLimit = Math.ceil(selectedMatch.totalSlots / 4);
+
+            for (let i = 1; i <= slotLimit; i++) {
+                const box = document.createElement('div');
+                box.className = "slot-box";
+                box.innerText = i;
+                if (takenSlots.includes(i)) {
+                    box.classList.add('taken');
+                } else {
+                    box.onclick = () => {
+                        document.querySelectorAll('.slot-box').forEach(b => b.classList.remove('selected'));
+                        box.classList.add('selected');
+                        selectedPosition = i;
+                        document.getElementById('proceed-to-join-btn').disabled = false;
+                    }
+                }
+                grid.appendChild(box);
+            }
+
+            document.getElementById('slot-modal-title').innerText = currentJoinMode === 'solo' ? "Pick Your Solo Slot" : "Pick Team Slot";
+            document.getElementById('slot-modal').style.display = 'flex';
+        };
+
+        window.handleSlotProceed = () => {
+            document.getElementById('slot-modal').style.display = 'none';
+            document.getElementById('display-selected-slot').innerText = selectedPosition;
+            document.getElementById('ff-name').value = userObj.ffName || "";
+            document.getElementById('ff-uid').value = userObj.ffUid || "";
+            
+            if(currentJoinMode === 'create') {
+                document.getElementById('join-modal-title').innerText = "Create Team";
+                document.getElementById('team-name-container').style.display = 'block';
+            } else {
+                document.getElementById('join-modal-title').innerText = "Confirm Slot";
+                document.getElementById('team-name-container').style.display = 'none';
+            }
+            
+            document.getElementById('join-modal').style.display = 'flex';
+        };
+
+        window.executeJoin = async () => {
+            const n = document.getElementById('ff-name').value.trim(), u = document.getElementById('ff-uid').value.trim();
+            if(!n || !u) return alert("Game details are mandatory!");
+            
+            const gName = document.getElementById('group-name-input').value.trim();
+            if(currentJoinMode === 'create' && !gName) return alert("Team Name is strictly REQUIRED!");
+
+            setGlobalLoading(true, 'final-submit-btn');
+
+            try {
+                if(currentJoinMode === 'solo') {
+                    await update(ref(db, `users/${auth.currentUser.uid}`), { coins: parseInt(userObj.coins) - parseInt(selectedMatch.fee) });
+                    await update(ref(db, `matches/${selectedMatch.id}/participants/${auth.currentUser.uid}`), { ffName: n, ffUid: u, slot: selectedPosition });
+                    await push(ref(db, `users/${auth.currentUser.uid}/history`), { 
+                        title: "Joined Match", 
+                        amount: "-"+selectedMatch.fee, 
+                        date: new Date().toLocaleString(), 
+                        reason: "Slot "+selectedPosition+" Solo", 
+                        status: "success" 
+                    });
+                    alert("Joined successfully as Solo!");
+                } else if(currentJoinMode === 'create') {
+                    const cost = parseInt(adminObj.groupCost || 0);
+                    const totalCost = parseInt(selectedMatch.fee) + cost;
+
+                    if(parseInt(userObj.coins) < totalCost) {
+                        setGlobalLoading(false, 'final-submit-btn');
+                        return alert("Insufficient coins for Team Creation!");
+                    }
+
+                    const teamCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                    const updates = {};
+                    updates[`matches/${selectedMatch.id}/teams/${teamCode}`] = { 
+                        leader: auth.currentUser.uid, 
+                        teamName: gName, 
+                        slot: selectedPosition, 
+                        members: { [auth.currentUser.uid]: { ffName: n, ffUid: u } } 
+                    };
+                    updates[`matches/${selectedMatch.id}/participants/${auth.currentUser.uid}`] = { ffName: n, ffUid: u, teamCode, slot: selectedPosition };
+                    updates[`users/${auth.currentUser.uid}/coins`] = parseInt(userObj.coins) - totalCost;
+                    
+                    await update(ref(db), updates);
+                    await push(ref(db, `users/${auth.currentUser.uid}/history`), { 
+                        title: "Created Team", 
+                        amount: "-"+totalCost, 
+                        date: new Date().toLocaleString(), 
+                        reason: "Team Slot "+selectedPosition, 
+                        status: "success" 
+                    });
+                    alert("Team Created! Share this Code with friends: " + teamCode);
+                }
+            } catch(e) {
+                alert("Operation failed: " + e.message);
+            }
+
+            setGlobalLoading(false, 'final-submit-btn');
+            closeModal();
+        };
+
+        window.confirmJoinTeam = async () => {
+            const code = document.getElementById('team-code-input').value.trim().toUpperCase(), 
+                  n = document.getElementById('teammate-ff-name').value.trim(), 
+                  u = document.getElementById('teammate-ff-uid').value.trim();
+            
+            if(!code || !n || !u) return alert("All fields are required!");
+
+            setGlobalLoading(true, 'confirm-team-join-btn');
+
+            try {
+                const matchSnap = await get(ref(db, `matches/${selectedMatch.id}`));
+                const matchData = matchSnap.val();
+                const teams = matchData.teams || {};
+                
+                if(!teams[code]) {
+                    setGlobalLoading(false, 'confirm-team-join-btn');
+                    return alert("Invalid Team Code! Please check again.");
+                }
+
+                const team = teams[code];
+                const limit = selectedMatch.teamMode === 'Duo' ? 2 : 4;
+                if(Object.keys(team.members).length >= limit) {
+                    setGlobalLoading(false, 'confirm-team-join-btn');
+                    return alert("This team is already full!");
+                }
+
+                const updates = {};
+                updates[`matches/${selectedMatch.id}/teams/${code}/members/${auth.currentUser.uid}`] = { ffName: n, ffUid: u };
+                updates[`matches/${selectedMatch.id}/participants/${auth.currentUser.uid}`] = { ffName: n, ffUid: u, teamCode: code, slot: team.slot };
+                updates[`users/${auth.currentUser.uid}/coins`] = parseInt(userObj.coins) - parseInt(selectedMatch.fee);
+                
+                await update(ref(db), updates);
+                await push(ref(db, `users/${auth.currentUser.uid}/history`), { 
+                    title: "Joined via Code", 
+                    amount: "-"+selectedMatch.fee, 
+                    date: new Date().toLocaleString(), 
+                    reason: "Match Slot: "+team.slot, 
+                    status: "success" 
+                });
+                alert("Successfully joined Team " + (team.teamName || code));
+                closeModal();
+            } catch(e) {
+                alert("Join failed: " + e.message);
+            }
+            setGlobalLoading(false, 'confirm-team-join-btn');
+        };
+
+        window.kickMember = async (mId, tCode, mUid) => {
+            const confirm = await window.customDialog("Are you sure you want to kick this player?", "confirm");
+            if(!confirm) return;
+            setGlobalLoading(true);
+            try {
+                const matchSnap = await get(ref(db, `matches/${mId}`));
+                const matchData = matchSnap.val();
+                const fee = parseInt(matchData.fee);
+                const targetUserSnap = await get(ref(db, `users/${mUid}`));
+                const targetUserData = targetUserSnap.val();
+                const updates = {};
+                updates[`matches/${mId}/participants/${mUid}`] = null;
+                updates[`matches/${mId}/teams/${tCode}/members/${mUid}`] = null;
+                updates[`users/${mUid}/coins`] = (parseInt(targetUserData.coins) || 0) + fee;
+                const hRef = push(ref(db, `users/${mUid}/history`));
+                updates[`users/${mUid}/history/${hRef.key}`] = { 
+                    title: "Kicked from Team", 
+                    amount: "+"+fee, 
+                    date: new Date().toLocaleString(), 
+                    reason: "Refund for " + matchData.title, 
+                    status: "success" 
+                };
+                await update(ref(db), updates);
+                alert("Member kicked and refunded.");
+            } catch(e) { alert("Kick failed: " + e.message); }
+            setGlobalLoading(false);
+        };
+
+        window.leaveTeam = async (mId, tCode) => {
+            const confirm = await window.customDialog("Are you sure you want to leave this team?", "confirm");
+            if(!confirm) return;
+            setGlobalLoading(true);
+            try {
+                const matchSnap = await get(ref(db, `matches/${mId}`));
+                const matchData = matchSnap.val();
+                const team = matchData.teams[tCode];
+                const fee = parseInt(matchData.fee);
+                const updates = {};
+                updates[`matches/${mId}/participants/${auth.currentUser.uid}`] = null;
+                updates[`matches/${mId}/teams/${tCode}/members/${auth.currentUser.uid}`] = null;
+                updates[`users/${auth.currentUser.uid}/coins`] = (parseInt(userObj.coins) || 0) + fee;
+                const hRef = push(ref(db, `users/${auth.currentUser.uid}/history`));
+                updates[`users/${auth.currentUser.uid}/history/${hRef.key}`] = { title: "Left Team: "+tCode, amount: "+"+fee, date: new Date().toLocaleString(), reason: "Match Exit Refund", status: "success" };
+                const remaining = Object.keys(team.members).filter(id => id !== auth.currentUser.uid);
+                if(team.leader === auth.currentUser.uid) {
+                    if(remaining.length > 0) updates[`matches/${mId}/teams/${tCode}/leader`] = remaining[0];
+                    else updates[`matches/${mId}/teams/${tCode}`] = null;
+                }
+                await update(ref(db), updates);
+                alert("You left the team. Fee refunded.");
+            } catch(e) { alert(e.message); }
+            setGlobalLoading(false);
+        };
+
+        window.dismissTeam = async (mId, tCode) => {
+            const confirm = await window.customDialog("Dismiss team? All members will be removed and refunded.", "confirm");
+            if(!confirm) return;
+            setGlobalLoading(true);
+            try {
+                const matchSnap = await get(ref(db, `matches/${mId}`));
+                const matchData = matchSnap.val();
+                const team = matchData.teams[tCode];
+                const fee = parseInt(matchData.fee);
+                const updates = {};
+                for(let mUid in team.members) {
+                    updates[`matches/${mId}/participants/${mUid}`] = null;
+                    const uSnap = await get(ref(db, `users/${mUid}`));
+                    const uData = uSnap.val();
+                    updates[`users/${mUid}/coins`] = (parseInt(uData.coins) || 0) + fee;
+                    const hRef = push(ref(db, `users/${mUid}/history`));
+                    updates[`users/${mUid}/history/${hRef.key}`] = { title: "Team Dismissed", amount: "+"+fee, date: new Date().toLocaleString(), reason: "Match: "+matchData.title, status: "success" };
+                }
+                updates[`matches/${mId}/teams/${tCode}`] = null;
+                await update(ref(db), updates);
+                alert("Team dismissed.");
+            } catch(e) { alert(e.message); }
+            setGlobalLoading(false);
+        };
+
+        let activeRename = null;
+        window.openRenameModal = (mId, tCode) => {
+            activeRename = { mId, tCode };
+            document.getElementById('rename-modal').style.display = 'flex';
+        };
+
+        document.getElementById('confirm-rename-btn').onclick = async () => {
+            const newName = document.getElementById('new-team-name').value.trim();
+            const fee = parseInt(adminObj.renameFee || 0);
+            if(!newName) return alert("Enter name!");
+            if(parseInt(userObj.coins) < fee) return alert("Low balance!");
+            setGlobalLoading(true, 'confirm-rename-btn');
+            try {
+                const updates = {};
+                updates[`matches/${activeRename.mId}/teams/${activeRename.tCode}/teamName`] = newName;
+                updates[`users/${auth.currentUser.uid}/coins`] = parseInt(userObj.coins) - fee;
+                const hRef = push(ref(db, `users/${auth.currentUser.uid}/history`));
+                updates[`users/${activeRename.mId}/history/${hRef.key}`] = { title: "Team Rename", amount: "-"+fee, date: new Date().toLocaleString(), reason: "New Name: "+newName, status: "success" };
+                await update(ref(db), updates);
+                alert("Name updated!"); closeModal();
+            } catch(e) { alert(e.message); }
+            setGlobalLoading(false, 'confirm-rename-btn');
+        };
+
+        let resendTimerInterval;
+        let timeLeftCount = 30;
+        window.startOTPTimer = () => {
+            timeLeftCount = 30; document.getElementById('otp-timer-box').style.display = 'block';
+            document.getElementById('resend-otp-btn').style.display = 'none';
+            document.getElementById('timer-label-text').style.display = 'inline';
+            document.getElementById('timer-text-display').innerText = timeLeftCount;
+            clearInterval(resendTimerInterval);
+            resendTimerInterval = setInterval(() => {
+                timeLeftCount--; document.getElementById('timer-text-display').innerText = timeLeftCount;
+                if (timeLeftCount <= 0) { clearInterval(resendTimerInterval); document.getElementById('timer-label-text').style.display = 'none'; document.getElementById('resend-otp-btn').style.display = 'inline-block'; }
+            }, 1000);
+        };
+
+        window.resendOTP = async () => {
+            const e = document.getElementById('auth-email').value.trim().toLowerCase();
+            const e_key = e.replace(/[^a-zA-Z0-9]/g, "");
+            const generatedOtp = Math.floor(100000 + Math.random() * 900000);
+            const expiry = new Date(Date.now() + 15 * 60000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            setGlobalLoading(true);
+            try {
+                const templateParams = { to_email: e, otp_code: generatedOtp, time: expiry };
+                await emailjs.send('service_cr17hun', 'template_gv02zkj', templateParams);
+                await update(ref(db, 'otp_requests/' + e_key), { otp: generatedOtp });
+                alert("New OTP sent!"); startOTPTimer();
+            } catch(err) { alert("Failed: " + err.message); }
+            setGlobalLoading(false);
+        };
+
+        window.handleAuth = async () => {
+            const e = document.getElementById('auth-email').value.trim().toLowerCase(), p = document.getElementById('auth-pass').value;
+            if(isSignUp) {
+                const n = document.getElementById('reg-name').value.trim(), 
+                      fn = document.getElementById('reg-ffname').value.trim(), 
+                      fu = document.getElementById('reg-ffuid').value.trim(), 
+                      r = document.getElementById('reg-ref').value.trim();
+
+                if(!n || !fn || !fu || !e || !p) return alert("All fields are mandatory.");
+                if(p.length < 8) return alert("Password must be at least 8 characters!");
+
+                setGlobalLoading(true, 'auth-btn'); 
+                try {
+                    const e_key = e.replace(/[^a-zA-Z0-9]/g, "");
+                    if(!isOtpSent) {
+                        const generatedOtp = Math.floor(100000 + Math.random() * 900000);
+                        const expiry = new Date(Date.now() + 15 * 60000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        const templateParams = { to_email: e, otp_code: generatedOtp, time: expiry };
+                        await emailjs.send('service_cr17hun', 'template_gv02zkj', templateParams);
+                        await set(ref(db, 'otp_requests/' + e_key), { name: n, email: e, pass: p, ffName: fn, ffUid: fu, referredBy: r||"", otp: generatedOtp });
+                        document.getElementById('signup-fields').style.display = 'none'; 
+                        document.getElementById('main-auth-inputs').style.display = 'none'; 
+                        document.getElementById('otp-container').style.display = 'block';
+                        document.getElementById('auth-btn-txt').innerText = "Verify & Signup"; 
+                        document.getElementById('toggle-area').style.display = 'none';
+                        isOtpSent = true; startOTPTimer(); alert("OTP sent to your email!");
+                    } else {
+                        const otp_entered = document.getElementById('auth-otp').value.toString().trim();
+                        const requestSnap = await get(ref(db, 'otp_requests/' + e_key));
+                        const requestData = requestSnap.val();
+                        if(String(requestData.otp).trim() === otp_entered) {
+                            const res = await createUserWithEmailAndPassword(auth, e, p);
+                            const myCode = n.substring(0,4).toUpperCase() + Math.floor(1000+Math.random()*9000);
+                            let bonus = 0; 
+                            if(r) { 
+                                const allUsers = (await get(ref(db, 'users'))).val(); 
+                                for(let id in allUsers) if(allUsers[id].referCode === r) { 
+                                    bonus = parseInt(adminObj.referBonus || 0); 
+                                    await update(ref(db, `users/${id}`), { coins: (parseInt(allUsers[id].coins) || 0) + bonus }); 
+                                    break; 
+                                } 
+                            }
+                            await set(ref(db, 'users/'+res.user.uid), { name: n, email: e, ffName: fn, fu: fu, coins: bonus, referCode: myCode, referredBy: r||"", pass: p });
+                            await remove(ref(db, 'otp_requests/' + e_key)); alert("Signup Success!");
+                        } else { alert("Invalid OTP!"); }
+                    }
+                } catch(err) { alert(err.message); }
+                setGlobalLoading(false, 'auth-btn');
+            } else {
+                if(!e || !p) return alert("Email and Password required!");
+                setGlobalLoading(true, 'auth-btn'); 
+                try { 
+                    await signInWithEmailAndPassword(auth, e, p); 
+                } catch(err) { 
+                    if (err.code === 'auth/invalid-login-credentials' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+                        alert("Incorrect password. Please try again.");
+                    } else { alert(err.message); }
+                }
+                setGlobalLoading(false, 'auth-btn');
+            }
+        };
+
+        window.toggleAuthMode = () => { 
+            isSignUp = !isSignUp; isOtpSent = false; 
+            document.getElementById('otp-container').style.display = 'none'; 
+            document.getElementById('otp-timer-box').style.display = 'none';
+            clearInterval(resendTimerInterval);
+            document.getElementById('main-auth-inputs').style.display = 'block'; 
+            document.getElementById('auth-title').innerText = isSignUp ? "Create Account" : "Welcome Back"; 
+            document.getElementById('auth-btn-txt').innerText = isSignUp ? "Request OTP" : "Login"; 
+            document.getElementById('signup-fields').style.display = isSignUp ? "block" : "none"; 
+            document.getElementById('refer-field').style.display = isSignUp ? "block" : "none"; 
+            document.getElementById('toggle-area').style.display = 'block';
+            document.getElementById('toggle-text').innerHTML = isSignUp ? "Already have an account? <b style='color:var(--primary)'>Login</b>" : "Don't have an account? <b style='color:var(--primary)'>Sign up</b>";
+            document.getElementById('fp-link-btn').style.display = isSignUp ? 'none' : 'block';
+        };
+
+        window.submitWithdraw = async () => {
+            const a = document.getElementById('wd-amt').value;
+            const u = document.getElementById('wd-upi').value.trim();
+            if(!u || !u.includes('@')) { return alert("Valid UPI required!"); }
+            if(!a || parseInt(a) < parseInt(adminObj.minWithdraw)) return alert("Check Min Amount!");
+            if(parseInt(a) > parseInt(userObj.coins)) return alert("Low Balance!");
+            setGlobalLoading(true, 'wd-submit-btn'); 
+            
+            const newTxnRef = push(ref(db, 'requests/withdrawals'));
+            const txnKey = newTxnRef.key;
+            
+            const timeString = new Date().toLocaleString();
+            
+            await update(ref(db, `users/${auth.currentUser.uid}`), { coins: parseInt(userObj.coins) - parseInt(a) });
+            await set(ref(db, `requests/withdrawals/${txnKey}`), { uid: auth.currentUser.uid, amount: a, upi: u, status: "pending", timestamp: Date.now() });
+            await set(ref(db, `users/${auth.currentUser.uid}/history/${txnKey}`), { title: "Withdraw Request", amount: "-"+a, date: timeString, reason: "Transfer to " + u, status: "pending", type: "withdrawal" });
+            
+            setGlobalLoading(false, 'wd-submit-btn');
+            alert("Withdraw Request Sent!");
+            closeModal();
+        };
+
+        window.submitDeposit = async () => { 
+            const u = document.getElementById('utr-input').value.trim(), a = document.getElementById('dep-amt').value; 
+            if(!u || !a) return alert("Fill details!"); 
+            const utrPattern = /^\d{12}$/;
+            if (!utrPattern.test(u)) {
+                return alert("Invalid UTR Code! Please provide an exact 12-digit numeric transaction reference.");
+            }
+            setGlobalLoading(true, 'dep-submit-btn'); 
+            
+            const newTxnRef = push(ref(db, 'requests/deposits'));
+            const txnKey = newTxnRef.key;
+            
+            const timeString = new Date().toLocaleString();
+            
+            await set(ref(db, `requests/deposits/${txnKey}`), { uid: auth.currentUser.uid, amount: a, utr: u, status: "pending", timestamp: Date.now() }); 
+            await set(ref(db, `users/${auth.currentUser.uid}/history/${txnKey}`), { title: "Deposit Request", amount: "+"+a, date: timeString, reason: "UTR: " + u, status: "pending", type: "deposit" });
+            
+            setGlobalLoading(false, 'dep-submit-btn');
+            alert("Deposit Submitted!"); 
+            showScreen('wallet-screen'); 
+        };
+
+        function loadHistory(uid) {
+            // Listen to User history path
+            onValue(ref(db, `users/${uid}/history`), (historySnap) => {
+                // Listen to Global Deposit Requests path for updates
+                onValue(ref(db, `requests/deposits`), (depSnap) => {
+                    // Listen to Global Withdrawal Requests path for updates
+                    onValue(ref(db, `requests/withdrawals`), (wdSnap) => {
+                        const list = document.getElementById('txn-list'); 
+                        if(!list) return;
+                        
+                        let historyData = historySnap.val() || {};
+                        let depositsData = depSnap.val() || {};
+                        let withdrawalsData = wdSnap.val() || {};
+                        
+                        // Merge live requests status inside history mapping
+                        let finalMap = {};
+                        
+                        Object.keys(historyData).forEach(key => {
+                            finalMap[key] = { ...historyData[key] };
+                            
+                            // Live status sync matching
+                            if (finalMap[key].type === 'deposit' && depositsData[key]) {
+                                finalMap[key].status = depositsData[key].status;
+                            } else if (finalMap[key].type === 'withdrawal' && withdrawalsData[key]) {
+                                finalMap[key].status = withdrawalsData[key].status;
+                            }
+                        });
+                        
+                        if(Object.keys(finalMap).length === 0) { 
+                            list.innerHTML = "<div style='text-align:center; padding:40px; color:#64748b;'><br>No transactions found.</div>"; 
+                            return; 
+                        }
+                        
+                        const sortedKeys = Object.keys(finalMap).reverse();
+                        
+                        // Memory allocation for rendering to block the flicker/lag
+                        const fragment = document.createDocumentFragment();
+                        
+                        sortedKeys.forEach(key => { 
+                            const t = finalMap[key];
+                            let amountValue = t.amount ? t.amount.toString() : "0";
+                            if (amountValue.startsWith('--')) amountValue = amountValue.substring(1);
+                            
+                            let displayStatus = "PENDING", statusColor = '#eab308';
+                            const isUserInitiated = t.type === 'deposit' || t.type === 'withdrawal';
+
+                            if (!isUserInitiated) {
+                                // Force Admin balance adjustments / rewards to SUCCESS
+                                displayStatus = "SUCCESS";
+                                statusColor = '#10b981';
+                                // Auto prefix "+" if no sign exists
+                                if (!amountValue.includes('+') && !amountValue.includes('-')) {
+                                    amountValue = "+" + amountValue;
+                                }
+                            } else {
+                                // Standard live sync parsing for standard deposits/withdrawals
+                                const rawStatus = (t.status || 'pending').toLowerCase();
+                                if (['success', 'accepted', 'completed', 'approved', 'paid'].includes(rawStatus)) { 
+                                    displayStatus = "SUCCESS"; 
+                                    statusColor = '#10b981'; 
+                                } 
+                                else if (['rejected', 'failed', 'cancelled', 'declined'].includes(rawStatus)) { 
+                                    displayStatus = "FAILED"; 
+                                    statusColor = '#ef4444'; 
+                                }
+                            }
+
+                            const isCredit = amountValue.includes('+') || (!amountValue.includes('-') && !['withdraw', 'entry', 'fee'].some(k => t.title?.toLowerCase().includes(k)));
+                            const amtTextColor = isCredit ? '#10b981' : '#ef4444';
+                            
+                            const txnItem = document.createElement('div');
+                            txnItem.className = 'txn-item';
+                            txnItem.innerHTML = `
+                                <div class="txn-main">
+                                    <div style="flex: 1; padding-right: 10px;">
+                                        <div style="font-size:14px; color: var(--text); font-weight: 700; margin-bottom: 2px;">${t.title || 'Transaction'}</div>
+                                        <div style="color:var(--text-muted); font-size:11px;">${t.date || 'Recent'}</div>
+                                    </div>
+                                    <div style="text-align:right;">
+                                        <div style="color:${amtTextColor}; font-weight:800; font-size:16px;">${amountValue}</div>
+                                        <span class="status-badge" style="background:${statusColor}15; color:${statusColor}; border:1px solid ${statusColor}30;">${displayStatus}</span>
+                                    </div>
+                                </div>
+                                ${t.reason ? `<div class="txn-reason">${t.reason}</div>` : ''}
+                            `;
+                            
+                            fragment.appendChild(txnItem);
+                        });
+                        
+                        list.innerHTML = ""; 
+                        list.appendChild(fragment);
+                    });
+                });
+            });
+        }
+
+        window.uploadDP = async (input) => { 
+            const fd = new FormData(); fd.append("image", input.files[0]); 
+            setGlobalLoading(true);
+            const r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API}`, { method: "POST", body: fd }); 
+            const json = await r.json(); 
+            if(json.success) await update(ref(db, 'users/'+auth.currentUser.uid), { profilePic: json.data.url });
+            setGlobalLoading(false);
+        };
+
+        window.openProfileEdit = () => { document.getElementById('edit-ffname').value = userObj.ffName || ""; document.getElementById('edit-ffuid').value = userObj.ffUid || ""; document.getElementById('profile-edit-modal').style.display = 'flex'; };
+        window.saveProfileChanges = async () => { const n = document.getElementById('edit-ffname').value, u = document.getElementById('edit-ffuid').value; if(!n || !u) return alert("Please fill both!"); setGlobalLoading(true, 'save-profile-btn'); await update(ref(db, 'users/' + auth.currentUser.uid), { ffName: n, ffUid: u }); setGlobalLoading(false, 'save-profile-btn'); alert("Details Updated!"); closeModal(); };
+        window.logout = () => signOut(auth);
+        window.closeModal = () => document.querySelectorAll('.modal').forEach(m => m.style.display='none');
+        
+        window.togglePass = (id, icon) => { 
+            const x = document.getElementById(id); 
+            if(x.type === "password") { x.type = "text"; icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash', 'eye-active'); } 
+            else { x.type = "password"; icon.classList.remove('fa-eye-slash', 'eye-active'); icon.classList.add('fa-eye'); }
+        };
+
+        window.handleBack = () => { if(userObj && userObj.isBanned) showScreen('home-screen'); else showScreen('profile-screen'); };
+        window.copyRef = () => { navigator.clipboard.writeText(userObj.referCode); alert("Copied!"); };
+        
+        window.share = async (plat) => { 
+            const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Win Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
+            if (plat === 'more') {
+                try {
+                    if (navigator.share) {
+                        await navigator.share({ title: 'Nova Battle', text: msg });
+                    } else { throw new Error("Web Share not supported"); }
+                } catch (err) {
+                    if(err.name !== 'AbortError') {
+                        navigator.clipboard.writeText(msg);
+                        alert("Referral link copied to clipboard!");
+                    }
+                }
+                return;
+            }
+            if(plat=='wa') window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+            if(plat=='tg') window.open(`https://t.me/share/url?url=https://novabattle.netlify.app&text=${encodeURIComponent(msg)}`);
+        };
+
+        window.showInfo = (type) => { 
+            const title = document.getElementById('info-title'), text = document.getElementById('info-text'), btns = document.getElementById('support-btns'), dateField = document.getElementById('policy-date-container'); 
+            btns.style.display = "none"; dateField.style.display = "none"; text.innerText = ""; 
+            if(type=='support') { title.innerText="Support"; btns.style.display="block"; document.getElementById('s-mail-btn').onclick = () => window.open("mailto:"+adminObj.supportEmail); document.getElementById('s-insta-btn').onclick = () => window.open(adminObj.instaUrl); } 
+            if(type=='policy') { title.innerText="Privacy Policy"; text.innerText = adminObj.privacyPolicy; if(adminObj.policyUpdateDate) { dateField.style.display = "block"; document.getElementById('policy-date').innerText = adminObj.policyUpdateDate; } } 
+            if(type=='faq') { title.innerText="FAQ & Terms"; text.innerText = adminObj.faqContent; } 
+            if(type=='about') { title.innerText="About Us"; text.innerText = adminObj.aboutUs; } 
+            showScreen('info-screen'); 
+        };
+        window.openWdModal = () => { document.getElementById('withdraw-modal').style.display='flex'; };
+    </script>
+</body>
+</html>
