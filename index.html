@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Nova Battle - Master Final v1.0.4</title>
-    
-    <link rel="icon" type="image/png" href="favicon.png">
-    
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -29,17 +26,15 @@
         html, body {
             margin: 0;
             padding: 0;
-            width: 100%;
             height: 100%;
-            overflow: hidden;
-            /* CRITICAL FIX: Disables overscroll stretching on iOS and Android WebViews */
-            overscroll-behavior: none; 
-            -webkit-overflow-scrolling: auto;
+            width: 100%;
+            overflow: hidden; /* Main window scroll block karne ke liye */
+            position: fixed;  /* WebView ka dynamic rubber-banding pull block karne ke liye */
+            background: var(--bg); 
+            color: var(--text);
         }
 
         body { 
-            background: var(--bg); 
-            color: var(--text); 
             padding-top: env(safe-area-inset-top);
 
             /* FEATURE: Disable Text Selection for Native App Feel */
@@ -97,12 +92,8 @@
             gap: 8px;
         }
 
-        /* FIX: Changed from sticky to fixed to prevent visual dragging lag */
         .header { 
-            position: fixed; 
-            top: 0; 
-            left: 0;
-            z-index: 100; 
+            flex-shrink: 0; /* Header apni jagah fix rahega compression se bachega */
             background: #ffffff; 
             display: flex; 
             justify-content: space-between; 
@@ -112,28 +103,28 @@
             border-bottom: 1px solid var(--border); 
             width: 100%;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            height: 65px;
+            z-index: 100;
         }
 
-        /* FIX: Screens are now individually bound to control internal scroll container only */
+        /* FIXED APP STRUCTURAL FLEXBOX LAYOUT DEFINITION */
         .screen { 
             display: none; 
-            height: 100vh; 
+            height: 100%; 
             width: 100%; 
-            overflow-y: auto; 
-            -webkit-overflow-scrolling: touch; /* Fast smooth inertia scroll */
-            overscroll-behavior-y: contain; /* Blocks layout bubble up */
-            padding: 65px 0 100px 0; /* 65px top offset for Header, 100px for Navigation space */
             position: absolute; 
             top: 0; 
-            left: 0; 
+            left: 0;
+            flex-direction: column; /* Sub-components ko Vertical align karega */
         }
         
         .screen-content { 
-            padding: 20px 20px 0 20px; 
+            flex: 1; /* Pure space ko capture karega bina page expand kiye */
+            overflow-y: auto; /* Sirf isi container me scrolling active hogi */
+            -webkit-overflow-scrolling: touch; /* Makkhan jaisa iOS dynamic momentum scrolling */
+            padding: 20px 20px 100px 20px; /* Safe padding for bottom navigation visibility */
         }
 
-        .active { display: block !important; animation: fadeIn 0.4s ease; }
+        .active { display: flex !important; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
 
         .glass-card { 
@@ -181,11 +172,11 @@
         .btn-joined { background: #f1f5f9; color: #64748b; pointer-events: none; border: 1px solid #e2e8f0; }
         .btn-completed { background: #e2e8f0; color: #94a3b8; pointer-events: none; }
         
-        /* PLAY NOW Active Play Button Custom CSS Style - Updated to App's Deep Purple Accent Look */
+        /* PLAY NOW Active Play Button Custom CSS Style */
         .btn-play-now { background: linear-gradient(135deg, #7c3aed, #5b21b6); color: white; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4); pointer-events: auto !important; }
         .btn-play-now:active { transform: scale(0.98); opacity: 0.9; }
 
-        /* Custom Small Card View for Team Type - Updated to Match Deep Purple Theme */
+        /* Custom Small Card View for Team Type */
         .team-type-badge {
             display: inline-block;
             background: #f5f3ff;
@@ -216,12 +207,12 @@
         #splash h1 { color: #0f172a; }
         @keyframes logoPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         
-        #ban-overlay { position: fixed; inset: 0; background: #ffffff; z-index: 9000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+        #ban-overlay { display: none; position: fixed; inset: 0; background: #ffffff; z-index: 9000; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
 
         #update-modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 20000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); }
         .update-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 25px; padding: 30px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
 
-        .cat-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .cat-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; flex-shrink: 0; }
         .cat-bar::-webkit-scrollbar { display: none; }
         .cat-btn { background: #ffffff; padding: 10px 18px; border-radius: 20px; border: 1px solid var(--border); font-size: 13px; white-space: nowrap; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .active-cat { background: var(--primary); border-color: var(--primary); color: white; font-weight: bold; }
@@ -238,6 +229,7 @@
             touch-action: pan-y; 
             cursor: grab;
             box-shadow: var(--shadow);
+            flex-shrink: 0;
         }
         .slider-container:active { cursor: grabbing; }
         .slider-wrapper { 
@@ -258,8 +250,7 @@
         .copy-box { background:#f1f5f9; padding:12px; border-radius:12px; color:var(--text); font-size:12px; margin-bottom:12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0; }
         .copy-box i { cursor: pointer; font-size: 16px; transition: 0.2s; margin-left: 10px; color: var(--primary); }
 
-        /* FIX: Absolute bottom locking layout with overscroll handler */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0 25px 0; z-index: 500; box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05); height: 75px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0 25px 0; z-index: 500; box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05); }
         .nav-item { text-align: center; color: #94a3b8; font-size: 11px; flex: 1; cursor: pointer; transition: 0.3s; }
         .nav-item.active-nav { color: var(--primary); }
         .nav-item i { font-size: 22px; margin-bottom: 4px; }
@@ -332,7 +323,7 @@
             min-height: 50px;
         }
         .slot-box {
-            position: relative; /* Green Tik mark alignment ke liye */
+            position: relative; 
             background: #ffffff;
             border: 1px solid #e2e8f0;
             padding: 14px 10px;
@@ -349,7 +340,6 @@
             transform: scale(0.92);
         }
         
-        /* FIX 4: IMPROVED CONTRAST AND GREEN TICK FOR TAKEN SLOTS */
         .slot-box.taken {
             background: #f1f5f9 !important;
             color: #cbd5e1 !important;
@@ -361,7 +351,6 @@
             pointer-events: none !important;
         }
 
-        /* 2. Occupied slots ke upar Green Tik (Checkmark) dikhane ke liye */
         .slot-box.taken::after {
             content: "✓" !important;
             position: absolute !important;
@@ -370,8 +359,8 @@
             transform: translate(-50%, -50%) !important;
             font-size: 16px !important;
             font-weight: bold !important;
-            color: #ffffff !important;           /* White checkmark */
-            background-color: #28a745 !important;   /* Green circle background */
+            color: #ffffff !important;           
+            background-color: #28a745 !important;   
             border-radius: 50% !important;
             width: 24px !important;
             height: 24px !important;
@@ -802,7 +791,7 @@
         let fp_email_stored = "";
         let recovered_pass = ""; 
         let selectedPosition = null;
-        let currentJoinMode = 'solo'; // solo, create, join
+        let currentJoinMode = 'solo'; 
 
         onAuthStateChanged(auth, (user) => {
             if(user) {
@@ -1048,7 +1037,6 @@
                         clickAction = "";
                     } 
                     else if(joined) { 
-                        // FEATURE 2 Integration: Joined user gets PLAY NOW if ID/PASS is shared
                         if(m.roomId && m.roomId !== 'Wait' && m.roomId.trim() !== "") {
                             btnTxt = "PLAY NOW";
                             btnClass = "btn-play-now";
@@ -1109,7 +1097,6 @@
                         teamUI += `</div>`;
                     }
 
-                    // FEATURE 1 & FEATURE 2 HTML Render Integration
                     const currentTeamType = m.teamMode || 'Solo';
                     
                     container.innerHTML += `<div class="glass-card m-card"><img src="${m.image}" class="m-img"><div style="padding:15px"><div class="team-type-badge">${currentTeamType}</div><h3>${m.title}</h3><div class="m-grid"><span><i class="fa-solid fa-gamepad"></i> Mode: <b>${m.gameMode || 'Classic'}</b></span><span><i class="fa-solid fa-map-location-dot"></i> Map: <b>${m.map || 'Bermuda'}</b></span><span><i class="fa-solid fa-users-rectangle"></i> Team: <b>${m.teamMode || 'Solo'}</b></span><span><i class="fa-solid fa-trophy"></i> Win: <b>₹${m.prize}</b></span><span><i class="fa-solid fa-ticket"></i> Fee: <b>₹${m.fee}</b></span><span><i class="fa-solid fa-skull"></i> Kill: <b>₹${m.perKill || 0}</b></span><span style="grid-column: span 2;"><i class="fa-solid fa-clock"></i> Time: <b>${m.time || 'Check Details'}</b></span></div><div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b; margin-top:5px;"><span>Players Filled</span><span style="color:var(--primary); font-weight:700;">${count} / ${m.totalSlots}</span></div><div class="p-bar-container"><div class="p-bar-fill" style="width: ${fillPerc}%"></div></div>${roomUI}${noticeUI}<button class="btn ${btnClass}" onclick="${clickAction}">${btnTxt}</button>${teamUI}</div></div>`;
@@ -1410,7 +1397,7 @@
                 updates[`matches/${activeRename.mId}/teams/${activeRename.tCode}/teamName`] = newName;
                 updates[`users/${auth.currentUser.uid}/coins`] = parseInt(userObj.coins) - fee;
                 const hRef = push(ref(db, `users/${auth.currentUser.uid}/history`));
-                updates[`users/${activeRename.mId}/history/${hRef.key}`] = { title: "Team Rename", amount: "-"+fee, date: new Date().toLocaleString(), reason: "New Name: "+newName, status: "success" };
+                updates[`users/${auth.currentUser.uid}/history/${hRef.key}`] = { title: "Team Rename", amount: "-"+fee, date: new Date().toLocaleString(), reason: "New Name: "+newName, status: "success" };
                 await update(ref(db), updates);
                 alert("Name updated!"); closeModal();
             } catch(e) { alert(e.message); }
@@ -1533,7 +1520,6 @@
             
             const newTxnRef = push(ref(db, 'requests/withdrawals'));
             const txnKey = newTxnRef.key;
-            
             const timeString = new Date().toLocaleString();
             
             await update(ref(db, `users/${auth.currentUser.uid}`), { coins: parseInt(userObj.coins) - parseInt(a) });
@@ -1556,7 +1542,6 @@
             
             const newTxnRef = push(ref(db, 'requests/deposits'));
             const txnKey = newTxnRef.key;
-            
             const timeString = new Date().toLocaleString();
             
             await set(ref(db, `requests/deposits/${txnKey}`), { uid: auth.currentUser.uid, amount: a, utr: u, status: "pending", timestamp: Date.now() }); 
@@ -1568,11 +1553,8 @@
         };
 
         function loadHistory(uid) {
-            // Listen to User history path
             onValue(ref(db, `users/${uid}/history`), (historySnap) => {
-                // Listen to Global Deposit Requests path for updates
                 onValue(ref(db, `requests/deposits`), (depSnap) => {
-                    // Listen to Global Withdrawal Requests path for updates
                     onValue(ref(db, `requests/withdrawals`), (wdSnap) => {
                         const list = document.getElementById('txn-list'); 
                         if(!list) return;
@@ -1581,13 +1563,10 @@
                         let depositsData = depSnap.val() || {};
                         let withdrawalsData = wdSnap.val() || {};
                         
-                        // Merge live requests status inside history mapping
                         let finalMap = {};
                         
                         Object.keys(historyData).forEach(key => {
                             finalMap[key] = { ...historyData[key] };
-                            
-                            // Live status sync matching
                             if (finalMap[key].type === 'deposit' && depositsData[key]) {
                                 finalMap[key].status = depositsData[key].status;
                             } else if (finalMap[key].type === 'withdrawal' && withdrawalsData[key]) {
@@ -1601,8 +1580,6 @@
                         }
                         
                         const sortedKeys = Object.keys(finalMap).reverse();
-                        
-                        // Memory allocation for rendering to block the flicker/lag
                         const fragment = document.createDocumentFragment();
                         
                         sortedKeys.forEach(key => { 
@@ -1614,15 +1591,12 @@
                             const isUserInitiated = t.type === 'deposit' || t.type === 'withdrawal';
 
                             if (!isUserInitiated) {
-                                // Force Admin balance adjustments / rewards to SUCCESS
                                 displayStatus = "SUCCESS";
                                 statusColor = '#10b981';
-                                // Auto prefix "+" if no sign exists
                                 if (!amountValue.includes('+') && !amountValue.includes('-')) {
                                     amountValue = "+" + amountValue;
                                 }
                             } else {
-                                // Standard live sync parsing for standard deposits/withdrawals
                                 const rawStatus = (t.status || 'pending').toLowerCase();
                                 if (['success', 'accepted', 'completed', 'approved', 'paid'].includes(rawStatus)) { 
                                     displayStatus = "SUCCESS"; 
