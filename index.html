@@ -561,7 +561,7 @@
             <div class="glass-card" style="text-align:center; border: 2px dashed #ddd6fe; background: #f5f3ff; box-shadow: none;" onclick="copyRef()">
                 <p style="font-size: 12px; font-weight: 700; color: var(--text-muted);">MY REFER CODE</p>
                 <h2 id="u-ref-code" style="letter-spacing:5px; color:var(--primary); margin:10px 0;">...</h2>
-                <p style="font-size: 11px; color: var(--primary);">Click to copy</p>
+                <p style="font-size: 11px; color: var(--primary);">Click to share</p>
             </div>
             <div style="display:flex; justify-content:center; gap:25px; font-size:35px; margin: 25px 0;">
                 <i class="fab fa-whatsapp" style="color:#22c55e" onclick="share('wa')"></i>
@@ -1658,7 +1658,24 @@
         };
 
         window.handleBack = () => { if(userObj && userObj.isBanned) showScreen('home-screen'); else showScreen('profile-screen'); };
-        window.copyRef = () => { navigator.clipboard.writeText(userObj.referCode); alert("Copied!"); };
+        
+        // MODIFIED: Copy panel will now act as a dynamic trigger for native device sharing
+        window.copyRef = async () => { 
+            const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Win Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'Nova Battle', text: msg });
+                } catch (err) {
+                    if(err.name !== 'AbortError') {
+                        navigator.clipboard.writeText(userObj.referCode);
+                        alert("Copied!");
+                    }
+                }
+            } else {
+                navigator.clipboard.writeText(userObj.referCode);
+                alert("Copied!");
+            }
+        };
         
         window.share = async (plat) => { 
             const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Win Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
