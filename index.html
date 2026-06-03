@@ -1397,7 +1397,7 @@
                 updates[`matches/${activeRename.mId}/teams/${activeRename.tCode}/teamName`] = newName;
                 updates[`users/${auth.currentUser.uid}/coins`] = parseInt(userObj.coins) - fee;
                 const hRef = push(ref(db, `users/${auth.currentUser.uid}/history`));
-                updates[`users/${auth.currentUser.uid}/history/${hRef.key}`] = { title: "Team Rename", amount: "-"+fee, date: new Date().toLocaleString(), reason: "New Name: "+newName, status: "success" };
+                updates[`users/${activeRename.mId}/history/${hRef.key}`] = { title: "Team Rename", amount: "-"+fee, date: new Date().toLocaleString(), reason: "New Name: "+newName, status: "success" };
                 await update(ref(db), updates);
                 alert("Name updated!"); closeModal();
             } catch(e) { alert(e.message); }
@@ -1475,7 +1475,7 @@
                                     break; 
                                 } 
                             }
-                            await set(ref(db, 'users/'+res.user.uid), { name: n, email: e, ffName: fn, fu: fu, coins: bonus, referCode: myCode, referredBy: r||"", pass: p });
+                            await set(ref(db, 'users/'+res.user.uid), { name: n, email: e, ffName: fn, ffUid: fu, coins: bonus, referCode: myCode, referredBy: r||"", pass: p });
                             await remove(ref(db, 'otp_requests/' + e_key)); alert("Signup Success!");
                         } else { alert("Invalid OTP!"); }
                     }
@@ -1659,36 +1659,35 @@
 
         window.handleBack = () => { if(userObj && userObj.isBanned) showScreen('home-screen'); else showScreen('profile-screen'); };
         
-        // MODIFIED: Copy panel will now act as a dynamic trigger for native device sharing
+        // MODIFIED: Copy panel & Refer Code now send data to Sketchware
         window.copyRef = async () => { 
             const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Win Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
-            if (navigator.share) {
-                try {
-                    await navigator.share({ title: 'Nova Battle', text: msg });
-                } catch (err) {
-                    if(err.name !== 'AbortError') {
-                        navigator.clipboard.writeText(userObj.referCode);
-                        alert("Copied!");
-                    }
+            if (window.AndroidShare) {
+                window.AndroidShare.shareText(msg);
+            } else if (navigator.share) {
+                try { await navigator.share({ title: 'Nova Battle', text: msg }); } catch (err) {
+                    if(err.name !== 'AbortError') { navigator.clipboard.writeText(userObj.referCode); alert("Copied!"); }
                 }
             } else {
-                navigator.clipboard.writeText(userObj.referCode);
-                alert("Copied!");
+                navigator.clipboard.writeText(userObj.referCode); alert("Copied!");
             }
         };
         
+        // MODIFIED: Direct buttons and 'More' now route to Native Android Share if inside WebView
         window.share = async (plat) => { 
             const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Win Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
+            
+            if (window.AndroidShare) {
+                window.AndroidShare.shareText(msg);
+                return;
+            }
+            
             if (plat === 'more') {
                 try {
-                    if (navigator.share) {
-                        await navigator.share({ title: 'Nova Battle', text: msg });
-                    } else { throw new Error("Web Share not supported"); }
+                    if (navigator.share) { await navigator.share({ title: 'Nova Battle', text: msg }); } 
+                    else { throw new Error("Web Share not supported"); }
                 } catch (err) {
-                    if(err.name !== 'AbortError') {
-                        navigator.clipboard.writeText(msg);
-                        alert("Referral link copied to clipboard!");
-                    }
+                    if(err.name !== 'AbortError') { navigator.clipboard.writeText(msg); alert("Referral link copied!"); }
                 }
                 return;
             }
