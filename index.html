@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Nova Battle - Master Final v1.0.4</title>
+    
+    <link rel="icon" type="image/png" href="favicon.png">
+    
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1393,7 +1396,7 @@
                 updates[`matches/${activeRename.mId}/teams/${activeRename.tCode}/teamName`] = newName;
                 updates[`users/${auth.currentUser.uid}/coins`] = parseInt(userObj.coins) - fee;
                 const hRef = push(ref(db, `users/${auth.currentUser.uid}/history`));
-                updates[`users/${auth.currentUser.uid}/history/${hRef.key}`] = { title: "Team Rename", amount: "-"+fee, date: new Date().toLocaleString(), reason: "New Name: "+newName, status: "success" };
+                updates[`users/${activeRename.mId}/history/${hRef.key}`] = { title: "Team Rename", amount: "-"+fee, date: new Date().toLocaleString(), reason: "New Name: "+newName, status: "success" };
                 await update(ref(db), updates);
                 alert("Name updated!"); closeModal();
             } catch(e) { alert(e.message); }
@@ -1669,6 +1672,25 @@
         window.handleBack = () => { if(userObj && userObj.isBanned) showScreen('home-screen'); else showScreen('profile-screen'); };
         window.copyRef = () => { navigator.clipboard.writeText(userObj.referCode); alert("Copied!"); };
         
+        window.share = async (plat) => { 
+            const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Win Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
+            if (plat === 'more') {
+                try {
+                    if (navigator.share) {
+                        await navigator.share({ title: 'Nova Battle', text: msg });
+                    } else { throw new Error("Web Share not supported"); }
+                } catch (err) {
+                    if(err.name !== 'AbortError') {
+                        navigator.clipboard.writeText(msg);
+                        alert("Referral link copied to clipboard!");
+                    }
+                }
+                return;
+            }
+            if(plat=='wa') window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+            if(plat=='tg') window.open(`https://t.me/share/url?url=https://novabattle.netlify.app&text=${encodeURIComponent(msg)}`);
+        };
+
         window.share = async (plat) => { 
             const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Win Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
             if (plat === 'more') {
