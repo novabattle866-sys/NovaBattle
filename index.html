@@ -563,11 +563,13 @@
                 <h2 id="u-ref-code" style="letter-spacing:5px; color:var(--primary); margin:10px 0;">...</h2>
                 <p style="font-size: 11px; color: var(--primary);">Click to share</p>
             </div>
-            <div style="display:flex; justify-content:center; gap:25px; font-size:35px; margin: 25px 0;">
-                <i class="fab fa-whatsapp" style="color:#22c55e" onclick="share('wa')"></i>
-                <i class="fab fa-telegram" style="color:#3b82f6" onclick="share('tg')"></i>
-                <i class="fa-solid fa-share-nodes" style="color:var(--primary); transition: 0.2s;" onclick="share('more')"></i>
+            
+            <div style="margin: 25px 0;">
+                <button class="btn btn-p" onclick="share('more')" style="border-radius: 16px; padding: 15px; font-size: 14px;">
+                    <i class="fa-solid fa-user-plus"></i> Invite Friends
+                </button>
             </div>
+            
             <div class="glass-card">
                 <h4 style="margin-top: 0;"><i class="fa-solid fa-list-check" style="color: var(--primary);"></i> Referral Terms</h4>
                 <p id="ref-tc-txt" style="font-size:12px; color:var(--text-muted); line-height:1.6;"></p>
@@ -845,15 +847,15 @@
         };
 
         window.handleFPSendOTP = async () => {
-            const email = document.getElementById('fp-email').value.trim().toLowerCase();
-            if(!email) return alert("Please enter your email.");
+            const e = document.getElementById('fp-email').value.trim().toLowerCase();
+            if(!e) return alert("Please enter your email.");
             setGlobalLoading(true, 'fp-send-otp-btn');
             try {
                 const usersSnap = await get(ref(db, 'users'));
                 const users = usersSnap.val();
                 let userRecord = null;
                 for(let id in users) { 
-                    if(users[id].email === email) { 
+                    if(users[id].email === e) { 
                         userRecord = users[id]; 
                         break;
                     } 
@@ -866,13 +868,13 @@
 
                 recovered_pass = userRecord.pass || "N/A";
                 fp_otp_generated = Math.floor(100000 + Math.random() * 900000);
-                fp_email_stored = email;
+                fp_email_stored = e;
                 
                 const expiry = new Date(Date.now() + 15 * 60000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const templateParams = { to_email: email, otp_code: fp_otp_generated, time: expiry };
+                const templateParams = { to_email: e, otp_code: fp_otp_generated, time: expiry };
                 await emailjs.send('service_cr17hun', 'template_gv02zkj', templateParams);
                 
-                alert("Recovery OTP sent to: " + email);
+                alert("Recovery OTP sent to: " + e);
                 document.getElementById('fp-step-1').style.display = 'none';
                 document.getElementById('fp-step-2').style.display = 'block';
             } catch (err) { alert("Failed to send OTP: " + err.message); }
