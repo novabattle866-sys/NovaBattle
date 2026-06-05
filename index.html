@@ -775,6 +775,40 @@
         // --- INSTAGRAM-STYLE BACK BUTTON NAVIGATION SYSTEM LOGIC ---
         let currentActiveScreenId = 'auth-screen';
 
+        // Setup MutationObserver to watch modal display changes and sync history state
+        let isObserverSyncing = false;
+        const modalObserver = new MutationObserver(() => {
+            if (isObserverSyncing) return;
+            
+            let hasAnyOpen = false;
+            document.querySelectorAll('.modal').forEach(m => {
+                if (m.style.display === 'flex' || m.style.display === 'block') {
+                    hasAnyOpen = true;
+                }
+            });
+
+            isObserverSyncing = true;
+            if (hasAnyOpen) {
+                if (!history.state || !history.state.modalOpen) {
+                    let stateObj = { screenId: currentActiveScreenId, modalOpen: true };
+                    if (currentActiveScreenId === 'auth-screen') {
+                        if (isOtpSent) stateObj.subState = 'otp';
+                        else if (isSignUp) stateObj.subState = 'signup';
+                    }
+                    window.history.pushState(stateObj, '', '');
+                }
+            } else {
+                if (history.state && history.state.modalOpen) {
+                    window.history.back();
+                }
+            }
+            isObserverSyncing = false;
+        });
+
+        document.querySelectorAll('.modal').forEach((modal) => {
+            modalObserver.observe(modal, { attributes: true, attributeFilter: ['style'] });
+        });
+
         window.showScreen = (id, isFromPopState = false) => {
             if(userObj && userObj.isBanned && id !== 'info-screen' && id !== 'auth-screen' && id !== 'home-screen') return;
             
@@ -785,18 +819,32 @@
             const target = document.getElementById(id);
             if(target) target.classList.add('active');
             
+            const prevScreenId = currentActiveScreenId;
             currentActiveScreenId = id;
 
-            // INSTAGRAM RULE IMPLEMENTATION: 
-            // Sub-pages (`deposit-screen` etc.) ke liye dynamic history push hogi.
-            // Par jab hum primary tab switch karenge (`home`, `wallet`, etc.), hum direct 'home-screen' par laane ka path clear rakhte hain.
+            // SMART HTML5 HISTORY NAVIGATION MANAGEMENT
             if (!isFromPopState) {
-                if (['home-screen', 'auth-screen'].includes(id)) {
+                const isTab = ['wallet-screen', 'refer-screen', 'profile-screen'].includes(id);
+                const isPrevTab = ['wallet-screen', 'refer-screen', 'profile-screen'].includes(prevScreenId);
+
+                if (id === 'home-screen') {
+                    // Agar hum bottom tabs me se kisi bhi screen se Home click karenge
+                    // Toh hum piche wala state clean karke pop kar dete hain.
+                    if (isPrevTab) {
+                        window.history.back();
+                        return;
+                    } else {
+                        window.history.replaceState({ screenId: id }, '', '');
+                    }
+                } else if (['auth-screen'].includes(id)) {
                     window.history.replaceState({ screenId: id }, '', '');
-                } else if (['wallet-screen', 'refer-screen', 'profile-screen'].includes(id)) {
-                    // Kisi bhi primary tab me aane par back target ko home-screen bana diya gaya hai.
-                    window.history.replaceState({ screenId: 'home-screen' }, '', '');
-                    window.history.pushState({ screenId: id }, '', '');
+                } else if (isTab) {
+                    // Smart Tab Replacing Rule to keep history stack size exactly = 2
+                    if (isPrevTab) {
+                        window.history.replaceState({ screenId: id }, '', '');
+                    } else {
+                        window.history.pushState({ screenId: id }, '', '');
+                    }
                 } else {
                     window.history.pushState({ screenId: id }, '', '');
                 }
@@ -831,32 +879,23 @@
             });
 
             if (anyModalOpen) {
+                isObserverSyncing = true;
                 window.closeModal();
-                let stateToPush = { screenId: currentActiveScreenId };
-                if (currentActiveScreenId === 'auth-screen') {
-                    if (isOtpSent) {
-                        stateToPush.subState = 'otp';
-                    } else if (isSignUp) {
-                        stateToPush.subState = 'signup';
-                    }
-                }
-                window.history.pushState(stateToPush, '', '');
+                isObserverSyncing = false;
                 return;
             }
 
-            // INSTAGRAM LOGIC TRIGGER: Kisi bhi tab ya sub-tab se back karne par direct home-screen lane ka flow
+            // INSTAGRAM LOGIC TRIGGER: Smart routing based on target history state
             if (auth.currentUser && userObj && !userObj.isBanned) {
-                if (currentActiveScreenId !== 'home-screen') {
-                    // Agar deposit screen par hai, to pehle wallet par back jayega, baki sabse seedhe Home par
-                    if (currentActiveScreenId === 'deposit-screen') {
-                        window.showScreen('wallet-screen', true);
-                    } else if (currentActiveScreenId === 'info-screen') {
-                        window.showScreen('profile-screen', true);
-                    } else {
-                        window.showScreen('home-screen', true);
-                    }
+                const state = event.state;
+                if (state && state.screenId) {
+                    window.showScreen(state.screenId, true);
                 } else {
-                    navigator.app ? navigator.app.exitApp() : history.back();
+                    if (currentActiveScreenId !== 'home-screen') {
+                        window.showScreen('home-screen', true);
+                    } else {
+                        navigator.app ? navigator.app.exitApp() : history.back();
+                    }
                 }
             } else {
                 if (currentActiveScreenId !== 'auth-screen') {
@@ -1056,7 +1095,7 @@
                     const today = new Date();
                     const diffTime = Math.abs(today - releaseDate);
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    if (diffDays > 7) { if(skipBtn) skipBtn.style.display = 'none'; } else { if(skipBtn) skipBtn.style.display = 'block'; }
+                    if (diffDays > 7) { if(skipBtn) style.display = 'none'; } else { if(skipBtn) style.display = 'block'; }
                 }
                 if(modal) modal.style.display = 'flex';
             }
