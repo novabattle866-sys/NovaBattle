@@ -53,6 +53,17 @@
             user-select: text !important;
         }
 
+        /* Initial Screen White Loader Style */
+        #initial-screen-loader {
+            position: fixed;
+            inset: 0;
+            background: #ffffff;
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         /* Global Loader CSS */
         #global-loader {
             position: fixed;
@@ -376,6 +387,10 @@
     </style>
 </head>
 <body>
+
+    <div id="initial-screen-loader">
+        <div class="loader-spinner" style="margin-bottom: 0;"></div>
+    </div>
 
     <div id="global-loader">
         <div class="loader-spinner"></div>
@@ -746,8 +761,7 @@
         const IMGBB_API = "6a5e44c73fa4ddd086cf78320ab9f484";
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getDatabase(app);
-        const APP_VERSION = "1.1"; 
+        const db = getDatabase(app);        const APP_VERSION = "1.1"; 
 
         window.setGlobalLoading = (state, btnId = null) => {
             const loader = document.getElementById('global-loader');
@@ -774,6 +788,13 @@
             if(id=='wallet-screen') document.querySelectorAll('.nav-item')[1]?.classList.add('active-nav');
             if(id=='refer-screen') document.querySelectorAll('.nav-item')[2]?.classList.add('active-nav');
             if(id=='profile-screen') document.querySelectorAll('.nav-item')[3]?.classList.add('active-nav');
+
+            // Ek baar screen toggle hone ke baad initial white screen loader ko delete/remove kar do
+            const initLoader = document.getElementById('initial-screen-loader');
+            if (initLoader) {
+                initLoader.style.display = 'none';
+                initLoader.remove();
+            }
         };
 
         let userObj = null, adminObj = {}, isSignUp = false, selectedMatch = null, activeCategory = 'upcoming', isOtpSent = false;
