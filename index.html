@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Nova Battle - Master Final v1.0.4</title>
+    <title>Nova Battle</title>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -200,12 +200,6 @@
 
         .p-bar-container { background: #f1f5f9; height: 10px; border-radius: 10px; margin: 10px 0 15px 0; overflow: hidden; border: 1px solid #e2e8f0; }
         .p-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #a855f7); transition: width 0.5s ease; }
-
-        #splash { position: fixed; inset: 0; background: #ffffff; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #splash img { width: 110px; height: 110px; border-radius: 25px; box-shadow: 0 10px 25px rgba(124, 58, 237, 0.2); margin-bottom: 20px; opacity: 0; transform: scale(0.8); transition: 0.8s; }
-        #splash img.loaded { opacity: 1; transform: scale(1); animation: logoPulse 2s infinite ease-in-out; }
-        #splash h1 { color: #0f172a; }
-        @keyframes logoPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         
         #ban-overlay { display: none; position: fixed; inset: 0; background: #ffffff; z-index: 9000; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
 
@@ -431,12 +425,6 @@
             <button class="btn btn-p" id="update-now-btn" style="margin-bottom: 12px;"><i class="fa-solid fa-download"></i> Update Now</button>
             <button class="btn" id="update-skip-btn" style="background: transparent; color: var(--text-muted); border: 1px solid #e2e8f0;" onclick="closeUpdateModal()">Skip for now</button>
         </div>
-    </div>
-
-    <div id="splash">
-        <img id="splash-logo-img" src="" alt="">
-        <h1 style="letter-spacing: 4px; font-weight: 700;">NOVA BATTLE</h1>
-        <p style="color: var(--primary); font-size: 12px; font-weight: 600;">Connecting...</p>
     </div>
 
     <div id="ban-overlay">
@@ -759,7 +747,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
-        const APP_VERSION = "1.0.4"; 
+        const APP_VERSION = "1.1"; 
 
         window.setGlobalLoading = (state, btnId = null) => {
             const loader = document.getElementById('global-loader');
@@ -821,14 +809,9 @@
                         setCategory('upcoming');
                         showScreen('home-screen');
                     }
-                    setTimeout(() => { 
-                        document.getElementById('splash-logo-img').classList.add('loaded'); 
-                        checkUpdate(); 
-                        setTimeout(() => document.getElementById('splash').style.display = 'none', 1000); 
-                    }, 500);
+                    checkUpdate(); 
                 });
             } else {
-                document.getElementById('splash').style.display = 'none';
                 document.getElementById('bot-nav').style.display = 'none';
                 document.getElementById('ban-overlay').style.display = 'none';
                 showScreen('auth-screen');
@@ -942,7 +925,6 @@
         onValue(ref(db, 'admin_settings'), (snap) => {
             adminObj = snap.val() || {};
             document.querySelectorAll('.admin-logo').forEach(i => i.src = adminObj.appLogo);
-            document.getElementById('splash-logo-img').src = adminObj.appLogo;
             document.getElementById('admin-qr-img').src = adminObj.payQR;
             document.getElementById('refer-banner-img').src = adminObj.referBanner || adminObj.bannerUrl;
             document.getElementById('min-wd-txt').innerText = adminObj.minWithdraw || 0;
