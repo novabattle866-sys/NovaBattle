@@ -516,7 +516,7 @@
     </div>
 
     <div id="wallet-screen" class="screen">
-        <div class="header"><i class="fa fa-chevron-left" style="color: var(--text)" onclick="showScreen('home-screen')"></i><span style="color: var(--text); font-weight: 700;">My Wallet</span><div></div></div>
+        <div class="header"><i class="fa fa-chevron-left" style="color: var(--text)" onclick="handleBackBtnClick()"></i><span style="color: var(--text); font-weight: 700;">My Wallet</span><div></div></div>
         <div class="screen-content">
             <div class="glass-card" style="text-align:center; background:linear-gradient(135deg, #6366f1, #7c3aed); padding:35px 20px; border: none;">
                 <p style="color: rgba(255,255,255,0.8); margin: 0; font-size: 14px;">Total Balance</p>
@@ -532,7 +532,7 @@
     </div>
 
     <div id="deposit-screen" class="screen">
-        <div class="header"><i class="fa fa-chevron-left" style="color: var(--text)" onclick="showScreen('wallet-screen')"></i><span style="color: var(--text); font-weight: 700;">Deposit Funds</span><div></div></div>
+        <div class="header"><i class="fa fa-chevron-left" style="color: var(--text)" onclick="handleBackBtnClick()"></i><span style="color: var(--text); font-weight: 700;">Deposit Funds</span><div></div></div>
         <div class="screen-content">
             <div class="glass-card" style="text-align:center">
                 <input type="number" id="dep-amt" placeholder="Amount to Deposit (₹)" oninput="document.getElementById('dv').innerText=this.value">
@@ -548,7 +548,7 @@
     </div>
 
     <div id="refer-screen" class="screen">
-        <div class="header"><i class="fa fa-chevron-left" style="color: var(--text)" onclick="showScreen('home-screen')"></i><span style="color: var(--text); font-weight: 700;">Refer & Earn</span><div></div></div>
+        <div class="header"><i class="fa fa-chevron-left" style="color: var(--text)" onclick="handleBackBtnClick()"></i><span style="color: var(--text); font-weight: 700;">Refer & Earn</span><div></div></div>
         <div class="screen-content">
             <img id="refer-banner-img" src="" style="width:100%; border-radius:24px; margin-bottom:20px; height: 180px; object-fit: cover; box-shadow: var(--shadow);">
             <div class="glass-card" style="display:flex; text-align:center; padding: 25px 15px;">
@@ -626,7 +626,7 @@
     </div>
 
     <div id="info-screen" class="screen">
-        <div class="header"><i class="fa fa-chevron-left" style="color: var(--text)" onclick="handleBack()"></i><span id="info-title" style="color: var(--text); font-weight: 700;">Details</span><div></div></div>
+        <div class="header"><i class="fa fa-chevron-left" style="color: var(--text)" onclick="handleBackBtnClick()"></i><span id="info-title" style="color: var(--text); font-weight: 700;">Details</span><div></div></div>
         <div class="screen-content">
             <div class="glass-card">
                 <div id="policy-date-container" style="display:none; font-size:12px; color:var(--primary); margin-bottom:15px; font-weight: 700; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">Last Update: <span id="policy-date"></span></div>
@@ -772,11 +772,36 @@
             }
         };
 
-        window.showScreen = (id) => {
+        // --- INSTAGRAM-STYLE BACK BUTTON NAVIGATION SYSTEM LOGIC ---
+        let currentActiveScreenId = 'auth-screen';
+
+        window.showScreen = (id, isFromPopState = false) => {
             if(userObj && userObj.isBanned && id !== 'info-screen' && id !== 'auth-screen' && id !== 'home-screen') return;
+            
+            // Open Modals ko automatically close karein jab screen badal rahi ho
+            window.closeModal();
+
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             const target = document.getElementById(id);
             if(target) target.classList.add('active');
+            
+            currentActiveScreenId = id;
+
+            // INSTAGRAM RULE IMPLEMENTATION: 
+            // Sub-pages (`deposit-screen` etc.) ke liye dynamic history push hogi.
+            // Par jab hum primary tab switch karenge (`home`, `wallet`, etc.), hum direct 'home-screen' par laane ka path clear rakhte hain.
+            if (!isFromPopState) {
+                if (['home-screen', 'auth-screen'].includes(id)) {
+                    window.history.replaceState({ screenId: id }, '', '');
+                } else if (['wallet-screen', 'refer-screen', 'profile-screen'].includes(id)) {
+                    // Kisi bhi primary tab me aane par back target ko home-screen bana diya gaya hai.
+                    window.history.replaceState({ screenId: 'home-screen' }, '', '');
+                    window.history.pushState({ screenId: id }, '', '');
+                } else {
+                    window.history.pushState({ screenId: id }, '', '');
+                }
+            }
+
             const nav = document.getElementById('bot-nav');
             if(id === 'auth-screen' || (userObj && userObj.isBanned)) {
                 nav.style.display = 'none';
@@ -789,13 +814,118 @@
             if(id=='refer-screen') document.querySelectorAll('.nav-item')[2]?.classList.add('active-nav');
             if(id=='profile-screen') document.querySelectorAll('.nav-item')[3]?.classList.add('active-nav');
 
-            // Ek baar screen toggle hone ke baad initial white screen loader ko delete/remove kar do
             const initLoader = document.getElementById('initial-screen-loader');
             if (initLoader) {
                 initLoader.style.display = 'none';
                 initLoader.remove();
             }
         };
+
+        // Phone ke hardware/system back button clicks ko manage karne ka upgraded logic
+        window.addEventListener('popstate', (event) => {
+            let anyModalOpen = false;
+            document.querySelectorAll('.modal').forEach(m => {
+                if(m.style.display === 'flex' || m.style.display === 'block') {
+                    anyModalOpen = true;
+                }
+            });
+
+            if (anyModalOpen) {
+                window.closeModal();
+                let stateToPush = { screenId: currentActiveScreenId };
+                if (currentActiveScreenId === 'auth-screen') {
+                    if (isOtpSent) {
+                        stateToPush.subState = 'otp';
+                    } else if (isSignUp) {
+                        stateToPush.subState = 'signup';
+                    }
+                }
+                window.history.pushState(stateToPush, '', '');
+                return;
+            }
+
+            // INSTAGRAM LOGIC TRIGGER: Kisi bhi tab ya sub-tab se back karne par direct home-screen lane ka flow
+            if (auth.currentUser && userObj && !userObj.isBanned) {
+                if (currentActiveScreenId !== 'home-screen') {
+                    // Agar deposit screen par hai, to pehle wallet par back jayega, baki sabse seedhe Home par
+                    if (currentActiveScreenId === 'deposit-screen') {
+                        window.showScreen('wallet-screen', true);
+                    } else if (currentActiveScreenId === 'info-screen') {
+                        window.showScreen('profile-screen', true);
+                    } else {
+                        window.showScreen('home-screen', true);
+                    }
+                } else {
+                    navigator.app ? navigator.app.exitApp() : history.back();
+                }
+            } else {
+                if (currentActiveScreenId !== 'auth-screen') {
+                    window.showScreen('auth-screen', true);
+                } else {
+                    // Login Screen Hardware Back Button Navigation Handler
+                    const state = event.state;
+                    if (state && state.screenId === 'auth-screen') {
+                        if (state.subState === 'otp') {
+                            isOtpSent = true;
+                            isSignUp = true;
+                            document.getElementById('signup-fields').style.display = 'none'; 
+                            document.getElementById('main-auth-inputs').style.display = 'none'; 
+                            document.getElementById('otp-container').style.display = 'block';
+                            document.getElementById('auth-btn-txt').innerText = "Verify & Signup"; 
+                            document.getElementById('toggle-area').style.display = 'none';
+                            document.getElementById('otp-timer-box').style.display = 'block';
+                        } else if (state.subState === 'signup') {
+                            isOtpSent = false;
+                            isSignUp = true;
+                            document.getElementById('otp-container').style.display = 'none'; 
+                            document.getElementById('otp-timer-box').style.display = 'none';
+                            clearInterval(resendTimerInterval);
+                            document.getElementById('main-auth-inputs').style.display = 'block'; 
+                            document.getElementById('auth-title').innerText = "Create Account"; 
+                            document.getElementById('auth-btn-txt').innerText = "Request OTP"; 
+                            document.getElementById('signup-fields').style.display = "block"; 
+                            document.getElementById('refer-field').style.display = "block"; 
+                            document.getElementById('toggle-area').style.display = 'block';
+                            document.getElementById('toggle-text').innerHTML = "Already have an account? <b style='color:var(--primary)'>Login</b>";
+                            document.getElementById('fp-link-btn').style.display = 'none';
+                        } else {
+                            isOtpSent = false;
+                            isSignUp = false;
+                            document.getElementById('otp-container').style.display = 'none'; 
+                            document.getElementById('otp-timer-box').style.display = 'none';
+                            clearInterval(resendTimerInterval);
+                            document.getElementById('main-auth-inputs').style.display = 'block'; 
+                            document.getElementById('auth-title').innerText = "Welcome Back"; 
+                            document.getElementById('auth-btn-txt').innerText = "Login"; 
+                            document.getElementById('signup-fields').style.display = "none"; 
+                            document.getElementById('refer-field').style.display = "none"; 
+                            document.getElementById('toggle-area').style.display = 'block';
+                            document.getElementById('toggle-text').innerHTML = "Don't have an account? <b style='color:var(--primary)'>Sign up</b>";
+                            document.getElementById('fp-link-btn').style.display = 'block';
+                        }
+                    } else {
+                        navigator.app ? navigator.app.exitApp() : history.back();
+                    }
+                }
+            }
+        });
+
+        // Header ke back arrow button (Chevron Left) click function
+        window.handleBackBtnClick = () => {
+            if (['deposit-screen'].includes(currentActiveScreenId)) {
+                window.showScreen('wallet-screen');
+            } else if (['info-screen'].includes(currentActiveScreenId)) {
+                if (userObj && userObj.isBanned) {
+                    window.showScreen('home-screen');
+                } else {
+                    window.showScreen('profile-screen');
+                }
+            } else {
+                // Instagram logic: Baki kisi bhi condition me seedhe home screen par drop karega
+                window.showScreen('home-screen');
+            }
+        };
+        // ----------------------------------------------------------------------
 
         let userObj = null, adminObj = {}, isSignUp = false, selectedMatch = null, activeCategory = 'upcoming', isOtpSent = false;
         let fp_otp_generated = null;
@@ -1090,7 +1220,7 @@
                                         <span>${mUid === team.leader ? '<i class="fa fa-flag leader-flag"></i>' : ''} ${member.ffName} <small style="color:#94a3b8">(${member.ffUid})</small></span>
                                         <div style="display:flex; gap:10px;">
                                             ${isLeader && mUid !== auth.currentUser.uid ? `<i class="fa-solid fa-user-minus action-btn" style="color:#ef4444" onclick="kickMember('${id}', '${tCode}', '${mUid}')"></i>` : ''}
-                                            ${mUid === auth.currentUser.uid ? `<i class="fa-solid fa-right-from-bracket action-btn" style="color:orange" onclick="leaveTeam('${id}', '${tCode}')"></i>` : ''}
+                                            ${mUid === auth.currentUser.uid ? `<i class="fa-solid fa-right-from-bracket action-btn" style="colororange" onclick="leaveTeam('${id}', '${tCode}')"></i>` : ''}
                                         </div>
                                     </div>`;
                                 }
@@ -1464,6 +1594,9 @@
                         document.getElementById('auth-btn-txt').innerText = "Verify & Signup"; 
                         document.getElementById('toggle-area').style.display = 'none';
                         isOtpSent = true; startOTPTimer(); alert("OTP sent to your email!");
+                        
+                        // Push subState in history for OTP view
+                        window.history.pushState({ screenId: 'auth-screen', subState: 'otp' }, '', '');
                     } else {
                         const otp_entered = document.getElementById('auth-otp').value.toString().trim();
                         const requestSnap = await get(ref(db, 'otp_requests/' + e_key));
@@ -1500,7 +1633,7 @@
             }
         };
 
-        window.toggleAuthMode = () => { 
+        window.toggleAuthMode = (isFromPopState = false) => { 
             isSignUp = !isSignUp; isOtpSent = false; 
             document.getElementById('otp-container').style.display = 'none'; 
             document.getElementById('otp-timer-box').style.display = 'none';
@@ -1513,6 +1646,14 @@
             document.getElementById('toggle-area').style.display = 'block';
             document.getElementById('toggle-text').innerHTML = isSignUp ? "Already have an account? <b style='color:var(--primary)'>Login</b>" : "Don't have an account? <b style='color:var(--primary)'>Sign up</b>";
             document.getElementById('fp-link-btn').style.display = isSignUp ? 'none' : 'block';
+
+            if (!isFromPopState) {
+                if (isSignUp) {
+                    window.history.pushState({ screenId: 'auth-screen', subState: 'signup' }, '', '');
+                } else {
+                    window.history.back();
+                }
+            }
         };
 
         window.submitWithdraw = async () => {
@@ -1661,10 +1802,7 @@
             if(x.type === "password") { x.type = "text"; icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash', 'eye-active'); } 
             else { x.type = "password"; icon.classList.remove('fa-eye-slash', 'eye-active'); icon.classList.add('fa-eye'); }
         };
-
-        window.handleBack = () => { if(userObj && userObj.isBanned) showScreen('home-screen'); else showScreen('profile-screen'); };
         
-        // MODIFIED: Copy panel & Refer Code now send data to Sketchware
         window.copyRef = async () => { 
             const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Win Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
             if (window.AndroidShare) {
@@ -1678,7 +1816,6 @@
             }
         };
         
-        // MODIFIED: Direct buttons and 'More' now route to Native Android Share if inside WebView
         window.share = async (plat) => { 
             const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Win Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
             
