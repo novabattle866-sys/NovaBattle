@@ -772,6 +772,15 @@
             }
         };
 
+        // Custom Java Bridge handler to launch Free Fire Max via Android Interface
+        window.openFreeFire = function() {
+            if (window.AndroidInterface) { 
+                window.AndroidInterface.launchFreeFire(); 
+            } else { 
+                alert("App के अंदर ही गेम ओपन होगा!"); 
+            }
+        };
+
         // --- INSTAGRAM-STYLE BACK BUTTON NAVIGATION SYSTEM LOGIC ---
         let currentActiveScreenId = 'auth-screen';
 
@@ -1214,7 +1223,7 @@
                         if(m.roomId && m.roomId !== 'Wait' && m.roomId.trim() !== "") {
                             btnTxt = "PLAY NOW";
                             btnClass = "btn-play-now";
-                            clickAction = "window.open('https://play.google.com/store/apps/details?id=com.dts.freefiremax', '_blank')";
+                            clickAction = "openFreeFire()";
                         } else {
                             btnTxt = "JOINED"; 
                             btnClass = 'btn-joined'; 
