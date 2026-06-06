@@ -1282,7 +1282,7 @@
 
                     const currentTeamType = m.teamMode || 'Solo';
                     
-                    container.innerHTML += `<div class="glass-card m-card"><img src="${m.image}" class="m-img"><div style="padding:15px"><div class="team-type-badge">${currentTeamType}</div><h3>${m.title}</h3><div class="m-grid"><span><i class="fa-solid fa-gamepad"></i> Mode: <b>${m.gameMode || 'Classic'}</b></span><span><i class="fa-solid fa-map-location-dot"></i> Map: <b>${m.map || 'Bermuda'}</b></span><span><i class="fa-solid fa-users-rectangle"></i> Team: <b>${m.teamMode || 'Solo'}</b></span><span><i class="fa-solid fa-trophy"></i> Win: <b>₹${m.prize}</b></span><span><i class="fa-solid fa-ticket"></i> Fee: <b>₹${m.fee}</b></span><span><i class="fa-solid fa-skull"></i> Kill: <b>₹${m.perKill || 0}</b></span><span style="grid-column: span 2;"><i class="fa-solid fa-clock"></i> Time: <b>${m.time || 'Check Details'}</b></span></div><div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b; margin-top:5px;"><span>Players Filled</span><span style="color:var(--primary); font-weight:700;">${count} / ${m.totalSlots}</span></div><div class="p-bar-container"><div class="p-bar-fill" style="width: ${fillPerc}%"></div></div>${roomUI}${noticeUI}<button class="btn ${btnClass}" onclick="${clickAction}">${btnTxt}</button>${teamUI}</div></div>`;
+                    container.innerHTML += `<div class="glass-card m-card"><img src="${m.image}" class="m-img"><div style="padding:15px"><div class="team-type-badge">${currentTeamType}</div><h3>${m.title}</h3><div class="m-grid"><span><i class="fa-solid fa-gamepad"></i> Mode: <b>${m.gameMode || 'Classic'}</b></span><span><i class="fa-solid fa-map-location-dot"></i> Map: <b>${m.map || 'Bermuda'}</b></span><span><i class="fa-solid fa-users-rectangle"></i> Team: <b>${m.teamMode || 'Solo'}</b></span><span><i class="fa-solid fa-trophy"></i> Prize Pool: <b>₹${m.prize}</b></span><span><i class="fa-solid fa-ticket"></i> Fee: <b>₹${m.fee}</b></span><span><i class="fa-solid fa-skull"></i> Kill: <b>₹${m.perKill || 0}</b></span><span style="grid-column: span 2;"><i class="fa-solid fa-clock"></i> Time: <b>${m.time || 'Check Details'}</b></span></div><div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b; margin-top:5px;"><span>Players Filled</span><span style="color:var(--primary); font-weight:700;">${count} / ${m.totalSlots}</span></div><div class="p-bar-container"><div class="p-bar-fill" style="width: ${fillPerc}%"></div></div>${roomUI}${noticeUI}<button class="btn ${btnClass}" onclick="${clickAction}">${btnTxt}</button>${teamUI}</div></div>`;
                 });
 
                 if (matchCounter === 0) {
@@ -1852,7 +1852,7 @@
         };
         
         window.copyRef = async () => { 
-            const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Win Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
+            const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Prize Pool Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
             if (window.AndroidShare) {
                 window.AndroidShare.shareText(msg);
             } else if (navigator.share) {
@@ -1865,7 +1865,7 @@
         };
         
         window.share = async (plat) => { 
-            const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Win Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
+            const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Prize Pool Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
             
             if (window.AndroidShare) {
                 window.AndroidShare.shareText(msg);
