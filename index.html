@@ -247,6 +247,29 @@
         }
         .slide-img { min-width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
 
+        /* Empty/Loading Slider Wrapper Placeholder CSS */
+        .slider-wrapper:empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), #a855f7);
+        }
+        .slider-wrapper:empty::after {
+            content: "Nova Battle";
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 1px;
+            animation: pulsePlaceholder 1.5s infinite ease-in-out;
+        }
+        @keyframes pulsePlaceholder {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
         .m-card { padding: 0; overflow: hidden; background: #ffffff; }
         .m-img { width: 100%; height: 175px; object-fit: cover; }
         .m-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px; color: var(--text-muted); margin: 15px 0; }
@@ -433,6 +456,7 @@
         </div>
     </div>
 
+    <!-- UPDATE MODAL UI -->
     <div id="update-modal">
         <div class="update-box">
             <i class="fa-solid fa-cloud-arrow-up" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
@@ -454,7 +478,7 @@
 
     <div id="auth-screen" class="screen">
         <div class="screen-content">
-            <center><img class="admin-logo" src="" style="width:80px; margin: 40px 0 20px; border-radius:18px; box-shadow: var(--shadow);"></center>
+            <center><img class="admin-logo" src="" onerror="handleSquareImageError(this)" style="width:80px; margin: 40px 0 20px; border-radius:18px; box-shadow: var(--shadow);"></center>
             <div class="glass-card">
                 <h2 id="auth-title" style="margin-top: 0;">Welcome Back</h2>
                 <div id="signup-fields" style="display:none;">
@@ -493,7 +517,7 @@
     <div id="home-screen" class="screen">
         <div class="header">
             <div style="display:flex; align-items:center; gap:10px; font-weight: 800; color: var(--text);">
-                <img class="admin-logo" src="" width="32" style="border-radius: 8px;">
+                <img class="admin-logo" src="" onerror="handleSquareImageError(this)" width="32" style="border-radius: 8px;">
                 <span>Nova Battle</span>
             </div>
             <div id="u-coins-box" onclick="showScreen('wallet-screen')">
@@ -538,7 +562,7 @@
             <div class="glass-card" style="text-align:center">
                 <input type="number" id="dep-amt" placeholder="Amount to Deposit (₹)" oninput="document.getElementById('dv').innerText=this.value">
                 <div style="background: #ffffff; padding: 15px; border-radius: 20px; border: 1px solid #e2e8f0; display: inline-block; margin-bottom: 15px;">
-                    <img id="admin-qr-img" src="" style="width:230px; height:230px; display: block;">
+                    <img id="admin-qr-img" src="" onerror="handleSquareImageError(this)" style="width:230px; height:230px; display: block;">
                 </div>
                 <p style="font-weight:700; color:var(--primary); font-size: 18px;">Payable: ₹<span id="dv">0</span></p>
                 <p style="font-size:12px; color:var(--text-muted); margin: 10px 0 20px; line-height: 1.5;">After making the payment, enter your Transaction ID / UTR Number below and click Submit.</p>
@@ -551,7 +575,7 @@
     <div id="refer-screen" class="screen">
         <div class="header"><i class="fa fa-chevron-left" style="color: var(--text)" onclick="handleBackBtnClick()"></i><span style="color: var(--text); font-weight: 700;">Refer & Earn</span><div></div></div>
         <div class="screen-content">
-            <img id="refer-banner-img" src="" style="width:100%; border-radius:24px; margin-bottom:20px; height: 180px; object-fit: cover; box-shadow: var(--shadow);">
+            <img id="refer-banner-img" src="" onerror="handleImageError(this)" style="width:100%; border-radius:24px; margin-bottom:20px; height: 180px; object-fit: cover; box-shadow: var(--shadow);">
             <div class="glass-card" style="display:flex; text-align:center; padding: 25px 15px;">
                 <div style="flex:1;">
                     <p style="color: var(--text-muted); font-size: 12px; margin: 0;">Total Referrals</p>
@@ -592,7 +616,7 @@
         <div class="screen-content">
             <div class="glass-card" style="text-align:center; padding-top:25px; position: relative;">
                 <div class="dp-box">
-                    <img id="u-dp" src="https://via.placeholder.com/150">
+                    <img id="u-dp" src="https://via.placeholder.com/150" onerror="handleSquareImageError(this)">
                     <label for="dp-file" class="dp-edit"><i class="fa fa-camera"></i></label>
                     <input type="file" id="dp-file" style="display:none" onchange="uploadDP(this)">
                 </div>
@@ -740,6 +764,18 @@
             });
         };
         window.alert = function(message) { window.customDialog(message, 'alert'); };
+
+        // Fallback placeholder logic for missing/failed wide banners (Matches, sliders, etc.)
+        window.handleImageError = function(img) {
+            img.onerror = null;
+            img.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%237c3aed'/><stop offset='100%' stop-color='%23a855f7'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g)'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='700' font-size='44' fill='%23ffffff'>Nova Battle</text><text x='50%' y='59%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='400' font-size='18' fill='rgba(255,255,255,0.7)'>Loading Arena...</text></svg>";
+        };
+
+        // Fallback placeholder logic for missing/failed square icons (Logos, profiles, QR, etc.)
+        window.handleSquareImageError = function(img) {
+            img.onerror = null;
+            img.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%237c3aed'/><stop offset='100%' stop-color='%23a855f7'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g)'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='700' font-size='16' fill='%23ffffff'>Nova Battle</text></svg>";
+        };
     </script>
 
     <script type="module">
@@ -1086,6 +1122,7 @@
             }
         };
 
+        // CHECK UPDATE LOGIC FOR TOURNEY UPDATES
         async function checkUpdate() {
             const snap = await get(ref(db, 'admin_settings/app_update'));
             const updateData = snap.val();
@@ -1105,7 +1142,7 @@
                     const today = new Date();
                     const diffTime = Math.abs(today - releaseDate);
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    if (diffDays > 7) { if(skipBtn) style.display = 'none'; } else { if(skipBtn) style.display = 'block'; }
+                    if (diffDays > 7) { if(skipBtn) skipBtn.style.display = 'none'; } else { if(skipBtn) skipBtn.style.display = 'block'; }
                 }
                 if(modal) modal.style.display = 'flex';
             }
@@ -1135,7 +1172,7 @@
             if(wrapper) {
                 wrapper.innerHTML = "";
                 const banners = adminObj.bannerUrl ? adminObj.bannerUrl.split(',') : [];
-                banners.forEach(url => wrapper.innerHTML += `<img src="${url.trim()}" class="slide-img">`);
+                banners.forEach(url => wrapper.innerHTML += `<img src="${url.trim()}" class="slide-img" onerror="handleImageError(this)">`);
                 initInteractiveSlider(banners.length);
             }
             loadMatchesData();
@@ -1283,7 +1320,7 @@
 
                     const currentTeamType = m.teamMode || 'Solo';
                     
-                    container.innerHTML += `<div class="glass-card m-card"><img src="${m.image}" class="m-img"><div style="padding:15px"><div class="team-type-badge">${currentTeamType}</div><h3>${m.title}</h3><div class="m-grid"><span><i class="fa-solid fa-gamepad"></i> Mode: <b>${m.gameMode || 'Classic'}</b></span><span><i class="fa-solid fa-map-location-dot"></i> Map: <b>${m.map || 'Bermuda'}</b></span><span><i class="fa-solid fa-users-rectangle"></i> Team: <b>${m.teamMode || 'Solo'}</b></span><span><i class="fa-solid fa-trophy"></i> Prize Pool: <b>₹${m.prize}</b></span><span><i class="fa-solid fa-ticket"></i> Fee: <b>₹${m.fee}</b></span><span><i class="fa-solid fa-skull"></i> Kill: <b>₹${m.perKill || 0}</b></span><span style="grid-column: span 2;"><i class="fa-solid fa-clock"></i> Time: <b>${m.time || 'Check Details'}</b></span></div><div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b; margin-top:5px;"><span>Players Filled</span><span style="color:var(--primary); font-weight:700;">${count} / ${m.totalSlots}</span></div><div class="p-bar-container"><div class="p-bar-fill" style="width: ${fillPerc}%"></div></div>${roomUI}${noticeUI}<button class="btn ${btnClass}" onclick="${clickAction}">${btnTxt}</button>${teamUI}</div></div>`;
+                    container.innerHTML += `<div class="glass-card m-card"><img src="${m.image}" class="m-img" onerror="handleImageError(this)"><div style="padding:15px"><div class="team-type-badge">${currentTeamType}</div><h3>${m.title}</h3><div class="m-grid"><span><i class="fa-solid fa-gamepad"></i> Mode: <b>${m.gameMode || 'Classic'}</b></span><span><i class="fa-solid fa-map-location-dot"></i> Map: <b>${m.map || 'Bermuda'}</b></span><span><i class="fa-solid fa-users-rectangle"></i> Team: <b>${m.teamMode || 'Solo'}</b></span><span><i class="fa-solid fa-trophy"></i> Prize Pool: <b>₹${m.prize}</b></span><span><i class="fa-solid fa-ticket"></i> Fee: <b>₹${m.fee}</b></span><span><i class="fa-solid fa-skull"></i> Kill: <b>₹${m.perKill || 0}</b></span><span style="grid-column: span 2;"><i class="fa-solid fa-clock"></i> Time: <b>${m.time || 'Check Details'}</b></span></div><div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b; margin-top:5px;"><span>Players Filled</span><span style="color:var(--primary); font-weight:700;">${count} / ${m.totalSlots}</span></div><div class="p-bar-container"><div class="p-bar-fill" style="width: ${fillPerc}%"></div></div>${roomUI}${noticeUI}<button class="btn ${btnClass}" onclick="${clickAction}">${btnTxt}</button>${teamUI}</div></div>`;
                 });
 
                 if (matchCounter === 0) {
