@@ -53,11 +53,12 @@
             user-select: text !important;
         }
 
-        /* Initial Screen White Loader Style */
+        /* Initial Screen Image Loader Style */
         #initial-screen-loader {
             position: fixed;
             inset: 0;
-            background: #ffffff;
+            background: url('https://i.ibb.co/nq67j9ZR/Intro-D134-AAF.webp') no-repeat center center;
+            background-size: cover;
             z-index: 999999;
             display: flex;
             align-items: center;
@@ -1606,7 +1607,7 @@
             const e_key = e.replace(/[^a-zA-Z0-9]/g, "");
             const generatedOtp = Math.floor(100000 + Math.random() * 900000);
             const expiry = new Date(Date.now() + 15 * 60000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            setGlobalLoading(true);
+            setGlobalLoading(false);
             try {
                 const templateParams = { to_email: e, otp_code: generatedOtp, time: expiry };
                 await emailjs.send('service_cr17hun', 'template_gv02zkj', templateParams);
