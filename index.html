@@ -53,16 +53,23 @@
             user-select: text !important;
         }
 
-        /* Initial Screen Image Loader Style */
+        /* Initial Screen Video Splash Loader Style */
         #initial-screen-loader {
             position: fixed;
             inset: 0;
-            background: url('https://i.ibb.co/G3Mv22w3/Screenshot-20260606-213047.webp') no-repeat center center;
-            background-size: cover;
+            background: #ffffff; /* White background during loading */
             z-index: 999999;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+        }
+        #initial-screen-loader video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0; /* Hidden initially to avoid default play/loading icon */
+            transition: opacity 0.3s ease; /* Smooth fade-in when playing starts */
         }
 
         /* Global Loader CSS */
@@ -413,7 +420,7 @@
 <body>
 
     <div id="initial-screen-loader">
-        <div class="loader-spinner" style="margin-bottom: 0;"></div>
+        <video id="splash-video" playsinline autoplay src="intro.mp4"></video>
     </div>
 
     <div id="global-loader">
@@ -800,6 +807,53 @@
         const auth = getAuth(app);
         const db = getDatabase(app);        const APP_VERSION = "1.1"; 
 
+        // Synchronization states for Splash Screen Video ending and Auth screen being ready
+        let splashVideoEnded = false;
+        let firstScreenReady = false;
+
+        function tryRemoveSplash() {
+            if (splashVideoEnded && firstScreenReady) {
+                const initLoader = document.getElementById('initial-screen-loader');
+                if (initLoader) {
+                    initLoader.style.opacity = '0';
+                    initLoader.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => {
+                        initLoader.style.display = 'none';
+                        initLoader.remove();
+                    }, 500);
+                }
+            }
+        }
+
+        // Initialize Splash Video Handlers
+        const splashVideo = document.getElementById('splash-video');
+        if (splashVideo) {
+            // Smoothly fade-in the video only when it starts rendering
+            splashVideo.addEventListener('playing', () => {
+                splashVideo.style.opacity = '1';
+            });
+
+            splashVideo.play().catch(e => {
+                console.log("Autoplay was blocked or needs explicit interaction: ", e);
+            });
+            
+            splashVideo.onended = () => {
+                splashVideoEnded = true;
+                tryRemoveSplash();
+            };
+            
+            // Failsafe backup in case video fails to load/play
+            setTimeout(() => {
+                if (!splashVideoEnded) {
+                    splashVideoEnded = true;
+                    tryRemoveSplash();
+                }
+            }, 8000); 
+        } else {
+            splashVideoEnded = true;
+            tryRemoveSplash();
+        }
+
         window.setGlobalLoading = (state, btnId = null) => {
             const loader = document.getElementById('global-loader');
             loader.style.display = state ? 'flex' : 'none';
@@ -908,11 +962,8 @@
             if(id=='refer-screen') document.querySelectorAll('.nav-item')[2]?.classList.add('active-nav');
             if(id=='profile-screen') document.querySelectorAll('.nav-item')[3]?.classList.add('active-nav');
 
-            const initLoader = document.getElementById('initial-screen-loader');
-            if (initLoader) {
-                initLoader.style.display = 'none';
-                initLoader.remove();
-            }
+            firstScreenReady = true;
+            tryRemoveSplash();
         };
 
         // Phone ke hardware/system back button clicks ko manage karne ka upgraded logic
@@ -1306,7 +1357,7 @@
                                         <span>${mUid === team.leader ? '<i class="fa fa-flag leader-flag"></i>' : ''} ${member.ffName} <small style="color:#94a3b8">(${member.ffUid})</small></span>
                                         <div style="display:flex; gap:10px;">
                                             ${isLeader && mUid !== auth.currentUser.uid ? `<i class="fa-solid fa-user-minus action-btn" style="color:#ef4444" onclick="kickMember('${id}', '${tCode}', '${mUid}')"></i>` : ''}
-                                            ${mUid === auth.currentUser.uid ? `<i class="fa-solid fa-right-from-bracket action-btn" style="colororange" onclick="leaveTeam('${id}', '${tCode}')"></i>` : ''}
+                                            ${mUid === auth.currentUser.uid ? `<i class="fa-solid fa-right-from-bracket action-btn" style="color:orange" onclick="leaveTeam('${id}', '${tCode}')"></i>` : ''}
                                         </div>
                                     </div>`;
                                 }
