@@ -420,7 +420,7 @@
 <body>
 
     <div id="initial-screen-loader">
-        <video id="splash-video" playsinline autoplay src="intro.mp4"></video>
+        <video id="splash-video" playsinline autoplay></video>
     </div>
 
     <div id="global-loader">
@@ -832,10 +832,6 @@
             splashVideo.addEventListener('playing', () => {
                 splashVideo.style.opacity = '1';
             });
-
-            splashVideo.play().catch(e => {
-                console.log("Autoplay was blocked or needs explicit interaction: ", e);
-            });
             
             splashVideo.onended = () => {
                 splashVideoEnded = true;
@@ -849,6 +845,24 @@
                     tryRemoveSplash();
                 }
             }, 8000); 
+
+            // JS-side Fetch + Blob conversion fixes range-request issues on Android Webview
+            fetch('intro.mp4')
+                .then(response => {
+                    if (!response.ok) throw new Error("HTTP error " + response.status);
+                    return response.blob();
+                })
+                .then(blob => {
+                    splashVideo.src = URL.createObjectURL(blob);
+                    splashVideo.play().catch(e => {
+                        console.log("Autoplay was blocked: ", e);
+                    });
+                })
+                .catch(err => {
+                    console.error("Local splash video fetch failed, loading fallback: ", err);
+                    splashVideoEnded = true;
+                    tryRemoveSplash();
+                });
         } else {
             splashVideoEnded = true;
             tryRemoveSplash();
@@ -1426,8 +1440,7 @@
             }
 
             let slotLimit = selectedMatch.totalSlots || 48;
-            if(selectedMatch.teamMode === 'Duo') slotLimit = Math.ceil(selectedMatch.totalSlots / 2);
-            else if(selectedMatch.teamMode === 'Squad') slotLimit = Math.ceil(selectedMatch.totalSlots / 4);
+            if(selectedMatch.teamMode === 'Duo' ? (slotLimit = Math.ceil(selectedMatch.totalSlots / 2)) : selectedMatch.teamMode === 'Squad' ? (slotLimit = Math.ceil(selectedMatch.totalSlots / 4)) : (slotLimit = selectedMatch.totalSlots || 48));
 
             for (let i = 1; i <= slotLimit; i++) {
                 const box = document.createElement('div');
