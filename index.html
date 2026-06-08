@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Nova Battle</title>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <!-- JS RSA Sign Library for FCM Token Generation on Client Side -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.9.0/jsrsasign-all-min.js"></script>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -1044,6 +1046,73 @@
             }
         };
 
+        // GOOGLE SERVICE ACCOUNT FOR SECURE BACKGROUND REQUEST PUSH SYSTEM
+        const serviceAccount = {
+            "type": "service_account",
+            "project_id": "novabattle-99eb9",
+            "private_key_id": "699a78fd1205fd71217470228eb017354d24c221",
+            "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDNEr269cTmwc6f\nTcTuKczwiKCv8YReRu2UCSZP9eWAi3dMo3WTdaNWlYglgHVc9OOYfz0IrkghDBkN\nrwin4Z/QkLjfkA7b4Aqc+35j3H+HtNM1Ru3c9udYDiTZ9WNcUMWbymD05Q4OfGrK\nQZGk9t8nlFbvwFwm65E3S0NRJ5i80KUlmC0tzXiBQs+5QCD0U+ETq5CILYYmG72P\nRYY/G0PiVVUOrcapX/brbxxggVfoUgz4fifXopTrF3rOIljQxjZDPt7SI68Sv2pp\nXkZ8yKanrqlMM6IeONwSxYdOboRovD4nqIwY7apjFHxhBptraBwU13XCyK0B8Xj8\nit9VfvCDAgMBAAECggEAOWooVYpOrN6RB1fiLV3lo2hVOL1RNoX8KSigod1x+lnR\ntlLDbdwPNYQbAIjlEvf7Kqxg/aexyRLWhta9ASexs1Z5dBokltm0jvv4iGPpDqkJ\nQw7PNMCpx6T6G03RGj0A/lucZqQkmdiqm2LdMIbvtmiZKHm+MyVb3FPFjpib8iyl\nvu0cncNDvszGP1BMrp2pQvJ/76VTrq4D7SF94uZHWaXpCQ943m3H09Hn+88cbeCD\nLRw6m9d0ztHYVk7SW+JRQJOk7wRVZSMfxly7GwJUxqvYNa4YezRJq025yuoYYfuV\nVTGkdQ/EefYkVW/HU7Oi1UPV4WQjK+25yYVbtFu3bQKBgQDxXGzz5/lalOqVOEw2\nTXB3qJcIhPNXBgS3U1TCo6U/njt79w3TKLBrrTK+38eexXbxof5Iv+X0NvCj1ths\niwGLOxqxRzmLDfvSRinNttZGg4SgktaZ0/rjK9FkOu9G9FrNEs/QFeZzC/Zr3gLP\nn2eB+lV1dRCX+SIAwkjJiN4gZwKBgQDZguFTa7XOTDdXwMhxIyejpVVh28uEunQB\nsNF9f+Aa2wDQvguXswQMVV14JfkHCa/nRFeYfoAEjEuhEulkntQ3Pq52xJiHdmrj\nWnurdTT3BOjqEivT/ISnxPtVv4q37pZmQ8LJIYRxUm9TCMWg/DNL4ew5MnMPboXK\n53w9xqothQKBgQDFpz/eGbj88fiNDJZ03cPdaeWNZ3rzaA1Sp95Aqsy3pXfnE7Fx\nm9+lvidRYmbR4bl/NX7MysGg1aEJOvbvJIK2J0e7p60678+qKiUvvqwJAMkKylUN\nkifiA08teonanF8Dk4U1Tcnzqvc47I12w357VarITn6xRacP4grDZ98nvwKBgFE5\nP51gNncAHRaG5hLhltbUUasGYdyBp/pNph0gWHaO26IXpcqTTeqxIgNQ4sqPAoHx\nEmjerD2GimNu5XrumL68iHfPeEn1nXqi+lWPoiSwT63A9V7nCD6CH3zo1wtSbBVq\nLl3fR07uAqZWOz6fjyRCDG1ben4DvrCDevCytC/lAoGAOh+DrKfs7jEhVhr/rxU0\n4zEKgiE5WUoMYOX/HorPHi57/Z1AQPv8IynozNE/mhDI1kHao11X15+naFsbE2QO\nhggY9nXZk41OyJGK6MC5RTPSy3FJy5RCuy4rAF8ngdu57w8Dqn9nFaTAGC5Ti1pQ\nlXBehjmHnDwoAOCdNkRUyLo=\n-----END PRIVATE KEY-----\n",
+            "client_email": "firebase-adminsdk-fbsvc@novabattle-99eb9.iam.gserviceaccount.com"
+        };
+
+        // Generates the OAuth2 access token inside the browser using standard JWT signing (RS256)
+        async function getGoogleAccessToken() {
+            const header = { "alg": "RS256", "typ": "JWT" };
+            const now = Math.floor(Date.now() / 1000);
+            const claimSet = {
+                "iss": serviceAccount.client_email,
+                "scope": "https://www.googleapis.com/auth/firebase.messaging",
+                "aud": "https://oauth2.googleapis.com/token",
+                "exp": now + 3600,
+                "iat": now
+            };
+
+            const sHeader = JSON.stringify(header);
+            const sPayload = JSON.stringify(claimSet);
+            const privateKey = serviceAccount.private_key;
+
+            const jwt = KJUR.jws.JWS.sign(null, sHeader, sPayload, privateKey);
+
+            const response = await fetch("https://oauth2.googleapis.com/token", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${encodeURIComponent(jwt)}`
+            });
+
+            const data = await response.json();
+            return data.access_token;
+        }
+
+        // Sends instant push notification to Admin App on "admin_alerts" Topic
+        async function triggerAdminAlertFCM(title, message) {
+            try {
+                const realGoogleToken = await getGoogleAccessToken();
+                const jsonPayload = {
+                    "message": {
+                        "topic": "admin_alerts",
+                        "data": {
+                            "title": title,
+                            "body": message,
+                            "notification_id": String(Date.now())
+                        }
+                    }
+                };
+
+                await fetch("https://fcm.googleapis.com/v1/projects/novabattle-99eb9/messages:send", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + realGoogleToken
+                    },
+                    body: JSON.stringify(jsonPayload)
+                });
+            } catch (err) {
+                console.error("FCM background sending issue: ", err);
+            }
+        }
+
         let userObj = null, adminObj = {}, isSignUp = false, selectedMatch = null, activeCategory = 'upcoming', isOtpSent = false;
         let fp_otp_generated = null;
         let fp_email_stored = "";
@@ -1053,7 +1122,6 @@
 
         onAuthStateChanged(auth, (user) => {
             if(user) {
-                // Subscribe User to their individual push topic
                 if (window.AndroidInterface && window.AndroidInterface.subscribeToTopic) {
                     window.AndroidInterface.subscribeToTopic(`user_${user.uid}`);
                 }
@@ -1077,7 +1145,6 @@
                         if(userObj.profilePic) document.getElementById('u-dp').src = userObj.profilePic;
                         document.getElementById('bot-nav').style.display = 'flex';
                         
-                        // Sync Match Push Notification Topics automatically on data fetch
                         syncMatchSubscriptions(user.uid);
 
                         updateReferralStats(userObj.referCode);
@@ -1096,7 +1163,6 @@
             }
         });
 
-        // Smart dynamic subscription syncing
         window.syncMatchSubscriptions = async (uid) => {
             if (!window.AndroidInterface || !window.AndroidInterface.subscribeToTopic) return;
             try {
@@ -1118,7 +1184,6 @@
                         }
                     }
 
-                    // Subscribe if active, else unsubscribe safely
                     if (isJoined && mStatus !== 'completed') {
                         window.AndroidInterface.subscribeToTopic(`match_${mid}`);
                     } else {
@@ -1246,7 +1311,7 @@
             if(wrapper) {
                 wrapper.innerHTML = "";
                 const banners = adminObj.bannerUrl ? adminObj.bannerUrl.split(',') : [];
-                banners.forEach(url => wrapper.innerHTML += `<img src="${url.trim}" class="slide-img" onerror="handleImageError(this)">`);
+                banners.forEach(url => wrapper.innerHTML += `<img src="${url.trim()}" class="slide-img" onerror="handleImageError(this)">`);
                 initInteractiveSlider(banners.length);
             }
             loadMatchesData();
@@ -1510,7 +1575,6 @@
                         status: "success" 
                     });
 
-                    // Subscribe device to Match Target Push Notification Topic
                     if (window.AndroidInterface && window.AndroidInterface.subscribeToTopic) {
                         window.AndroidInterface.subscribeToTopic(`match_${selectedMatch.id}`);
                     }
@@ -1545,7 +1609,6 @@
                         status: "success" 
                     });
 
-                    // Subscribe device to Match Target Push Notification Topic
                     if (window.AndroidInterface && window.AndroidInterface.subscribeToTopic) {
                         window.AndroidInterface.subscribeToTopic(`match_${selectedMatch.id}`);
                     }
@@ -1600,7 +1663,6 @@
                     status: "success" 
                 });
 
-                // Subscribe device to Match Target Push Notification Topic
                 if (window.AndroidInterface && window.AndroidInterface.subscribeToTopic) {
                     window.AndroidInterface.subscribeToTopic(`match_${selectedMatch.id}`);
                 }
@@ -1662,7 +1724,6 @@
                     else updates[`matches/${mId}/teams/${tCode}`] = null;
                 }
                 
-                // Unsubscribe device from Match Target Topic
                 if (window.AndroidInterface && window.AndroidInterface.unsubscribeFromTopic) {
                     window.AndroidInterface.unsubscribeFromTopic(`match_${mId}`);
                 }
@@ -1693,7 +1754,6 @@
                 }
                 updates[`matches/${mId}/teams/${tCode}`] = null;
                 
-                // Unsubscribe leader
                 if (window.AndroidInterface && window.AndroidInterface.unsubscribeFromTopic) {
                     window.AndroidInterface.unsubscribeFromTopic(`match_${mId}`);
                 }
@@ -1858,10 +1918,12 @@
             const timeString = new Date().toLocaleString();
             
             await update(ref(db, `users/${auth.currentUser.uid}`), { coins: parseInt(userObj.coins) - parseInt(a) });
-            // FIXED: Set notified as false so Admin Panel triggers Push Alert immediately
             await set(ref(db, `requests/withdrawals/${txnKey}`), { uid: auth.currentUser.uid, amount: a, upi: u, status: "pending", timestamp: Date.now(), notified: false });
             await set(ref(db, `users/${auth.currentUser.uid}/history/${txnKey}`), { title: "Withdraw Request", amount: "-"+a, date: timeString, reason: "Transfer to " + u, status: "pending", type: "withdrawal" });
             
+            // TRIGGERS REAL-TIME BACKGROUND FCM PUSH TO CLOSED ADMIN APP
+            await triggerAdminAlertFCM("New Withdrawal Request! 🔄", `User ${userObj.name} has requested a withdrawal of ₹${a}`);
+
             setGlobalLoading(false, 'wd-submit-btn');
             alert("Withdraw Request Sent!");
             closeModal();
@@ -1880,10 +1942,12 @@
             const txnKey = newTxnRef.key;
             const timeString = new Date().toLocaleString();
             
-            // FIXED: Set notified as false so Admin Panel triggers Push Alert immediately
             await set(ref(db, `requests/deposits/${txnKey}`), { uid: auth.currentUser.uid, amount: a, utr: u, status: "pending", timestamp: Date.now(), notified: false }); 
             await set(ref(db, `users/${auth.currentUser.uid}/history/${txnKey}`), { title: "Deposit Request", amount: "+"+a, date: timeString, reason: "UTR: " + u, status: "pending", type: "deposit" });
             
+            // TRIGGERS REAL-TIME BACKGROUND FCM PUSH TO CLOSED ADMIN APP
+            await triggerAdminAlertFCM("New Deposit Request! 💰", `User ${userObj.name} has submitted a deposit of ₹${a}`);
+
             setGlobalLoading(false, 'dep-submit-btn');
             alert("Deposit Submitted!"); 
             showScreen('wallet-screen'); 
