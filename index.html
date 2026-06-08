@@ -28,16 +28,14 @@
             padding: 0;
             height: 100%;
             width: 100%;
-            overflow: hidden; /* Main window scroll block karne ke liye */
-            position: fixed;  /* WebView ka dynamic rubber-banding pull block karne ke liye */
+            overflow: hidden; 
+            position: fixed;  
             background: var(--bg); 
             color: var(--text);
         }
 
         body { 
             padding-top: env(safe-area-inset-top);
-
-            /* FEATURE: Disable Text Selection for Native App Feel */
             -webkit-user-select: none; 
             -moz-user-select: none;    
             -ms-user-select: none;     
@@ -45,7 +43,6 @@
             -webkit-touch-callout: none; 
         }
 
-        /* FEATURE: Allow selection in Input and Textarea only */
         input, textarea, [contenteditable="true"] {
             -webkit-user-select: text !important;
             -moz-user-select: text !important;
@@ -53,11 +50,10 @@
             user-select: text !important;
         }
 
-        /* Initial Screen Video Splash Loader Style */
         #initial-screen-loader {
             position: fixed;
             inset: 0;
-            background: #ffffff; /* White background during loading */
+            background: #ffffff; 
             z-index: 999999;
             display: flex;
             align-items: center;
@@ -68,11 +64,10 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 0; /* Hidden initially to avoid default play/loading icon */
-            transition: opacity 0.3s ease; /* Smooth fade-in when playing starts */
+            opacity: 0; 
+            transition: opacity 0.3s ease; 
         }
 
-        /* Global Loader CSS */
         #global-loader {
             position: fixed;
             inset: 0;
@@ -95,7 +90,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Room Notice CSS */
         .room-notice {
             background: #eff6ff;
             border: 1px solid #bfdbfe;
@@ -112,7 +106,7 @@
         }
 
         .header { 
-            flex-shrink: 0; /* Header apni jagah fix rahega compression se bachega */
+            flex-shrink: 0; 
             background: #ffffff; 
             display: flex; 
             justify-content: space-between; 
@@ -125,7 +119,6 @@
             z-index: 100;
         }
 
-        /* FIXED APP STRUCTURAL FLEXBOX LAYOUT DEFINITION */
         .screen { 
             display: none; 
             height: 100%; 
@@ -133,14 +126,14 @@
             position: absolute; 
             top: 0; 
             left: 0;
-            flex-direction: column; /* Sub-components ko Vertical align karega */
+            flex-direction: column; 
         }
         
         .screen-content { 
-            flex: 1; /* Pure space ko capture karega bina page expand kiye */
-            overflow-y: auto; /* Sirf isi container me scrolling active hogi */
-            -webkit-overflow-scrolling: touch; /* Makkhan jaisa iOS dynamic momentum scrolling */
-            padding: 20px 20px 100px 20px; /* Safe padding for bottom navigation visibility */
+            flex: 1; 
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch; 
+            padding: 20px 20px 100px 20px; 
         }
 
         .active { display: flex !important; animation: fadeIn 0.4s ease; }
@@ -191,11 +184,9 @@
         .btn-joined { background: #f1f5f9; color: #64748b; pointer-events: none; border: 1px solid #e2e8f0; }
         .btn-completed { background: #e2e8f0; color: #94a3b8; pointer-events: none; }
         
-        /* PLAY NOW Active Play Button Custom CSS Style */
         .btn-play-now { background: linear-gradient(135deg, #7c3aed, #5b21b6); color: white; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4); pointer-events: auto !important; }
         .btn-play-now:active { transform: scale(0.98); opacity: 0.9; }
 
-        /* Custom Small Card View for Team Type */
         .team-type-badge {
             display: inline-block;
             background: #f5f3ff;
@@ -254,7 +245,6 @@
         }
         .slide-img { min-width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
 
-        /* Empty/Loading Slider Wrapper Placeholder CSS */
         .slider-wrapper:empty {
             display: flex;
             align-items: center;
@@ -414,7 +404,6 @@
             box-shadow: 0 6px 12px rgba(124, 58, 237, 0.3);
             transform: scale(1.05);
         }
-
     </style>
 </head>
 <body>
@@ -772,13 +761,11 @@
         };
         window.alert = function(message) { window.customDialog(message, 'alert'); };
 
-        // Fallback placeholder logic for missing/failed wide banners (Matches, sliders, etc.)
         window.handleImageError = function(img) {
             img.onerror = null;
             img.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%237c3aed'/><stop offset='100%' stop-color='%23a855f7'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g)'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='700' font-size='44' fill='%23ffffff'>Nova Battle</text><text x='50%' y='59%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='400' font-size='18' fill='rgba(255,255,255,0.7)'>Loading Arena...</text></svg>";
         };
 
-        // Fallback placeholder logic for missing/failed square icons (Logos, profiles, QR, etc.)
         window.handleSquareImageError = function(img) {
             img.onerror = null;
             img.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%237c3aed'/><stop offset='100%' stop-color='%23a855f7'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g)'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='700' font-size='16' fill='%23ffffff'>Nova Battle</text></svg>";
@@ -807,7 +794,6 @@
         const auth = getAuth(app);
         const db = getDatabase(app);        const APP_VERSION = "1.1"; 
 
-        // Synchronization states for Splash Screen Video ending and Auth screen being ready
         let splashVideoEnded = false;
         let firstScreenReady = false;
 
@@ -825,10 +811,8 @@
             }
         }
 
-        // Initialize Splash Video Handlers
         const splashVideo = document.getElementById('splash-video');
         if (splashVideo) {
-            // Smoothly fade-in the video only when it starts rendering
             splashVideo.addEventListener('playing', () => {
                 splashVideo.style.opacity = '1';
             });
@@ -838,7 +822,6 @@
                 tryRemoveSplash();
             };
             
-            // Failsafe backup in case video fails to load/play
             setTimeout(() => {
                 if (!splashVideoEnded) {
                     splashVideoEnded = true;
@@ -846,7 +829,6 @@
                 }
             }, 8000); 
 
-            // JS-side Fetch + Blob conversion fixes range-request issues on Android Webview
             fetch('intro.mp4')
                 .then(response => {
                     if (!response.ok) throw new Error("HTTP error " + response.status);
@@ -859,7 +841,7 @@
                     });
                 })
                 .catch(err => {
-                    console.error("Local splash video fetch failed, loading fallback: ", err);
+                    console.error("Local splash video fetch failed: ", err);
                     splashVideoEnded = true;
                     tryRemoveSplash();
                 });
@@ -877,7 +859,6 @@
             }
         };
 
-        // Custom Java Bridge handler to launch Free Fire Max via Android Interface
         window.openFreeFire = function() {
             if (window.AndroidInterface) { 
                 window.AndroidInterface.launchFreeFire(); 
@@ -886,10 +867,7 @@
             }
         };
 
-        // --- INSTAGRAM-STYLE BACK BUTTON NAVIGATION SYSTEM LOGIC ---
         let currentActiveScreenId = 'auth-screen';
-
-        // Setup MutationObserver to watch modal display changes and sync history state
         let isObserverSyncing = false;
         const modalObserver = new MutationObserver(() => {
             if (isObserverSyncing) return;
@@ -926,7 +904,6 @@
         window.showScreen = (id, isFromPopState = false) => {
             if(userObj && userObj.isBanned && id !== 'info-screen' && id !== 'auth-screen' && id !== 'home-screen') return;
             
-            // Open Modals ko automatically close karein jab screen badal rahi ho
             window.closeModal();
 
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -936,14 +913,11 @@
             const prevScreenId = currentActiveScreenId;
             currentActiveScreenId = id;
 
-            // SMART HTML5 HISTORY NAVIGATION MANAGEMENT
             if (!isFromPopState) {
                 const isTab = ['wallet-screen', 'refer-screen', 'profile-screen'].includes(id);
                 const isPrevTab = ['wallet-screen', 'refer-screen', 'profile-screen'].includes(prevScreenId);
 
                 if (id === 'home-screen') {
-                    // Agar hum bottom tabs me se kisi bhi screen se Home click karenge
-                    // Toh hum piche wala state clean karke pop kar dete hain.
                     if (isPrevTab) {
                         window.history.back();
                         return;
@@ -953,7 +927,6 @@
                 } else if (['auth-screen'].includes(id)) {
                     window.history.replaceState({ screenId: id }, '', '');
                 } else if (isTab) {
-                    // Smart Tab Replacing Rule to keep history stack size exactly = 2
                     if (isPrevTab) {
                         window.history.replaceState({ screenId: id }, '', '');
                     } else {
@@ -980,7 +953,6 @@
             tryRemoveSplash();
         };
 
-        // Phone ke hardware/system back button clicks ko manage karne ka upgraded logic
         window.addEventListener('popstate', (event) => {
             let anyModalOpen = false;
             document.querySelectorAll('.modal').forEach(m => {
@@ -996,7 +968,6 @@
                 return;
             }
 
-            // INSTAGRAM LOGIC TRIGGER: Smart routing based on target history state
             if (auth.currentUser && userObj && !userObj.isBanned) {
                 const state = event.state;
                 if (state && state.screenId) {
@@ -1012,7 +983,6 @@
                 if (currentActiveScreenId !== 'auth-screen') {
                     window.showScreen('auth-screen', true);
                 } else {
-                    // Login Screen Hardware Back Button Navigation Handler
                     const state = event.state;
                     if (state && state.screenId === 'auth-screen') {
                         if (state.subState === 'otp') {
@@ -1060,7 +1030,6 @@
             }
         });
 
-        // Header ke back arrow button (Chevron Left) click function
         window.handleBackBtnClick = () => {
             if (['deposit-screen'].includes(currentActiveScreenId)) {
                 window.showScreen('wallet-screen');
@@ -1071,11 +1040,9 @@
                     window.showScreen('profile-screen');
                 }
             } else {
-                // Instagram logic: Baki kisi bhi condition me seedhe home screen par drop karega
                 window.showScreen('home-screen');
             }
         };
-        // ----------------------------------------------------------------------
 
         let userObj = null, adminObj = {}, isSignUp = false, selectedMatch = null, activeCategory = 'upcoming', isOtpSent = false;
         let fp_otp_generated = null;
@@ -1086,6 +1053,11 @@
 
         onAuthStateChanged(auth, (user) => {
             if(user) {
+                // Subscribe User to their individual push topic
+                if (window.AndroidInterface && window.AndroidInterface.subscribeToTopic) {
+                    window.AndroidInterface.subscribeToTopic(`user_${user.uid}`);
+                }
+
                 onValue(ref(db, 'users/' + user.uid), (snap) => {
                     userObj = snap.val();
                     const banOverlay = document.getElementById('ban-overlay');
@@ -1104,6 +1076,10 @@
                         document.getElementById('u-ffuid-display').innerText = userObj.ffUid || "Not set";
                         if(userObj.profilePic) document.getElementById('u-dp').src = userObj.profilePic;
                         document.getElementById('bot-nav').style.display = 'flex';
+                        
+                        // Sync Match Push Notification Topics automatically on data fetch
+                        syncMatchSubscriptions(user.uid);
+
                         updateReferralStats(userObj.referCode);
                         loadHistory(user.uid);
                         
@@ -1119,6 +1095,40 @@
                 checkUpdate();
             }
         });
+
+        // Smart dynamic subscription syncing
+        window.syncMatchSubscriptions = async (uid) => {
+            if (!window.AndroidInterface || !window.AndroidInterface.subscribeToTopic) return;
+            try {
+                const matchesSnap = await get(ref(db, 'matches'));
+                const matches = matchesSnap.val() || {};
+                for (let mid in matches) {
+                    const m = matches[mid];
+                    const mStatus = (m.status || '').toLowerCase();
+                    let isJoined = false;
+
+                    if (m.participants && m.participants[uid]) {
+                        isJoined = true;
+                    } else if (m.teams) {
+                        for (let tCode in m.teams) {
+                            if (m.teams[tCode].members && m.teams[tCode].members[uid]) {
+                                isJoined = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Subscribe if active, else unsubscribe safely
+                    if (isJoined && mStatus !== 'completed') {
+                        window.AndroidInterface.subscribeToTopic(`match_${mid}`);
+                    } else {
+                        window.AndroidInterface.unsubscribeFromTopic(`match_${mid}`);
+                    }
+                }
+            } catch (e) {
+                console.error("Match sync subscription error: ", e);
+            }
+        };
 
         window.openForgotModal = () => {
             document.getElementById('forgot-modal').style.display = 'flex';
@@ -1187,7 +1197,6 @@
             }
         };
 
-        // CHECK UPDATE LOGIC FOR TOURNEY UPDATES
         async function checkUpdate() {
             const snap = await get(ref(db, 'admin_settings/app_update'));
             const updateData = snap.val();
@@ -1237,7 +1246,7 @@
             if(wrapper) {
                 wrapper.innerHTML = "";
                 const banners = adminObj.bannerUrl ? adminObj.bannerUrl.split(',') : [];
-                banners.forEach(url => wrapper.innerHTML += `<img src="${url.trim()}" class="slide-img" onerror="handleImageError(this)">`);
+                banners.forEach(url => wrapper.innerHTML += `<img src="${url.trim}" class="slide-img" onerror="handleImageError(this)">`);
                 initInteractiveSlider(banners.length);
             }
             loadMatchesData();
@@ -1500,6 +1509,12 @@
                         reason: "Slot "+selectedPosition+" Solo", 
                         status: "success" 
                     });
+
+                    // Subscribe device to Match Target Push Notification Topic
+                    if (window.AndroidInterface && window.AndroidInterface.subscribeToTopic) {
+                        window.AndroidInterface.subscribeToTopic(`match_${selectedMatch.id}`);
+                    }
+
                     alert("Joined successfully as Solo!");
                 } else if(currentJoinMode === 'create') {
                     const cost = parseInt(adminObj.groupCost || 0);
@@ -1529,6 +1544,12 @@
                         reason: "Team Slot "+selectedPosition, 
                         status: "success" 
                     });
+
+                    // Subscribe device to Match Target Push Notification Topic
+                    if (window.AndroidInterface && window.AndroidInterface.subscribeToTopic) {
+                        window.AndroidInterface.subscribeToTopic(`match_${selectedMatch.id}`);
+                    }
+
                     alert("Team Created! Share this Code with friends: " + teamCode);
                 }
             } catch(e) {
@@ -1578,6 +1599,12 @@
                     reason: "Match Slot: "+team.slot, 
                     status: "success" 
                 });
+
+                // Subscribe device to Match Target Push Notification Topic
+                if (window.AndroidInterface && window.AndroidInterface.subscribeToTopic) {
+                    window.AndroidInterface.subscribeToTopic(`match_${selectedMatch.id}`);
+                }
+
                 alert("Successfully joined Team " + (team.teamName || code));
                 closeModal();
             } catch(e) {
@@ -1634,6 +1661,12 @@
                     if(remaining.length > 0) updates[`matches/${mId}/teams/${tCode}/leader`] = remaining[0];
                     else updates[`matches/${mId}/teams/${tCode}`] = null;
                 }
+                
+                // Unsubscribe device from Match Target Topic
+                if (window.AndroidInterface && window.AndroidInterface.unsubscribeFromTopic) {
+                    window.AndroidInterface.unsubscribeFromTopic(`match_${mId}`);
+                }
+
                 await update(ref(db), updates);
                 alert("You left the team. Fee refunded.");
             } catch(e) { alert(e.message); }
@@ -1659,6 +1692,12 @@
                     updates[`users/${mUid}/history/${hRef.key}`] = { title: "Team Dismissed", amount: "+"+fee, date: new Date().toLocaleString(), reason: "Match: "+matchData.title, status: "success" };
                 }
                 updates[`matches/${mId}/teams/${tCode}`] = null;
+                
+                // Unsubscribe leader
+                if (window.AndroidInterface && window.AndroidInterface.unsubscribeFromTopic) {
+                    window.AndroidInterface.unsubscribeFromTopic(`match_${mId}`);
+                }
+
                 await update(ref(db), updates);
                 alert("Team dismissed.");
             } catch(e) { alert(e.message); }
@@ -1745,7 +1784,6 @@
                         document.getElementById('toggle-area').style.display = 'none';
                         isOtpSent = true; startOTPTimer(); alert("OTP sent to your email!");
                         
-                        // Push subState in history for OTP view
                         window.history.pushState({ screenId: 'auth-screen', subState: 'otp' }, '', '');
                     } else {
                         const otp_entered = document.getElementById('auth-otp').value.toString().trim();
@@ -1761,6 +1799,7 @@
                                     bonus = parseInt(adminObj.referBonus || 0); 
                                     await update(ref(db, `users/${id}`), { coins: (parseInt(allUsers[id].coins) || 0) + bonus }); 
                                     break; 
+                                
                                 } 
                             }
                             await set(ref(db, 'users/'+res.user.uid), { name: n, email: e, ffName: fn, ffUid: fu, coins: bonus, referCode: myCode, referredBy: r||"", pass: p });
@@ -1819,7 +1858,8 @@
             const timeString = new Date().toLocaleString();
             
             await update(ref(db, `users/${auth.currentUser.uid}`), { coins: parseInt(userObj.coins) - parseInt(a) });
-            await set(ref(db, `requests/withdrawals/${txnKey}`), { uid: auth.currentUser.uid, amount: a, upi: u, status: "pending", timestamp: Date.now() });
+            // FIXED: Set notified as false so Admin Panel triggers Push Alert immediately
+            await set(ref(db, `requests/withdrawals/${txnKey}`), { uid: auth.currentUser.uid, amount: a, upi: u, status: "pending", timestamp: Date.now(), notified: false });
             await set(ref(db, `users/${auth.currentUser.uid}/history/${txnKey}`), { title: "Withdraw Request", amount: "-"+a, date: timeString, reason: "Transfer to " + u, status: "pending", type: "withdrawal" });
             
             setGlobalLoading(false, 'wd-submit-btn');
@@ -1840,7 +1880,8 @@
             const txnKey = newTxnRef.key;
             const timeString = new Date().toLocaleString();
             
-            await set(ref(db, `requests/deposits/${txnKey}`), { uid: auth.currentUser.uid, amount: a, utr: u, status: "pending", timestamp: Date.now() }); 
+            // FIXED: Set notified as false so Admin Panel triggers Push Alert immediately
+            await set(ref(db, `requests/deposits/${txnKey}`), { uid: auth.currentUser.uid, amount: a, utr: u, status: "pending", timestamp: Date.now(), notified: false }); 
             await set(ref(db, `users/${auth.currentUser.uid}/history/${txnKey}`), { title: "Deposit Request", amount: "+"+a, date: timeString, reason: "UTR: " + u, status: "pending", type: "deposit" });
             
             setGlobalLoading(false, 'dep-submit-btn');
