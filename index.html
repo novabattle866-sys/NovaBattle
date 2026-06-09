@@ -565,7 +565,7 @@
                 <p style="font-weight:700; color:var(--primary); font-size: 18px;">Payable: ₹<span id="dv">0</span></p>
                 <p style="font-size:12px; color:var(--text-muted); margin: 10px 0 20px; line-height: 1.5;">After making the payment, enter your Transaction ID / UTR Number below and click Submit.</p>
                 <input type="text" id="utr-input" placeholder="Enter 12-digit UTR / TXN ID">
-                <button class="btn btn-p" id="dep-submit-btn" onclick="submitDeposit()">Submit Payment Request</button>
+                <button class="btn btn-p" id="dep-submit-btn" disabled onclick="submitDeposit()">Submit Payment Request</button>
             </div>
         </div>
     </div>
@@ -1929,12 +1929,70 @@
             closeModal();
         };
 
+        // NEW UTR VALIDATION UTILITY FUNCTION
+        function validateUTR(value) {
+            value = value.trim();
+            if (!value) return { isValid: false, type: null };
+
+            const isPureNumber = /^\d+$/.test(value);
+            const isPureLetters = /^[a-zA-Z]+$/.test(value);
+            const isAlphanumeric = /^[a-zA-Z0-9]+$/.test(value);
+
+            // 1. UPI numeric validation
+            if (isPureNumber) {
+                if (value.length === 12) {
+                    // Block generic predictable strings
+                    if (value === "123456789012") return { isValid: false, type: null };
+                    // Block repeating sequence patterns
+                    if (/^(\d)\1{11}$/.test(value)) return { isValid: false, type: null };
+                    return { isValid: true, type: "UPI (GPay/PhonePe/Paytm)" };
+                }
+                return { isValid: false, type: null };
+            }
+
+            // 2. Purely alphabetical rejection
+            if (isPureLetters) {
+                return { isValid: false, type: null };
+            }
+
+            // 3. FamPay & Merchant (alphanumeric validation between 12 to 22 characters)
+            if (isAlphanumeric && value.length >= 12 && value.length <= 22) {
+                return { isValid: true, type: "FamPay / Merchant Txn ID" };
+            }
+
+            return { isValid: false, type: null };
+        }
+
+        // MOUNT REAL-TIME KEY EVENT LISTENERS FOR USER TYPING ACTIONS
+        const utrInput = document.getElementById('utr-input');
+        const depSubmitBtn = document.getElementById('dep-submit-btn');
+
+        if (utrInput && depSubmitBtn) {
+            utrInput.addEventListener('input', () => {
+                const originalVal = utrInput.value;
+                const trimmedVal = originalVal.replace(/\s+/g, '');
+                if (originalVal !== trimmedVal) {
+                    utrInput.value = trimmedVal;
+                }
+                
+                const validation = validateUTR(trimmedVal);
+                if (validation.isValid) {
+                    depSubmitBtn.disabled = false;
+                    console.log(`Detected validation: ${validation.type}`);
+                } else {
+                    depSubmitBtn.disabled = true;
+                }
+            });
+        }
+
         window.submitDeposit = async () => { 
             const u = document.getElementById('utr-input').value.trim(), a = document.getElementById('dep-amt').value; 
             if(!u || !a) return alert("Fill details!"); 
-            const utrPattern = /^\d{12}$/;
-            if (!utrPattern.test(u)) {
-                return alert("Invalid UTR Code! Please provide an exact 12-digit numeric transaction reference.");
+            
+            // SECURITY CHECK USING INTEGRATED VAL LOGIC BEFORE FIREBASE COMMITS
+            const validation = validateUTR(u);
+            if (!validation.isValid) {
+                return alert("Invalid Transaction ID or UTR! Please provide a valid 12-digit UPI UTR or a 12-22 character FamPay/Merchant transaction reference.");
             }
             setGlobalLoading(true, 'dep-submit-btn'); 
             
