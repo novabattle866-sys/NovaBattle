@@ -1908,7 +1908,8 @@
         window.submitWithdraw = async () => {
             const a = document.getElementById('wd-amt').value;
             const u = document.getElementById('wd-upi').value.trim();
-            if(!u || !u.includes('@')) { return alert("Valid UPI required!"); }
+            const upiRegex = /^[\w.-]+@[a-zA-Z]+$/;
+            if(!u || !upiRegex.test(u)) { return alert("Please enter a valid UPI ID (username@handle)!"); }
             if(!a || parseInt(a) < parseInt(adminObj.minWithdraw)) return alert("Check Min Amount!");
             if(parseInt(a) > parseInt(userObj.coins)) return alert("Low Balance!");
             setGlobalLoading(true, 'wd-submit-btn'); 
