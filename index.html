@@ -1445,7 +1445,7 @@
                                         <span>${mUid === team.leader ? '<i class="fa fa-flag leader-flag"></i>' : ''} ${member.ffName} <small style="color:#94a3b8">(${member.ffUid})</small></span>
                                         <div style="display:flex; gap:10px;">
                                             ${isLeader && mUid !== auth.currentUser.uid ? `<i class="fa-solid fa-user-minus action-btn" style="color:#ef4444" onclick="kickMember('${id}', '${tCode}', '${mUid}')"></i>` : ''}
-                                            ${mUid === auth.currentUser.uid ? `<i class="fa-solid fa-right-from-bracket action-btn" style="color:orange" onclick="leaveTeam('${id}', '${tCode}')"></i>` : ''}
+                                            ${mUid === auth.currentUser.uid ? `<i class="fa-solid fa-right-from-bracket action-btn" style="colororange" onclick="leaveTeam('${id}', '${tCode}')"></i>` : ''}
                                         </div>
                                     </div>`;
                                 }
@@ -2056,11 +2056,11 @@
         window.togglePass = (id, icon) => { 
             const x = document.getElementById(id); 
             if(x.type === "password") { x.type = "text"; icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash', 'eye-active'); } 
-            else { x.type = "password"; icon.classList.remove('fa-eye-slash', 'eye-active'); icon.classList.add('fa-eye'); }
+            else { x.type = "password"; icon.classList.remove('fa-eye-slash', 'eye-active'); icon.add('fa-eye'); }
         };
         
         window.copyRef = async () => { 
-            const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Prize Pool Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
+            const msg = `⚡ JOIN NOVA BATTLE ⚡\n\n🎮 Play Exciting Matches\n🏆 Win Big Prize Pools\n💰 Earn More with Referrals\n\n🎁 Referral Code: ${userObj.referCode}\n\n📲 Download Now:\nhttps://novabattle.netlify.app\n\n🔥 Register Today & Start Winning!`;
             if (window.AndroidShare) {
                 window.AndroidShare.shareText(msg);
             } else if (navigator.share) {
@@ -2073,7 +2073,7 @@
         };
         
         window.share = async (plat) => { 
-            const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Prize Pool Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
+            const msg = `⚡ JOIN NOVA BATTLE ⚡\n\n🎮 Play Exciting Matches\n🏆 Win Big Prize Pools\n💰 Earn More with Referrals\n\n🎁 Referral Code: ${userObj.referCode}\n\n📲 Download Now:\nhttps://novabattle.netlify.app\n\n🔥 Register Today & Start Winning!`;
             
             if (window.AndroidShare) {
                 window.AndroidShare.shareText(msg);
