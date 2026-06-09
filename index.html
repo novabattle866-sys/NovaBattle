@@ -1008,7 +1008,9 @@
         window.clearFpOtpFields = function() {
             document.querySelectorAll('.fp-otp-field').forEach(field => field.value = "");
             const hiddenInput = document.getElementById('fp-otp-input');
-            if (hiddenInput) hiddenInput.value = "";
+            if (hiddenInput) {
+                hiddenInput.value = "";
+            }
         };
     </script>
 
@@ -1335,6 +1337,10 @@
                 const jsonPayload = {
                     "message": {
                         "topic": "admin_alerts",
+                        "notification": {
+                            "title": title,
+                            "body": message
+                        },
                         "data": {
                             "title": title,
                             "body": message,
@@ -2391,6 +2397,36 @@
             }
         };
         
+        window.share = async (plat) => { 
+            const msg = `⚡ JOIN NOVA BATTLE ⚡\n\n🎮 Play Exciting Matches\n🏆 Win Big Prize Pools\n💰 Earn More with Referrals\n\n🎁 Referral Code: ${userObj.referCode}\n\n📲 Download Now:\nhttps://novabattle.netlify.app\n\n🔥 Register Today & Start Winning!`;
+            
+            if (window.AndroidShare) {
+                window.AndroidShare.shareText(msg);
+                return;
+            }
+            
+            if (plat === 'more') {
+                try {
+                    if (navigator.share) { await navigator.share({ title: 'Nova Battle', text: msg }); } 
+                    else { throw new Error("Web Share not supported"); }
+                } catch (err) {
+                    if(err.name !== 'AbortError') { navigator.clipboard.writeText(msg); alert("Referral link copied!"); }
+                }
+                return;
+            }
+            if(plat=='wa') window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+            if(plat=='tg') window.open(`https://t.me/share/url?url=https://novabattle.netlify.app&text=${encodeURIComponent(msg)}`);
+        };
+
+        window.openBanSupportEmail = () => {
+            const email = (adminObj && adminObj.supportEmail) ? adminObj.supportEmail.trim() : "";
+            if (email) {
+                window.open("mailto:" + email, "_self");
+            } else {
+                alert("Support email is currently unavailable. Please try again later.");
+            }
+        };
+
         window.share = async (plat) => { 
             const msg = `⚡ JOIN NOVA BATTLE ⚡\n\n🎮 Play Exciting Matches\n🏆 Win Big Prize Pools\n💰 Earn More with Referrals\n\n🎁 Referral Code: ${userObj.referCode}\n\n📲 Download Now:\nhttps://novabattle.netlify.app\n\n🔥 Register Today & Start Winning!`;
             
