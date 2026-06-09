@@ -218,9 +218,9 @@
         #update-modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 20000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); }
         .update-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 25px; padding: 30px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
 
-        .cat-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; flex-shrink: 0; }
+        .cat-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; flex-shrink: 0; -webkit-overflow-scrolling: touch; }
         .cat-bar::-webkit-scrollbar { display: none; }
-        .cat-btn { background: #ffffff; padding: 10px 18px; border-radius: 20px; border: 1px solid var(--border); font-size: 13px; white-space: nowrap; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .cat-btn { background: #ffffff; padding: 10px 18px; border-radius: 20px; border: 1px solid var(--border); font-size: 13px; white-space: nowrap; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); flex-shrink: 0; }
         .active-cat { background: var(--primary); border-color: var(--primary); color: white; font-weight: bold; }
         
         .slider-container { 
