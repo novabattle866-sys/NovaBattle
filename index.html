@@ -433,6 +433,41 @@
             box-shadow: 0 6px 12px rgba(124, 58, 237, 0.3);
             transform: scale(1.05);
         }
+
+        /* 6-Digit Premium OTP Box Styling */
+        .otp-box-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 15px 0 20px 0;
+        }
+        .otp-box-input {
+            width: 42px;
+            height: 48px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #f1f5f9;
+            color: var(--text);
+            outline: none;
+            transition: all 0.2s ease;
+            margin-bottom: 0 !important;
+        }
+        .otp-box-input:focus {
+            border-color: var(--accent);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+        }
+        .otp-box-input::-webkit-outer-spin-button,
+        .otp-box-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .otp-box-input {
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
 <body>
@@ -466,7 +501,15 @@
             </div>
             <div id="fp-step-2" style="display:none">
                 <p style="font-size:12px; color:var(--primary); margin-bottom:15px;">Enter the 6-digit code sent to your email.</p>
-                <input type="number" id="fp-otp-input" placeholder="Enter OTP Code">
+                <div class="otp-box-container" id="fp-otp-boxes">
+                    <input type="number" class="otp-box-input" maxlength="1" oninput="this.value=this.value.slice(0,1)" pattern="[0-9]*" inputmode="numeric">
+                    <input type="number" class="otp-box-input" maxlength="1" oninput="this.value=this.value.slice(0,1)" pattern="[0-9]*" inputmode="numeric">
+                    <input type="number" class="otp-box-input" maxlength="1" oninput="this.value=this.value.slice(0,1)" pattern="[0-9]*" inputmode="numeric">
+                    <input type="number" class="otp-box-input" maxlength="1" oninput="this.value=this.value.slice(0,1)" pattern="[0-9]*" inputmode="numeric">
+                    <input type="number" class="otp-box-input" maxlength="1" oninput="this.value=this.value.slice(0,1)" pattern="[0-9]*" inputmode="numeric">
+                    <input type="number" class="otp-box-input" maxlength="1" oninput="this.value=this.value.slice(0,1)" pattern="[0-9]*" inputmode="numeric">
+                </div>
+                <input type="hidden" id="fp-otp-input">
                 <button class="btn btn-p" id="fp-verify-otp-btn" onclick="handleFPVerifyOTP()">Verify Code</button>
             </div>
             
@@ -522,7 +565,15 @@
                 </div>
                 <div id="otp-container" style="display:none; text-align:center; border-top:1px solid #f1f5f9; padding-top:15px; margin-top:10px;">
                     <p style="font-size:12px; color:var(--primary); margin-bottom:15px; font-weight: 600;">Check your Gmail for the 6-digit OTP code.</p>
-                    <input type="number" id="auth-otp" placeholder="Enter 6-digit OTP">
+                    <div class="otp-box-container" id="auth-otp-boxes">
+                        <input type="number" class="otp-box-input" maxlength="1" oninput="this.value=this.value.slice(0,1)" pattern="[0-9]*" inputmode="numeric">
+                        <input type="number" class="otp-box-input" maxlength="1" oninput="this.value=this.value.slice(0,1)" pattern="[0-9]*" inputmode="numeric">
+                        <input type="number" class="otp-box-input" maxlength="1" oninput="this.value=this.value.slice(0,1)" pattern="[0-9]*" inputmode="numeric">
+                        <input type="number" class="otp-box-input" maxlength="1" oninput="this.value=this.value.slice(0,1)" pattern="[0-9]*" inputmode="numeric">
+                        <input type="number" class="otp-box-input" maxlength="1" oninput="this.value=this.value.slice(0,1)" pattern="[0-9]*" inputmode="numeric">
+                        <input type="number" class="otp-box-input" maxlength="1" oninput="this.value=this.value.slice(0,1)" pattern="[0-9]*" inputmode="numeric">
+                    </div>
+                    <input type="hidden" id="auth-otp">
                 </div>
                 
                 <button class="btn btn-p" id="auth-btn" onclick="handleAuth()"><i class="fa-solid fa-right-to-bracket"></i> <span id="auth-btn-txt">Login</span></button>
@@ -1034,6 +1085,8 @@
                         } else if (state.subState === 'signup') {
                             isOtpSent = false;
                             isSignUp = true;
+                            document.querySelectorAll('#auth-otp-boxes .otp-box-input').forEach(inp => inp.value = "");
+                            document.getElementById('auth-otp').value = "";
                             document.getElementById('otp-container').style.display = 'none'; 
                             document.getElementById('otp-timer-box').style.display = 'none';
                             clearInterval(resendTimerInterval);
@@ -1048,6 +1101,8 @@
                         } else {
                             isOtpSent = false;
                             isSignUp = false;
+                            document.querySelectorAll('#auth-otp-boxes .otp-box-input').forEach(inp => inp.value = "");
+                            document.getElementById('auth-otp').value = "";
                             document.getElementById('otp-container').style.display = 'none'; 
                             document.getElementById('otp-timer-box').style.display = 'none';
                             clearInterval(resendTimerInterval);
@@ -1237,6 +1292,7 @@
             document.getElementById('fp-step-3').style.display = 'none';
             document.getElementById('fp-email').value = "";
             document.getElementById('fp-otp-input').value = "";
+            document.querySelectorAll('#fp-otp-boxes .otp-box-input').forEach(inp => inp.value = "");
             document.getElementById('user-existing-password').innerText = "********";
         };
 
@@ -1271,6 +1327,8 @@
                 alert("Recovery OTP sent to: " + e);
                 document.getElementById('fp-step-1').style.display = 'none';
                 document.getElementById('fp-step-2').style.display = 'block';
+                document.querySelectorAll('#fp-otp-boxes .otp-box-input').forEach(inp => inp.value = "");
+                document.getElementById('fp-otp-input').value = "";
             } catch (err) { alert("Failed to send OTP: " + err.message); }
             setGlobalLoading(false, 'fp-send-otp-btn');
         };
@@ -1847,6 +1905,8 @@
                 const templateParams = { to_email: e, otp_code: generatedOtp, time: expiry };
                 await emailjs.send('service_cr17hun', 'template_gv02zkj', templateParams);
                 await update(ref(db, 'otp_requests/' + e_key), { otp: generatedOtp });
+                document.querySelectorAll('#auth-otp-boxes .otp-box-input').forEach(inp => inp.value = "");
+                document.getElementById('auth-otp').value = "";
                 alert("New OTP sent!"); startOTPTimer();
             } catch(err) { alert("Failed: " + err.message); }
             setGlobalLoading(false);
@@ -1877,6 +1937,8 @@
                         document.getElementById('otp-container').style.display = 'block';
                         document.getElementById('auth-btn-txt').innerText = "Verify & Signup"; 
                         document.getElementById('toggle-area').style.display = 'none';
+                        document.querySelectorAll('#auth-otp-boxes .otp-box-input').forEach(inp => inp.value = "");
+                        document.getElementById('auth-otp').value = "";
                         isOtpSent = true; startOTPTimer(); alert("OTP sent to your email!");
                         
                         window.history.pushState({ screenId: 'auth-screen', subState: 'otp' }, '', '');
@@ -1919,6 +1981,8 @@
 
         window.toggleAuthMode = (isFromPopState = false) => { 
             isSignUp = !isSignUp; isOtpSent = false; 
+            document.querySelectorAll('#auth-otp-boxes .otp-box-input').forEach(inp => inp.value = "");
+            document.getElementById('auth-otp').value = "";
             document.getElementById('otp-container').style.display = 'none'; 
             document.getElementById('otp-timer-box').style.display = 'none';
             clearInterval(resendTimerInterval);
@@ -2138,6 +2202,95 @@
             showScreen('info-screen'); 
         };
         window.openWdModal = () => { document.getElementById('withdraw-modal').style.display='flex'; };
+
+        // 6-Digit Custom OTP Box Controller (Compatible with Existing Flows)
+        function setupOTPAutoVerification(containerId, hiddenInputId, onCompleteCallback) {
+            const container = document.getElementById(containerId);
+            const hiddenInput = document.getElementById(hiddenInputId);
+            if (!container || !hiddenInput) return;
+
+            const inputs = container.querySelectorAll('.otp-box-input');
+
+            inputs.forEach((input, index) => {
+                // Keydown events for Backspace navigation
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace') {
+                        if (input.value === '') {
+                            if (index > 0) {
+                                inputs[index - 1].focus();
+                                inputs[index - 1].value = '';
+                            }
+                        } else {
+                            input.value = '';
+                        }
+                        updateHiddenValue();
+                        e.preventDefault();
+                    }
+                });
+
+                // Input event for typing & forward navigation
+                input.addEventListener('input', (e) => {
+                    const val = e.target.value;
+                    if (val.length > 0) {
+                        if (index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        }
+                    }
+                    updateHiddenValue();
+                    checkAndTrigger();
+                });
+
+                // Paste event for easy 6-digit paste support
+                input.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const pasteData = (e.clipboardData || window.clipboardData).getData('text');
+                    const numbers = pasteData.replace(/[^0-9]/g, '').substring(0, 6);
+                    
+                    for (let i = 0; i < inputs.length; i++) {
+                        if (numbers[i]) {
+                            inputs[i].value = numbers[i];
+                        } else {
+                            inputs[i].value = '';
+                        }
+                    }
+                    
+                    const nextFocusIndex = Math.min(numbers.length, inputs.length - 1);
+                    inputs[nextFocusIndex].focus();
+
+                    updateHiddenValue();
+                    checkAndTrigger();
+                });
+            });
+
+            function updateHiddenValue() {
+                let code = '';
+                inputs.forEach(inp => {
+                    code += inp.value;
+                });
+                hiddenInput.value = code;
+            }
+
+            function checkAndTrigger() {
+                let code = '';
+                inputs.forEach(inp => {
+                    code += inp.value;
+                });
+                if (code.length === 6) {
+                    if (typeof onCompleteCallback === 'function') {
+                        onCompleteCallback();
+                    }
+                }
+            }
+        }
+
+        // Initialize Auto Verification for OTP boxes
+        setupOTPAutoVerification('auth-otp-boxes', 'auth-otp', () => {
+            window.handleAuth();
+        });
+
+        setupOTPAutoVerification('fp-otp-boxes', 'fp-otp-input', () => {
+            window.handleFPVerifyOTP();
+        });
     </script>
 </body>
 </html>
