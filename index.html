@@ -564,7 +564,7 @@
                 </div>
                 <p style="font-weight:700; color:var(--primary); font-size: 18px;">Payable: ₹<span id="dv">0</span></p>
                 <p style="font-size:12px; color:var(--text-muted); margin: 10px 0 20px; line-height: 1.5;">After making the payment, enter your Transaction ID / UTR Number below and click Submit.</p>
-                <input type="text" id="utr-input" placeholder="Enter 12-digit UTR / TXN ID">
+                <input type="text" id="utr-input" placeholder="Enter UTR / TXN ID" autocapitalize="characters" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()">
                 <button class="btn btn-p" id="dep-submit-btn" onclick="submitDeposit()">Submit Payment Request</button>
             </div>
         </div>
@@ -1932,9 +1932,9 @@
         window.submitDeposit = async () => { 
             const u = document.getElementById('utr-input').value.trim(), a = document.getElementById('dep-amt').value; 
             if(!u || !a) return alert("Fill details!"); 
-            const utrPattern = /^\d{12}$/;
+            const utrPattern = /^[A-Za-z0-9]{12,22}$/;
             if (!utrPattern.test(u)) {
-                return alert("Invalid UTR Code! Please provide an exact 12-digit numeric transaction reference.");
+                return alert("Invalid UTR/TXN ID! Please provide between 12 to 22 alphanumeric characters.");
             }
             setGlobalLoading(true, 'dep-submit-btn'); 
             
