@@ -218,36 +218,9 @@
         #update-modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 20000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); }
         .update-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 25px; padding: 30px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
 
-        .cat-bar { 
-            display: flex; 
-            gap: 10px; 
-            margin-bottom: 20px; 
-            overflow-x: auto; 
-            padding-bottom: 8px; 
-            scrollbar-width: none; 
-            flex-shrink: 0; 
-            margin-left: -20px; 
-            margin-right: -20px; 
-            padding-left: 20px; 
-            padding-right: 20px;
-            -webkit-overflow-scrolling: touch;
-        }
+        .cat-bar { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; flex-shrink: 0; }
         .cat-bar::-webkit-scrollbar { display: none; }
-        .cat-btn { 
-            background: #ffffff; 
-            padding: 10px 18px; 
-            border-radius: 20px; 
-            border: 1px solid var(--border); 
-            font-size: 13px; 
-            white-space: nowrap; 
-            cursor: pointer; 
-            color: var(--text-muted); 
-            display: flex; 
-            align-items: center; 
-            gap: 6px; 
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
-            flex-shrink: 0;
-        }
+        .cat-btn { background: #ffffff; padding: 10px 18px; border-radius: 20px; border: 1px solid var(--border); font-size: 13px; white-space: nowrap; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .active-cat { background: var(--primary); border-color: var(--primary); color: white; font-weight: bold; }
         
         .slider-container { 
@@ -433,34 +406,6 @@
             box-shadow: 0 6px 12px rgba(124, 58, 237, 0.3);
             transform: scale(1.05);
         }
-
-        /* Custom OTP Input Design */
-        .otp-box-wrapper {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .otp-field {
-            width: 42px !important;
-            height: 45px !important;
-            text-align: center !important;
-            font-size: 20px !important;
-            font-weight: bold !important;
-            border: 1px solid var(--border) !important;
-            border-radius: 10px !important;
-            background: #f1f5f9 !important;
-            color: var(--text) !important;
-            outline: none !important;
-            transition: all 0.2s !important;
-            margin-bottom: 0 !important;
-            padding: 0 !important;
-        }
-        .otp-field:focus {
-            border-color: var(--accent) !important;
-            background: #ffffff !important;
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1) !important;
-        }
     </style>
 </head>
 <body>
@@ -494,16 +439,8 @@
             </div>
             <div id="fp-step-2" style="display:none">
                 <p style="font-size:12px; color:var(--primary); margin-bottom:15px;">Enter the 6-digit code sent to your email.</p>
-                <div class="otp-box-wrapper" onpaste="handleFpOtpPaste(event)">
-                    <input type="text" class="otp-field fp-otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleFpOtpInput(this, 0)" onkeydown="handleFpOtpKeydown(event, 0)">
-                    <input type="text" class="otp-field fp-otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleFpOtpInput(this, 1)" onkeydown="handleFpOtpKeydown(event, 1)">
-                    <input type="text" class="otp-field fp-otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleFpOtpInput(this, 2)" onkeydown="handleFpOtpKeydown(event, 2)">
-                    <input type="text" class="otp-field fp-otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleFpOtpInput(this, 3)" onkeydown="handleFpOtpKeydown(event, 3)">
-                    <input type="text" class="otp-field fp-otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleFpOtpInput(this, 4)" onkeydown="handleFpOtpKeydown(event, 4)">
-                    <input type="text" class="otp-field fp-otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleFpOtpInput(this, 5)" onkeydown="handleFpOtpKeydown(event, 5)">
-                </div>
-                <input type="hidden" id="fp-otp-input" value="">
-                <button class="btn btn-p" id="fp-verify-otp-btn" onclick="handleFPVerifyOTP()" style="margin-top:15px;">Verify Code</button>
+                <input type="number" id="fp-otp-input" placeholder="Enter OTP Code">
+                <button class="btn btn-p" id="fp-verify-otp-btn" onclick="handleFPVerifyOTP()">Verify Code</button>
             </div>
             
             <div id="fp-step-3" style="display:none">
@@ -532,7 +469,7 @@
         <div class="glass-card" style="border-color: #fecaca; background: #fff1f2;">
             <i class="fa-solid fa-user-slash" style="font-size: 55px; color: #ef4444; margin-bottom: 20px;"></i>
             <h2 style="color: #ef4444; margin: 0 0 10px 0;">Your Account is BAN</h2>
-            <button class="btn btn-p" onclick="openBanSupportEmail()" style="margin-bottom: 12px;"><i class="fa-solid fa-headset"></i> Customer Support</button>
+            <button class="btn btn-p" onclick="showInfo('support')" style="margin-bottom: 12px;"><i class="fa-solid fa-headset"></i> Customer Support</button>
             <button class="btn" style="background:#ef4444; color:white;" onclick="logout()"><i class="fa-solid fa-power-off"></i> Logout</button>
         </div>
     </div>
@@ -556,20 +493,9 @@
                     <span id="fp-link-btn" class="fp-link" onclick="openForgotModal()">Forgot Password?</span>
                     <div id="refer-field" style="display:none;"><input type="text" id="reg-ref" placeholder="Referral Code (Optional)"></div>
                 </div>
-                
-                <!-- 6-Box OTP Verification Container -->
                 <div id="otp-container" style="display:none; text-align:center; border-top:1px solid #f1f5f9; padding-top:15px; margin-top:10px;">
                     <p style="font-size:12px; color:var(--primary); margin-bottom:15px; font-weight: 600;">Check your Gmail for the 6-digit OTP code.</p>
-                    <div class="otp-box-wrapper" onpaste="handleOtpPaste(event)">
-                        <input type="text" class="otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleOtpInput(this, 0)" onkeydown="handleOtpKeydown(event, 0)">
-                        <input type="text" class="otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleOtpInput(this, 1)" onkeydown="handleOtpKeydown(event, 1)">
-                        <input type="text" class="otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleOtpInput(this, 2)" onkeydown="handleOtpKeydown(event, 2)">
-                        <input type="text" class="otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleOtpInput(this, 3)" onkeydown="handleOtpKeydown(event, 3)">
-                        <input type="text" class="otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleOtpInput(this, 4)" onkeydown="handleOtpKeydown(event, 4)">
-                        <input type="text" class="otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleOtpInput(this, 5)" onkeydown="handleOtpKeydown(event, 5)">
-                    </div>
-                    <!-- Hidden element to hold compiled OTP for Firebase operations -->
-                    <input type="hidden" id="auth-otp" value="">
+                    <input type="number" id="auth-otp" placeholder="Enter 6-digit OTP">
                 </div>
                 
                 <button class="btn btn-p" id="auth-btn" onclick="handleAuth()"><i class="fa-solid fa-right-to-bracket"></i> <span id="auth-btn-txt">Login</span></button>
@@ -639,7 +565,7 @@
                 <p style="font-weight:700; color:var(--primary); font-size: 18px;">Payable: ₹<span id="dv">0</span></p>
                 <p style="font-size:12px; color:var(--text-muted); margin: 10px 0 20px; line-height: 1.5;">After making the payment, enter your Transaction ID / UTR Number below and click Submit.</p>
                 <input type="text" id="utr-input" placeholder="Enter 12-digit UTR / TXN ID">
-                <button class="btn btn-p" id="dep-submit-btn" disabled onclick="submitDeposit()">Submit Payment Request</button>
+                <button class="btn btn-p" id="dep-submit-btn" onclick="submitDeposit()">Submit Payment Request</button>
             </div>
         </div>
     </div>
@@ -783,8 +709,8 @@
     <div id="withdraw-modal" class="modal"><div class="modal-content">
         <h3>Request Withdrawal</h3>
         <input type="number" id="wd-amt" placeholder="Enter Amount (₹)">
-        <p style="font-size:12px; color:var(--primary); font-weight: 700; margin-top: -5px;">Minimum: ₹<span id="min-wd-txt">30</span></p>
-        <input type="text" id="wd-upi" placeholder="UPI ID (username@handle)" required>
+        <p style="font-size:12px; color:var(--primary); font-weight: 700; margin-top: -5px;">Minimum: ₹<span id="min-wd-txt">0</span></p>
+        <input type="text" id="wd-upi" placeholder="UPI ID (Ex: user@upi)">
         <p id="wd-error" style="color:#ef4444; font-size:11px; margin-top:-10px; margin-bottom:15px; display:none;">Please enter a valid UPI ID to proceed</p>
         <p style="font-size:11px; color:var(--text-muted); margin-top: 5px; line-height: 1.5;">Withdrawals are processed within 24 hours after admin verification.</p>
         <button class="btn btn-p" id="wd-submit-btn" onclick="submitWithdraw()">Submit Withdrawal</button>
@@ -845,172 +771,6 @@
         window.handleSquareImageError = function(img) {
             img.onerror = null;
             img.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%237c3aed'/><stop offset='100%' stop-color='%23a855f7'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g)'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='700' font-size='16' fill='%23ffffff'>Nova Battle</text></svg>";
-        };
-
-        // NEW 6-BOX OTP VERIFICATION LOGIC
-        window.handleOtpInput = function(element, index) {
-            // Remove any non-numeric values
-            element.value = element.value.replace(/[^0-9]/g, '');
-            
-            // Move focus to next input if filled
-            if (element.value.length === 1 && index < 5) {
-                const nextField = document.querySelectorAll('.otp-field')[index + 1];
-                if (nextField) nextField.focus();
-            }
-            
-            // Compile total 6-digit string
-            const fields = document.querySelectorAll('.otp-field');
-            let fullOtp = "";
-            fields.forEach(field => {
-                fullOtp += field.value;
-            });
-            
-            const hiddenInput = document.getElementById('auth-otp');
-            if (hiddenInput) {
-                hiddenInput.value = fullOtp;
-            }
-            
-            // Auto Trigger authentication when 6th digit is typed
-            if (fullOtp.length === 6) {
-                if (window.handleAuth) {
-                    window.handleAuth();
-                }
-            }
-        };
-
-        window.handleOtpKeydown = function(event, index) {
-            if (event.key === 'Backspace') {
-                const currentField = event.target;
-                if (currentField.value === '' && index > 0) {
-                    const prevField = document.querySelectorAll('.otp-field')[index - 1];
-                    if (prevField) {
-                        prevField.focus();
-                        prevField.value = ''; // Clear previous box on backspace
-                        
-                        // Re-sync compiled OTP value
-                        const fields = document.querySelectorAll('.otp-field');
-                        let fullOtp = "";
-                        fields.forEach(field => {
-                            fullOtp += field.value;
-                        });
-                        const hiddenInput = document.getElementById('auth-otp');
-                        if (hiddenInput) hiddenInput.value = fullOtp;
-                    }
-                }
-            }
-        };
-
-        window.handleOtpPaste = function(event) {
-            event.preventDefault();
-            const pasteData = (event.clipboardData || window.clipboardData).getData('text');
-            const numbersOnly = pasteData.replace(/[^0-9]/g, '').substring(0, 6);
-            const fields = document.querySelectorAll('.otp-field');
-            
-            for (let i = 0; i < fields.length; i++) {
-                if (numbersOnly[i]) {
-                    fields[i].value = numbersOnly[i];
-                } else {
-                    fields[i].value = "";
-                }
-            }
-            
-            const hiddenInput = document.getElementById('auth-otp');
-            if (hiddenInput) {
-                hiddenInput.value = numbersOnly;
-            }
-            
-            // Auto trigger auth on pasting complete OTP
-            if (numbersOnly.length === 6) {
-                if (window.handleAuth) {
-                    window.handleAuth();
-                }
-            } else if (fields[numbersOnly.length]) {
-                fields[numbersOnly.length].focus();
-            }
-        };
-
-        window.clearOtpFields = function() {
-            document.querySelectorAll('.otp-field').forEach(field => field.value = "");
-            const hiddenInput = document.getElementById('auth-otp');
-            if (hiddenInput) {
-                hiddenInput.value = "";
-            }
-        };
-
-        // NEW 6-BOX OTP VERIFICATION LOGIC FOR FORGOT PASSWORD
-        window.handleFpOtpInput = function(element, index) {
-            element.value = element.value.replace(/[^0-9]/g, '');
-            if (element.value.length === 1 && index < 5) {
-                const nextField = document.querySelectorAll('.fp-otp-field')[index + 1];
-                if (nextField) nextField.focus();
-            }
-            const fields = document.querySelectorAll('.fp-otp-field');
-            let fullOtp = "";
-            fields.forEach(field => {
-                fullOtp += field.value;
-            });
-            const hiddenInput = document.getElementById('fp-otp-input');
-            if (hiddenInput) {
-                hiddenInput.value = fullOtp;
-            }
-            if (fullOtp.length === 6) {
-                if (window.handleFPVerifyOTP) {
-                    window.handleFPVerifyOTP();
-                }
-            }
-        };
-
-        window.handleFpOtpKeydown = function(event, index) {
-            if (event.key === 'Backspace') {
-                const currentField = event.target;
-                if (currentField.value === '' && index > 0) {
-                    const prevField = document.querySelectorAll('.fp-otp-field')[index - 1];
-                    if (prevField) {
-                        prevField.focus();
-                        prevField.value = '';
-                        const fields = document.querySelectorAll('.fp-otp-field');
-                        let fullOtp = "";
-                        fields.forEach(field => {
-                            fullOtp += field.value;
-                        });
-                        const hiddenInput = document.getElementById('fp-otp-input');
-                        if (hiddenInput) hiddenInput.value = fullOtp;
-                    }
-                }
-            }
-        };
-
-        window.handleFpOtpPaste = function(event) {
-            event.preventDefault();
-            const pasteData = (event.clipboardData || window.clipboardData).getData('text');
-            const numbersOnly = pasteData.replace(/[^0-9]/g, '').substring(0, 6);
-            const fields = document.querySelectorAll('.fp-otp-field');
-            for (let i = 0; i < fields.length; i++) {
-                if (numbersOnly[i]) {
-                    fields[i].value = numbersOnly[i];
-                } else {
-                    fields[i].value = "";
-                }
-            }
-            const hiddenInput = document.getElementById('fp-otp-input');
-            if (hiddenInput) {
-                hiddenInput.value = numbersOnly;
-            }
-            if (numbersOnly.length === 6) {
-                if (window.handleFPVerifyOTP) {
-                    window.handleFPVerifyOTP();
-                }
-            } else if (fields[numbersOnly.length]) {
-                fields[numbersOnly.length].focus();
-            }
-        };
-
-        window.clearFpOtpFields = function() {
-            document.querySelectorAll('.fp-otp-field').forEach(field => field.value = "");
-            const hiddenInput = document.getElementById('fp-otp-input');
-            if (hiddenInput) {
-                hiddenInput.value = "";
-            }
         };
     </script>
 
@@ -1232,15 +992,10 @@
                             isSignUp = true;
                             document.getElementById('signup-fields').style.display = 'none'; 
                             document.getElementById('main-auth-inputs').style.display = 'none'; 
-                            if (window.clearOtpFields) window.clearOtpFields();
                             document.getElementById('otp-container').style.display = 'block';
                             document.getElementById('auth-btn-txt').innerText = "Verify & Signup"; 
                             document.getElementById('toggle-area').style.display = 'none';
                             document.getElementById('otp-timer-box').style.display = 'block';
-                            setTimeout(() => {
-                                const firstField = document.querySelectorAll('.otp-field')[0];
-                                if (firstField) firstField.focus();
-                            }, 100);
                         } else if (state.subState === 'signup') {
                             isOtpSent = false;
                             isSignUp = true;
@@ -1296,7 +1051,7 @@
             "type": "service_account",
             "project_id": "novabattle-99eb9",
             "private_key_id": "699a78fd1205fd71217470228eb017354d24c221",
-            "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDNEr269cTmwc6f\nTcTuKczwiKCv8YReRu2UCSZP9eWAi3dMo3WTdaNWlYglgHVc9OOYfz0IrkghDBkN\nrwin4Z/QkLjfkA7b4Aqc+35j3H+HtNM1Ru3c9udYDiTZ9WNcUMWbymD05Q4OfGrK\nQZGk9t8nlFbvwFwm65E3S0NRJ5i80KUlmC0tzXiBQs+5QCD0U+ETq5CILYYmG72P\nRYY/G0PiVVUOrcapX/brbxxggVfoUgz4fifXopTrF3rOIljQxjZDPt7SI68Sv2pp\nXkZ8yKanrqlMM6IeONwSxYdOboRovD4nqIwY7apjFHxhBptraBwU13XCyK0B8Xj8\nit9VfvCDAgMBAAECggEAOWooVYpOrN6RB1fiLV3lo2hVOL1RNoX8KSigod1x+lnR\ntlLDbdwPNYQbAIjlEvf7Kqxg/aexyRLWhta9ASexs1Z5dBokltm0jvv4iGPpDqkJ\nQw7PNMCpx6T6G03RGj0A/lucZqQkmdiqm2LdMIbvtmiZKHm+MyVb3FPFjpib8iyl\vu0cncNDvszGP1BMrp2pQvJ/76VTrq4D7SF94uZHWaXpCQ943m3H09Hn+88cbeCD\nLRw6m9d0ztHYVk7SW+JRQJOk7wRVZSMfxly7GwJUxqvYNa4YezRJq025yuoYYfuV\nVTGkdQ/EefYkVW/HU7Oi1UPV4WQjK+25yYVbtFu3bQKBgQDxXGzz5/lalOqVOEw2\nTXB3qJcIhPNXBgS3U1TCo6U/njt79w3TKLBrrTK+38eexXbxof5Iv+X0NvCj1ths\niwGLOxqxRzmLDfvSRinNttZGg4SgktaZ0/rjK9FkOu9G9FrNEs/QFeZzC/Zr3gLP\nn2eB+lV1dRCX+SIAwkjJiN4gZwKBgQDZguFTa7XOTDdXwMhxIyejpVVh28uEunQB\nsNF9f+Aa2wDQvguXswQMVV14JfkHCa/nRFeYfoAEjEuhEulkntQ3Pq52xJiHdmrj\nWnurdTT3BOjqEivT/ISnxPtVv4q37pZmQ8LJIYRxUm9TCMWg/DNL4ew5MnMPboXK\n53w9xqothQKBgQDFpz/eGbj88fiNDJZ03cPdaeWNZ3rzaA1Sp95Aqsy3pXfnE7Fx\nm9+lvidRYmbR4bl/NX7MysGg1aEJOvbvJIK2J0e7p60678+qKiUvvqwJAMkKylUN\nkifiA08teonanF8Dk4U1Tcnzqvc47I12w357VarITn6xRacP4grDZ98nvwKBgFE5\nP51gNncAHRaG5hLhltbUUasGYdyBp/pNph0gWHaO26IXpcqTTeqxIgNQ4sqPAoHx\nEmjerD2GimNu5XrumL68iHfPeEn1nXqi+lWPoiSwT63A9V7nCD6CH3zo1wtSbBVq\nLl3fR07uAqZWOz6fjyRCDG1ben4DvrCDevCytC/lAoGAOh+DrKfs7jEhVhr/rxU0\n4zEKgiE5WUoMYOX/HorPHi57/Z1AQPv8IynozNE/mhDI1kHao11X15+naFsbE2QO\nhggY9nXZk41OyJGK6MC5RTPSy3FJy5RCuy4rAF8ngdu57w8Dqn9nFaTAGC5Ti1pQ\nlXBehjmHnDwoAOCdNkRUyLo=\n-----END PRIVATE KEY-----\n",
+            "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDNEr269cTmwc6f\nTcTuKczwiKCv8YReRu2UCSZP9eWAi3dMo3WTdaNWlYglgHVc9OOYfz0IrkghDBkN\nrwin4Z/QkLjfkA7b4Aqc+35j3H+HtNM1Ru3c9udYDiTZ9WNcUMWbymD05Q4OfGrK\nQZGk9t8nlFbvwFwm65E3S0NRJ5i80KUlmC0tzXiBQs+5QCD0U+ETq5CILYYmG72P\nRYY/G0PiVVUOrcapX/brbxxggVfoUgz4fifXopTrF3rOIljQxjZDPt7SI68Sv2pp\nXkZ8yKanrqlMM6IeONwSxYdOboRovD4nqIwY7apjFHxhBptraBwU13XCyK0B8Xj8\nit9VfvCDAgMBAAECggEAOWooVYpOrN6RB1fiLV3lo2hVOL1RNoX8KSigod1x+lnR\ntlLDbdwPNYQbAIjlEvf7Kqxg/aexyRLWhta9ASexs1Z5dBokltm0jvv4iGPpDqkJ\nQw7PNMCpx6T6G03RGj0A/lucZqQkmdiqm2LdMIbvtmiZKHm+MyVb3FPFjpib8iyl\nvu0cncNDvszGP1BMrp2pQvJ/76VTrq4D7SF94uZHWaXpCQ943m3H09Hn+88cbeCD\nLRw6m9d0ztHYVk7SW+JRQJOk7wRVZSMfxly7GwJUxqvYNa4YezRJq025yuoYYfuV\nVTGkdQ/EefYkVW/HU7Oi1UPV4WQjK+25yYVbtFu3bQKBgQDxXGzz5/lalOqVOEw2\nTXB3qJcIhPNXBgS3U1TCo6U/njt79w3TKLBrrTK+38eexXbxof5Iv+X0NvCj1ths\niwGLOxqxRzmLDfvSRinNttZGg4SgktaZ0/rjK9FkOu9G9FrNEs/QFeZzC/Zr3gLP\nn2eB+lV1dRCX+SIAwkjJiN4gZwKBgQDZguFTa7XOTDdXwMhxIyejpVVh28uEunQB\nsNF9f+Aa2wDQvguXswQMVV14JfkHCa/nRFeYfoAEjEuhEulkntQ3Pq52xJiHdmrj\nWnurdTT3BOjqEivT/ISnxPtVv4q37pZmQ8LJIYRxUm9TCMWg/DNL4ew5MnMPboXK\n53w9xqothQKBgQDFpz/eGbj88fiNDJZ03cPdaeWNZ3rzaA1Sp95Aqsy3pXfnE7Fx\nm9+lvidRYmbR4bl/NX7MysGg1aEJOvbvJIK2J0e7p60678+qKiUvvqwJAMkKylUN\nkifiA08teonanF8Dk4U1Tcnzqvc47I12w357VarITn6xRacP4grDZ98nvwKBgFE5\nP51gNncAHRaG5hLhltbUUasGYdyBp/pNph0gWHaO26IXpcqTTeqxIgNQ4sqPAoHx\nEmjerD2GimNu5XrumL68iHfPeEn1nXqi+lWPoiSwT63A9V7nCD6CH3zo1wtSbBVq\nLl3fR07uAqZWOz6fjyRCDG1ben4DvrCDevCytC/lAoGAOh+DrKfs7jEhVhr/rxU0\n4zEKgiE5WUoMYOX/HorPHi57/Z1AQPv8IynozNE/mhDI1kHao11X15+naFsbE2QO\nhggY9nXZk41OyJGK6MC5RTPSy3FJy5RCuy4rAF8ngdu57w8Dqn9nFaTAGC5Ti1pQ\nlXBehjmHnDwoAOCdNkRUyLo=\n-----END PRIVATE KEY-----\n",
             "client_email": "firebase-adminsdk-fbsvc@novabattle-99eb9.iam.gserviceaccount.com"
         };
 
@@ -1337,10 +1092,6 @@
                 const jsonPayload = {
                     "message": {
                         "topic": "admin_alerts",
-                        "notification": {
-                            "title": title,
-                            "body": message
-                        },
                         "data": {
                             "title": title,
                             "body": message,
@@ -1450,7 +1201,7 @@
             document.getElementById('fp-step-2').style.display = 'none';
             document.getElementById('fp-step-3').style.display = 'none';
             document.getElementById('fp-email').value = "";
-            if (window.clearFpOtpFields) window.clearFpOtpFields();
+            document.getElementById('fp-otp-input').value = "";
             document.getElementById('user-existing-password').innerText = "********";
         };
 
@@ -1485,10 +1236,6 @@
                 alert("Recovery OTP sent to: " + e);
                 document.getElementById('fp-step-1').style.display = 'none';
                 document.getElementById('fp-step-2').style.display = 'block';
-                setTimeout(() => {
-                    const firstField = document.querySelectorAll('.fp-otp-field')[0];
-                    if (firstField) firstField.focus();
-                }, 100);
             } catch (err) { alert("Failed to send OTP: " + err.message); }
             setGlobalLoading(false, 'fp-send-otp-btn');
         };
@@ -1556,7 +1303,7 @@
             document.querySelectorAll('.admin-logo').forEach(i => i.src = adminObj.appLogo);
             document.getElementById('admin-qr-img').src = adminObj.payQR;
             document.getElementById('refer-banner-img').src = adminObj.referBanner || adminObj.bannerUrl;
-            document.getElementById('min-wd-txt').innerText = "30"; // Overridden to 30 as requested
+            document.getElementById('min-wd-txt').innerText = adminObj.minWithdraw || 0;
             document.getElementById('ref-tc-txt').innerText = adminObj.referTerms || "No terms available.";
             document.getElementById('g-cost').innerText = adminObj.groupCost || 0;
             document.getElementById('rename-cost-txt').innerText = adminObj.renameFee || 0;
@@ -2065,12 +1812,7 @@
                 const templateParams = { to_email: e, otp_code: generatedOtp, time: expiry };
                 await emailjs.send('service_cr17hun', 'template_gv02zkj', templateParams);
                 await update(ref(db, 'otp_requests/' + e_key), { otp: generatedOtp });
-                if (window.clearOtpFields) window.clearOtpFields();
                 alert("New OTP sent!"); startOTPTimer();
-                setTimeout(() => {
-                    const firstField = document.querySelectorAll('.otp-field')[0];
-                    if (firstField) firstField.focus();
-                }, 100);
             } catch(err) { alert("Failed: " + err.message); }
             setGlobalLoading(false);
         };
@@ -2097,15 +1839,10 @@
                         await set(ref(db, 'otp_requests/' + e_key), { name: n, email: e, pass: p, ffName: fn, ffUid: fu, referredBy: r||"", otp: generatedOtp });
                         document.getElementById('signup-fields').style.display = 'none'; 
                         document.getElementById('main-auth-inputs').style.display = 'none'; 
-                        if (window.clearOtpFields) window.clearOtpFields();
                         document.getElementById('otp-container').style.display = 'block';
                         document.getElementById('auth-btn-txt').innerText = "Verify & Signup"; 
                         document.getElementById('toggle-area').style.display = 'none';
                         isOtpSent = true; startOTPTimer(); alert("OTP sent to your email!");
-                        setTimeout(() => {
-                            const firstField = document.querySelectorAll('.otp-field')[0];
-                            if (firstField) firstField.focus();
-                        }, 100);
                         
                         window.history.pushState({ screenId: 'auth-screen', subState: 'otp' }, '', '');
                     } else {
@@ -2149,7 +1886,6 @@
             isSignUp = !isSignUp; isOtpSent = false; 
             document.getElementById('otp-container').style.display = 'none'; 
             document.getElementById('otp-timer-box').style.display = 'none';
-            if (window.clearOtpFields) window.clearOtpFields();
             clearInterval(resendTimerInterval);
             document.getElementById('main-auth-inputs').style.display = 'block'; 
             document.getElementById('auth-title').innerText = isSignUp ? "Create Account" : "Welcome Back"; 
@@ -2172,12 +1908,8 @@
         window.submitWithdraw = async () => {
             const a = document.getElementById('wd-amt').value;
             const u = document.getElementById('wd-upi').value.trim();
-            const upiRegex = /^[\w.\-_]+@[\w.\-_]+$/;
-            
-            if(!u || !upiRegex.test(u)) { 
-                return alert("Please enter a valid UPI ID (username@handle)!"); 
-            }
-            if(!a || parseInt(a) < 30) return alert("Check Min Amount! Minimum withdrawal is ₹30.");
+            if(!u || !u.includes('@')) { return alert("Valid UPI required!"); }
+            if(!a || parseInt(a) < parseInt(adminObj.minWithdraw)) return alert("Check Min Amount!");
             if(parseInt(a) > parseInt(userObj.coins)) return alert("Low Balance!");
             setGlobalLoading(true, 'wd-submit-btn'); 
             
@@ -2197,70 +1929,12 @@
             closeModal();
         };
 
-        // NEW UTR VALIDATION UTILITY FUNCTION
-        function validateUTR(value) {
-            value = value.trim();
-            if (!value) return { isValid: false, type: null };
-
-            const isPureNumber = /^\d+$/.test(value);
-            const isPureLetters = /^[a-zA-Z]+$/.test(value);
-            const isAlphanumeric = /^[a-zA-Z0-9]+$/.test(value);
-
-            // 1. UPI numeric validation
-            if (isPureNumber) {
-                if (value.length === 12) {
-                    // Block generic predictable strings
-                    if (value === "123456789012") return { isValid: false, type: null };
-                    // Block repeating sequence patterns
-                    if (/^(\d)\1{11}$/.test(value)) return { isValid: false, type: null };
-                    return { isValid: true, type: "UPI (GPay/PhonePe/Paytm)" };
-                }
-                return { isValid: false, type: null };
-            }
-
-            // 2. Purely alphabetical rejection
-            if (isPureLetters) {
-                return { isValid: false, type: null };
-            }
-
-            // 3. FamPay & Merchant (alphanumeric validation between 12 to 22 characters)
-            if (isAlphanumeric && value.length >= 12 && value.length <= 22) {
-                return { isValid: true, type: "FamPay / Merchant Txn ID" };
-            }
-
-            return { isValid: false, type: null };
-        }
-
-        // MOUNT REAL-TIME KEY EVENT LISTENERS FOR USER TYPING ACTIONS
-        const utrInput = document.getElementById('utr-input');
-        const depSubmitBtn = document.getElementById('dep-submit-btn');
-
-        if (utrInput && depSubmitBtn) {
-            utrInput.addEventListener('input', () => {
-                const originalVal = utrInput.value;
-                const trimmedVal = originalVal.replace(/\s+/g, '');
-                if (originalVal !== trimmedVal) {
-                    utrInput.value = trimmedVal;
-                }
-                
-                const validation = validateUTR(trimmedVal);
-                if (validation.isValid) {
-                    depSubmitBtn.disabled = false;
-                    console.log(`Detected validation: ${validation.type}`);
-                } else {
-                    depSubmitBtn.disabled = true;
-                }
-            });
-        }
-
         window.submitDeposit = async () => { 
             const u = document.getElementById('utr-input').value.trim(), a = document.getElementById('dep-amt').value; 
             if(!u || !a) return alert("Fill details!"); 
-            
-            // SECURITY CHECK USING INTEGRATED VAL LOGIC BEFORE FIREBASE COMMITS
-            const validation = validateUTR(u);
-            if (!validation.isValid) {
-                return alert("Invalid Transaction ID or UTR! Please provide a valid 12-digit UPI UTR or a 12-22 character FamPay/Merchant transaction reference.");
+            const utrPattern = /^\d{12}$/;
+            if (!utrPattern.test(u)) {
+                return alert("Invalid UTR Code! Please provide an exact 12-digit numeric transaction reference.");
             }
             setGlobalLoading(true, 'dep-submit-btn'); 
             
@@ -2385,20 +2059,20 @@
         };
         
         window.copyRef = async () => { 
-            const msg = `⚡ JOIN NOVA BATTLE ⚡\n\n🎮 Play Exciting Matches\n🏆 Win Big Prize Pools\n💰 Earn More with Referrals\n\n🎁 Referral Code: ${userObj.referCode}\n\n📲 Download Now:\nhttps://novabattle.netlify.app\n\n🔥 Register Today & Start Winning!`;
+            const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Prize Pool Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
             if (window.AndroidShare) {
                 window.AndroidShare.shareText(msg);
             } else if (navigator.share) {
                 try { await navigator.share({ title: 'Nova Battle', text: msg }); } catch (err) {
-                    if(err.name !== 'AbortError') { navigator.clipboard.writeText(msg); alert("Referral Message Copied!"); }
+                    if(err.name !== 'AbortError') { navigator.clipboard.writeText(userObj.referCode); alert("Copied!"); }
                 }
             } else {
-                navigator.clipboard.writeText(msg); alert("Referral Message Copied!");
+                navigator.clipboard.writeText(userObj.referCode); alert("Copied!");
             }
         };
         
         window.share = async (plat) => { 
-            const msg = `⚡ JOIN NOVA BATTLE ⚡\n\n🎮 Play Exciting Matches\n🏆 Win Big Prize Pools\n💰 Earn More with Referrals\n\n🎁 Referral Code: ${userObj.referCode}\n\n📲 Download Now:\nhttps://novabattle.netlify.app\n\n🔥 Register Today & Start Winning!`;
+            const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Prize Pool Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
             
             if (window.AndroidShare) {
                 window.AndroidShare.shareText(msg);
@@ -2416,45 +2090,6 @@
             }
             if(plat=='wa') window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
             if(plat=='tg') window.open(`https://t.me/share/url?url=https://novabattle.netlify.app&text=${encodeURIComponent(msg)}`);
-        };
-
-        window.openBanSupportEmail = () => {
-            const email = (adminObj && adminObj.supportEmail) ? adminObj.supportEmail.trim() : "";
-            if (email) {
-                window.open("mailto:" + email, "_self");
-            } else {
-                alert("Support email is currently unavailable. Please try again later.");
-            }
-        };
-
-        window.share = async (plat) => { 
-            const msg = `⚡ JOIN NOVA BATTLE ⚡\n\n🎮 Play Exciting Matches\n🏆 Win Big Prize Pools\n💰 Earn More with Referrals\n\n🎁 Referral Code: ${userObj.referCode}\n\n📲 Download Now:\nhttps://novabattle.netlify.app\n\n🔥 Register Today & Start Winning!`;
-            
-            if (window.AndroidShare) {
-                window.AndroidShare.shareText(msg);
-                return;
-            }
-            
-            if (plat === 'more') {
-                try {
-                    if (navigator.share) { await navigator.share({ title: 'Nova Battle', text: msg }); } 
-                    else { throw new Error("Web Share not supported"); }
-                } catch (err) {
-                    if(err.name !== 'AbortError') { navigator.clipboard.writeText(msg); alert("Referral link copied!"); }
-                }
-                return;
-            }
-            if(plat=='wa') window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
-            if(plat=='tg') window.open(`https://t.me/share/url?url=https://novabattle.netlify.app&text=${encodeURIComponent(msg)}`);
-        };
-
-        window.openBanSupportEmail = () => {
-            const email = (adminObj && adminObj.supportEmail) ? adminObj.supportEmail.trim() : "";
-            if (email) {
-                window.open("mailto:" + email, "_self");
-            } else {
-                alert("Support email is currently unavailable. Please try again later.");
-            }
         };
 
         window.showInfo = (type) => { 
