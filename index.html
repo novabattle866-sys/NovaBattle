@@ -494,8 +494,16 @@
             </div>
             <div id="fp-step-2" style="display:none">
                 <p style="font-size:12px; color:var(--primary); margin-bottom:15px;">Enter the 6-digit code sent to your email.</p>
-                <input type="number" id="fp-otp-input" placeholder="Enter OTP Code">
-                <button class="btn btn-p" id="fp-verify-otp-btn" onclick="handleFPVerifyOTP()">Verify Code</button>
+                <div class="otp-box-wrapper" onpaste="handleFpOtpPaste(event)">
+                    <input type="text" class="otp-field fp-otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleFpOtpInput(this, 0)" onkeydown="handleFpOtpKeydown(event, 0)">
+                    <input type="text" class="otp-field fp-otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleFpOtpInput(this, 1)" onkeydown="handleFpOtpKeydown(event, 1)">
+                    <input type="text" class="otp-field fp-otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleFpOtpInput(this, 2)" onkeydown="handleFpOtpKeydown(event, 2)">
+                    <input type="text" class="otp-field fp-otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleFpOtpInput(this, 3)" onkeydown="handleFpOtpKeydown(event, 3)">
+                    <input type="text" class="otp-field fp-otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleFpOtpInput(this, 4)" onkeydown="handleFpOtpKeydown(event, 4)">
+                    <input type="text" class="otp-field fp-otp-field" pattern="[0-9]*" inputmode="numeric" maxlength="1" oninput="handleFpOtpInput(this, 5)" onkeydown="handleFpOtpKeydown(event, 5)">
+                </div>
+                <input type="hidden" id="fp-otp-input" value="">
+                <button class="btn btn-p" id="fp-verify-otp-btn" onclick="handleFPVerifyOTP()" style="margin-top:15px;">Verify Code</button>
             </div>
             
             <div id="fp-step-3" style="display:none">
@@ -924,6 +932,82 @@
         window.clearOtpFields = function() {
             document.querySelectorAll('.otp-field').forEach(field => field.value = "");
             const hiddenInput = document.getElementById('auth-otp');
+            if (hiddenInput) {
+                hiddenInput.value = "";
+            }
+        };
+
+        // NEW 6-BOX OTP VERIFICATION LOGIC FOR FORGOT PASSWORD
+        window.handleFpOtpInput = function(element, index) {
+            element.value = element.value.replace(/[^0-9]/g, '');
+            if (element.value.length === 1 && index < 5) {
+                const nextField = document.querySelectorAll('.fp-otp-field')[index + 1];
+                if (nextField) nextField.focus();
+            }
+            const fields = document.querySelectorAll('.fp-otp-field');
+            let fullOtp = "";
+            fields.forEach(field => {
+                fullOtp += field.value;
+            });
+            const hiddenInput = document.getElementById('fp-otp-input');
+            if (hiddenInput) {
+                hiddenInput.value = fullOtp;
+            }
+            if (fullOtp.length === 6) {
+                if (window.handleFPVerifyOTP) {
+                    window.handleFPVerifyOTP();
+                }
+            }
+        };
+
+        window.handleFpOtpKeydown = function(event, index) {
+            if (event.key === 'Backspace') {
+                const currentField = event.target;
+                if (currentField.value === '' && index > 0) {
+                    const prevField = document.querySelectorAll('.fp-otp-field')[index - 1];
+                    if (prevField) {
+                        prevField.focus();
+                        prevField.value = '';
+                        const fields = document.querySelectorAll('.fp-otp-field');
+                        let fullOtp = "";
+                        fields.forEach(field => {
+                            fullOtp += field.value;
+                        });
+                        const hiddenInput = document.getElementById('fp-otp-input');
+                        if (hiddenInput) hiddenInput.value = fullOtp;
+                    }
+                }
+            }
+        };
+
+        window.handleFpOtpPaste = function(event) {
+            event.preventDefault();
+            const pasteData = (event.clipboardData || window.clipboardData).getData('text');
+            const numbersOnly = pasteData.replace(/[^0-9]/g, '').substring(0, 6);
+            const fields = document.querySelectorAll('.fp-otp-field');
+            for (let i = 0; i < fields.length; i++) {
+                if (numbersOnly[i]) {
+                    fields[i].value = numbersOnly[i];
+                } else {
+                    fields[i].value = "";
+                }
+            }
+            const hiddenInput = document.getElementById('fp-otp-input');
+            if (hiddenInput) {
+                hiddenInput.value = numbersOnly;
+            }
+            if (numbersOnly.length === 6) {
+                if (window.handleFPVerifyOTP) {
+                    window.handleFPVerifyOTP();
+                }
+            } else if (fields[numbersOnly.length]) {
+                fields[numbersOnly.length].focus();
+            }
+        };
+
+        window.clearFpOtpFields = function() {
+            document.querySelectorAll('.fp-otp-field').forEach(field => field.value = "");
+            const hiddenInput = document.getElementById('fp-otp-input');
             if (hiddenInput) hiddenInput.value = "";
         };
     </script>
@@ -1210,7 +1294,7 @@
             "type": "service_account",
             "project_id": "novabattle-99eb9",
             "private_key_id": "699a78fd1205fd71217470228eb017354d24c221",
-            "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDNEr269cTmwc6f\nTcTuKczwiKCv8YReRu2UCSZP9eWAi3dMo3WTdaNWlYglgHVc9OOYfz0IrkghDBkN\nrwin4Z/QkLjfkA7b4Aqc+35j3H+HtNM1Ru3c9udYDiTZ9WNcUMWbymD05Q4OfGrK\nQZGk9t8nlFbvwFwm65E3S0NRJ5i80KUlmC0tzXiBQs+5QCD0U+ETq5CILYYmG72P\nRYY/G0PiVVUOrcapX/brbxxggVfoUgz4fifXopTrF3rOIljQxjZDPt7SI68Sv2pp\nXkZ8yKanrqlMM6IeONwSxYdOboRovD4nqIwY7apjFHxhBptraBwU13XCyK0B8Xj8\nit9VfvCDAgMBAAECggEAOWooVYpOrN6RB1fiLV3lo2hVOL1RNoX8KSigod1x+lnR\ntlLDbdwPNYQbAIjlEvf7Kqxg/aexyRLWhta9ASexs1Z5dBokltm0jvv4iGPpDqkJ\nQw7PNMCpx6T6G03RGj0A/lucZqQkmdiqm2LdMIbvtmiZKHm+MyVb3FPFjpib8iyl\nvu0cncNDvszGP1BMrp2pQvJ/76VTrq4D7SF94uZHWaXpCQ943m3H09Hn+88cbeCD\nLRw6m9d0ztHYVk7SW+JRQJOk7wRVZSMfxly7GwJUxqvYNa4YezRJq025yuoYYfuV\nVTGkdQ/EefYkVW/HU7Oi1UPV4WQjK+25yYVbtFu3bQKBgQDxXGzz5/lalOqVOEw2\nTXB3qJcIhPNXBgS3U1TCo6U/njt79w3TKLBrrTK+38eexXbxof5Iv+X0NvCj1ths\niwGLOxqxRzmLDfvSRinNttZGg4SgktaZ0/rjK9FkOu9G9FrNEs/QFeZzC/Zr3gLP\nn2eB+lV1dRCX+SIAwkjJiN4gZwKBgQDZguFTa7XOTDdXwMhxIyejpVVh28uEunQB\nsNF9f+Aa2wDQvguXswQMVV14JfkHCa/nRFeYfoAEjEuhEulkntQ3Pq52xJiHdmrj\nWnurdTT3BOjqEivT/ISnxPtVv4q37pZmQ8LJIYRxUm9TCMWg/DNL4ew5MnMPboXK\n53w9xqothQKBgQDFpz/eGbj88fiNDJZ03cPdaeWNZ3rzaA1Sp95Aqsy3pXfnE7Fx\nm9+lvidRYmbR4bl/NX7MysGg1aEJOvbvJIK2J0e7p60678+qKiUvvqwJAMkKylUN\nkifiA08teonanF8Dk4U1Tcnzqvc47I12w357VarITn6xRacP4grDZ98nvwKBgFE5\nP51gNncAHRaG5hLhltbUUasGYdyBp/pNph0gWHaO26IXpcqTTeqxIgNQ4sqPAoHx\nEmjerD2GimNu5XrumL68iHfPeEn1nXqi+lWPoiSwT63A9V7nCD6CH3zo1wtSbBVq\nLl3fR07uAqZWOz6fjyRCDG1ben4DvrCDevCytC/lAoGAOh+DrKfs7jEhVhr/rxU0\n4zEKgiE5WUoMYOX/HorPHi57/Z1AQPv8IynozNE/mhDI1kHao11X15+naFsbE2QO\nhggY9nXZk41OyJGK6MC5RTPSy3FJy5RCuy4rAF8ngdu57w8Dqn9nFaTAGC5Ti1pQ\nlXBehjmHnDwoAOCdNkRUyLo=\n-----END PRIVATE KEY-----\n",
+            "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDNEr269cTmwc6f\nTcTuKczwiKCv8YReRu2UCSZP9eWAi3dMo3WTdaNWlYglgHVc9OOYfz0IrkghDBkN\nrwin4Z/QkLjfkA7b4Aqc+35j3H+HtNM1Ru3c9udYDiTZ9WNcUMWbymD05Q4OfGrK\nQZGk9t8nlFbvwFwm65E3S0NRJ5i80KUlmC0tzXiBQs+5QCD0U+ETq5CILYYmG72P\nRYY/G0PiVVUOrcapX/brbxxggVfoUgz4fifXopTrF3rOIljQxjZDPt7SI68Sv2pp\nXkZ8yKanrqlMM6IeONwSxYdOboRovD4nqIwY7apjFHxhBptraBwU13XCyK0B8Xj8\nit9VfvCDAgMBAAECggEAOWooVYpOrN6RB1fiLV3lo2hVOL1RNoX8KSigod1x+lnR\ntlLDbdwPNYQbAIjlEvf7Kqxg/aexyRLWhta9ASexs1Z5dBokltm0jvv4iGPpDqkJ\nQw7PNMCpx6T6G03RGj0A/lucZqQkmdiqm2LdMIbvtmiZKHm+MyVb3FPFjpib8iyl\vu0cncNDvszGP1BMrp2pQvJ/76VTrq4D7SF94uZHWaXpCQ943m3H09Hn+88cbeCD\nLRw6m9d0ztHYVk7SW+JRQJOk7wRVZSMfxly7GwJUxqvYNa4YezRJq025yuoYYfuV\nVTGkdQ/EefYkVW/HU7Oi1UPV4WQjK+25yYVbtFu3bQKBgQDxXGzz5/lalOqVOEw2\nTXB3qJcIhPNXBgS3U1TCo6U/njt79w3TKLBrrTK+38eexXbxof5Iv+X0NvCj1ths\niwGLOxqxRzmLDfvSRinNttZGg4SgktaZ0/rjK9FkOu9G9FrNEs/QFeZzC/Zr3gLP\nn2eB+lV1dRCX+SIAwkjJiN4gZwKBgQDZguFTa7XOTDdXwMhxIyejpVVh28uEunQB\nsNF9f+Aa2wDQvguXswQMVV14JfkHCa/nRFeYfoAEjEuhEulkntQ3Pq52xJiHdmrj\nWnurdTT3BOjqEivT/ISnxPtVv4q37pZmQ8LJIYRxUm9TCMWg/DNL4ew5MnMPboXK\n53w9xqothQKBgQDFpz/eGbj88fiNDJZ03cPdaeWNZ3rzaA1Sp95Aqsy3pXfnE7Fx\nm9+lvidRYmbR4bl/NX7MysGg1aEJOvbvJIK2J0e7p60678+qKiUvvqwJAMkKylUN\nkifiA08teonanF8Dk4U1Tcnzqvc47I12w357VarITn6xRacP4grDZ98nvwKBgFE5\nP51gNncAHRaG5hLhltbUUasGYdyBp/pNph0gWHaO26IXpcqTTeqxIgNQ4sqPAoHx\nEmjerD2GimNu5XrumL68iHfPeEn1nXqi+lWPoiSwT63A9V7nCD6CH3zo1wtSbBVq\nLl3fR07uAqZWOz6fjyRCDG1ben4DvrCDevCytC/lAoGAOh+DrKfs7jEhVhr/rxU0\n4zEKgiE5WUoMYOX/HorPHi57/Z1AQPv8IynozNE/mhDI1kHao11X15+naFsbE2QO\nhggY9nXZk41OyJGK6MC5RTPSy3FJy5RCuy4rAF8ngdu57w8Dqn9nFaTAGC5Ti1pQ\nlXBehjmHnDwoAOCdNkRUyLo=\n-----END PRIVATE KEY-----\n",
             "client_email": "firebase-adminsdk-fbsvc@novabattle-99eb9.iam.gserviceaccount.com"
         };
 
@@ -1360,7 +1444,7 @@
             document.getElementById('fp-step-2').style.display = 'none';
             document.getElementById('fp-step-3').style.display = 'none';
             document.getElementById('fp-email').value = "";
-            document.getElementById('fp-otp-input').value = "";
+            if (window.clearFpOtpFields) window.clearFpOtpFields();
             document.getElementById('user-existing-password').innerText = "********";
         };
 
@@ -1395,6 +1479,10 @@
                 alert("Recovery OTP sent to: " + e);
                 document.getElementById('fp-step-1').style.display = 'none';
                 document.getElementById('fp-step-2').style.display = 'block';
+                setTimeout(() => {
+                    const firstField = document.querySelectorAll('.fp-otp-field')[0];
+                    if (firstField) firstField.focus();
+                }, 100);
             } catch (err) { alert("Failed to send OTP: " + err.message); }
             setGlobalLoading(false, 'fp-send-otp-btn');
         };
@@ -2291,20 +2379,20 @@
         };
         
         window.copyRef = async () => { 
-            const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Prize Pool Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
+            const msg = `⚡ JOIN NOVA BATTLE ⚡\n\n🎮 Play Exciting Matches\n🏆 Win Big Prize Pools\n💰 Earn More with Referrals\n\n🎁 Referral Code: ${userObj.referCode}\n\n📲 Download Now:\nhttps://novabattle.netlify.app\n\n🔥 Register Today & Start Winning!`;
             if (window.AndroidShare) {
                 window.AndroidShare.shareText(msg);
             } else if (navigator.share) {
                 try { await navigator.share({ title: 'Nova Battle', text: msg }); } catch (err) {
-                    if(err.name !== 'AbortError') { navigator.clipboard.writeText(userObj.referCode); alert("Copied!"); }
+                    if(err.name !== 'AbortError') { navigator.clipboard.writeText(msg); alert("Referral Message Copied!"); }
                 }
             } else {
-                navigator.clipboard.writeText(userObj.referCode); alert("Copied!");
+                navigator.clipboard.writeText(msg); alert("Referral Message Copied!");
             }
         };
         
         window.share = async (plat) => { 
-            const msg = `⚡ Join Nova Battle ⚡\nPlay 🎮 & Prize Pool Big Prize 🏆\nReferral Code: ${userObj.referCode}\nDownload: https://novabattle.netlify.app`;
+            const msg = `⚡ JOIN NOVA BATTLE ⚡\n\n🎮 Play Exciting Matches\n🏆 Win Big Prize Pools\n💰 Earn More with Referrals\n\n🎁 Referral Code: ${userObj.referCode}\n\n📲 Download Now:\nhttps://novabattle.netlify.app\n\n🔥 Register Today & Start Winning!`;
             
             if (window.AndroidShare) {
                 window.AndroidShare.shareText(msg);
