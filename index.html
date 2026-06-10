@@ -1078,10 +1078,9 @@
             };
             
             setTimeout(() => {
-                if (!splashVideoEnded) {
-                    splashVideoEnded = true;
-                    tryRemoveSplash();
-                }
+                splashVideoEnded = true;
+                firstScreenReady = true;
+                tryRemoveSplash();
             }, 8000); 
 
             fetch('intro.mp4')
@@ -1177,7 +1176,7 @@
 
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             const target = document.getElementById(id);
-            if(target) target.add('active');
+            if(target) target.classList.add('active');
             
             const prevScreenId = currentActiveScreenId;
             currentActiveScreenId = id;
