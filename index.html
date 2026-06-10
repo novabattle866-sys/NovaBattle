@@ -135,7 +135,7 @@
             flex: 1; 
             overflow-y: auto; 
             -webkit-overflow-scrolling: touch; 
-            padding: 20px 20px 100px 20px; 
+            padding: 20px 20px 120px 20px; 
         }
 
         .active { display: flex !important; animation: fadeIn 0.4s ease; }
@@ -601,6 +601,12 @@
             </div>
         </div>
         <div class="screen-content">
+            <!-- ANNOUNCEMENT TEXT CARD VIEW -->
+            <div class="glass-card" id="announcement-card" style="display:none; background: #faf5ff; border: 1px solid #ebd5ff; color: var(--primary); padding: 12px 15px; border-radius: 16px; margin-bottom: 15px; align-items: center; gap: 10px; box-shadow: var(--shadow);">
+                <i class="fa-solid fa-bullhorn" style="font-size: 18px; color: var(--primary);"></i>
+                <span id="announcement-text" style="font-size: 13px; font-weight: 600; flex: 1; text-align:left;"></span>
+            </div>
+
             <div class="slider-container" id="slider-container">
                 <div class="slider-wrapper" id="slider-wrapper"></div>
             </div>
@@ -611,8 +617,105 @@
                 <div class="cat-btn" id="cat-my" onclick="setCategory('my')"><i class="fa-solid fa-gamepad"></i> My Battles</div>
                 <div class="cat-btn" id="cat-completed" onclick="setCategory('completed')"><i class="fa-solid fa-circle-check"></i> Completed</div>
             </div>
-            <h3 style="margin-bottom:15px; font-size:16px; color: var(--text);"><i class="fa-solid fa-trophy" style="color:var(--primary)"></i> Available Tournaments</h3>
-            <div id="match-container"></div>
+
+            <!-- CATEGORY LIST & MATCH CONTAINER -->
+            <div id="categories-section">
+                <h3 style="margin-bottom:15px; font-size:16px; color: var(--text);"><i class="fa-solid fa-layer-group" style="color:var(--primary)"></i> Match Categories</h3>
+                <div id="categories-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;"></div>
+            </div>
+
+            <div id="category-matches-view" style="display:none; text-align:left;">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; cursor:pointer; font-size:14px; font-weight:700; color:var(--primary);" onclick="exitCategoryMatches()">
+                    <i class="fa fa-arrow-left"></i> Back to Categories
+                </div>
+                <h3 style="margin-bottom:15px; font-size:16px; color: var(--text);"><i class="fa-solid fa-trophy" style="color:var(--primary)"></i> <span id="current-category-title">Matches</span></h3>
+                <div id="match-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LEADERBOARD SCREEN -->
+    <div id="leaderboard-screen" class="screen">
+        <div class="header">
+            <span style="font-weight: 700; color: var(--text);">Top Players</span>
+            <div></div>
+        </div>
+        <div class="screen-content">
+            <div id="leaderboard-container"></div>
+        </div>
+    </div>
+
+    <!-- MORE DETAILS SCREEN -->
+    <div id="more-details-screen" class="screen">
+        <div class="header">
+            <i class="fa fa-chevron-left" style="color: var(--text)" onclick="showScreen('home-screen')"></i>
+            <span id="md-title" style="color: var(--text); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">Match Details</span>
+            <div></div>
+        </div>
+        <div class="screen-content" style="padding-bottom: 120px;">
+            <div class="glass-card" style="padding: 0; overflow: hidden; margin-bottom: 20px;">
+                <img id="md-match-image" src="" onerror="handleImageError(this)" style="width:100%; height:180px; object-fit:cover;">
+            </div>
+            
+            <div style="display:flex; gap:10px; margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:8px;">
+                <button id="md-tab-desc" class="cat-btn active-cat" style="flex:1; justify-content:center;" onclick="setMDTab('desc')"><i class="fa-solid fa-file-text"></i> Description</button>
+                <button id="md-tab-joined" class="cat-btn" style="flex:1; justify-content:center;" onclick="setMDTab('joined')"><i class="fa-solid fa-users"></i> Joined Players</button>
+            </div>
+            
+            <div id="md-desc-content" style="text-align:left;">
+                <h3 id="md-match-name" style="margin-top:0; color:var(--text); font-size:18px;">Match Name</h3>
+                <div class="m-grid" style="margin-bottom:20px;">
+                    <span><i class="fa-solid fa-gamepad"></i> Mode: <b id="md-mode">Classic</b></span>
+                    <span><i class="fa-solid fa-map-location-dot"></i> Map: <b id="md-map">Bermuda</b></span>
+                    <span><i class="fa-solid fa-users-rectangle"></i> Team: <b id="md-team">Solo</b></span>
+                    <span><i class="fa-solid fa-clock"></i> Time: <b id="md-time">Check Details</b></span>
+                    <span style="grid-column: span 2;"><i class="fa-solid fa-ticket"></i> Entry Fee: <b id="md-fee">₹0</b></span>
+                </div>
+                
+                <h4 style="color:var(--text); border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:12px;"><i class="fa-solid fa-trophy" style="color:var(--primary)"></i> Price Details</h4>
+                <div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:20px; background:#f5f3ff; padding:12px; border-radius:12px; border:1px solid #ddd6fe;">
+                    <span>Prize Pool: <strong id="md-prize" style="color:var(--primary)">₹0</strong></span>
+                    <span>Per Kill: <strong id="md-perkill" style="color:var(--primary)">₹0</strong></span>
+                </div>
+                
+                <h4 style="color:var(--text); border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:12px;"><i class="fa-solid fa-circle-exclamation" style="color:var(--primary)"></i> About this match</h4>
+                <div style="font-size:12px; color:var(--text-muted); line-height:1.6; white-space:pre-line; background:#f8fafc; padding:15px; border-radius:15px; border:1px solid #e2e8f0;" id="md-rules-box">
+                </div>
+            </div>
+            
+            <div id="md-joined-content" style="display:none; text-align:left;">
+                <h3 style="margin-top:0; color:var(--text); font-size:16px; margin-bottom:15px;"><i class="fa-solid fa-users"></i> Registered Participants</h3>
+                <div id="md-joined-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MY JOINED MATCHES SCREEN -->
+    <div id="my-matches-screen" class="screen">
+        <div class="header">
+            <i class="fa fa-chevron-left" style="color: var(--text)" onclick="handleBackBtnClick()"></i>
+            <span style="color: var(--text); font-weight: 700;">My Joined Matches</span>
+            <div></div>
+        </div>
+        <div class="screen-content" style="padding-bottom:100px;">
+            <div class="cat-bar" style="margin-bottom:20px;">
+                <div class="cat-btn active-cat" id="mym-cat-upcoming" onclick="setMyMatchesTab('upcoming')"><i class="fa-solid fa-clock"></i> Upcoming</div>
+                <div class="cat-btn" id="mym-cat-ongoing" onclick="setMyMatchesTab('ongoing')"><i class="fa-solid fa-fire"></i> Ongoing</div>
+                <div class="cat-btn" id="mym-cat-completed" onclick="setMyMatchesTab('completed')"><i class="fa-solid fa-circle-check"></i> Completed</div>
+            </div>
+            <div id="my-matches-list-container"></div>
+        </div>
+    </div>
+
+    <!-- APP TUTORIAL SCREEN -->
+    <div id="app-tutorial-screen" class="screen">
+        <div class="header">
+            <i class="fa fa-chevron-left" style="color: var(--text)" onclick="handleBackBtnClick()"></i>
+            <span style="color: var(--text); font-weight: 700;">App Tutorials</span>
+            <div></div>
+        </div>
+        <div class="screen-content" style="padding-bottom:100px;">
+            <div id="tutorial-cards-container"></div>
         </div>
     </div>
 
@@ -624,7 +727,7 @@
                 <h1 style="font-size:42px; margin: 10px 0; color: white;">₹<span id="wall-bal">0</span></h1>
                 <div style="display:flex; gap:12px; margin-top:20px">
                     <button class="btn" style="background:white; color:var(--primary); flex:1; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid rgba(124, 58, 237, 0.1);" onclick="showScreen('deposit-screen')"><i class="fa-solid fa-plus-circle"></i> Deposit</button>
-                    <button class="btn" style="background:white; color:var(--primary); flex:1; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid rgba(124, 58, 237, 0.1);" onclick="openWdModal()"><i class="fa-solid fa-money-bill-transfer"></i> Withdraw</button>
+                    <button class="btn" style="background:white; color:var(--primary); flex:1; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid rgba(124, 58, 237, 0.1);" onclick="openWdMethodModal()"><i class="fa-solid fa-money-bill-transfer"></i> Withdraw</button>
                 </div>
             </div>
             <h4 style="margin: 25px 0 15px; color: var(--text); font-weight: 700;"><i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i> Transaction History</h4>
@@ -641,7 +744,7 @@
                     <img id="admin-qr-img" src="" onerror="handleSquareImageError(this)" style="width:230px; height:230px; display: block;">
                 </div>
                 <p style="font-weight:700; color:var(--primary); font-size: 18px;">Payable: ₹<span id="dv">0</span></p>
-                <p style="font-size:12px; color:var(--text-muted); margin: 10px 0 20px; line-height: 1.5;">After making the payment, enter your Transaction ID / UTR Number below and click Submit.</p>
+                <p style="font-size:12px; color:var(--text-muted); margin: 10px 0 20px; line-height: 1.5;">After making the payment, enter your Transaction ID / UTR Number below and click Submit. Minimum deposit is ₹10.</p>
                 <input type="text" id="utr-input" placeholder="Enter UTR / TXN ID" autocapitalize="characters" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()">
                 <button class="btn btn-p" id="dep-submit-btn" onclick="submitDeposit()">Submit Payment Request</button>
             </div>
@@ -659,7 +762,7 @@
                 </div>
                 <div style="flex:1; border-left:1px solid #f1f5f9;">
                     <p style="color: var(--text-muted); font-size: 12px; margin: 0;">Total Earned</p>
-                    <h2 id="ref-success" style="margin:5px 0; color:var(--primary)">0</h2>
+                    <h2 id="ref-success" style="margin:5px 0; color:var(--primary)">₹0</h2>
                 </div>
             </div>
             <div class="glass-card" style="text-align:center; border: 2px dashed #ddd6fe; background: #f5f3ff; box-shadow: none;" onclick="copyRef()">
@@ -704,21 +807,50 @@
                         <i class="fa-solid fa-pen-to-square" style="color: var(--primary); cursor: pointer; font-size: 20px;" onclick="openProfileEdit()"></i>
                     </div>
                 </div>
+
+                <!-- TOTAL JOINED MATCH & TOTAL WINNING CARD VIEW -->
+                <div class="glass-card" style="display:flex; text-align:center; padding: 15px; margin-top:15px; margin-bottom:0; background: #faf5ff; border: 1px solid #ebd5ff; box-shadow:none;">
+                    <div style="flex:1;">
+                        <p style="color: var(--text-muted); font-size: 11px; margin: 0; text-transform:uppercase; font-weight:600;">Joined Matches</p>
+                        <h3 id="profile-joined-count" style="margin:5px 0; color: var(--text); font-size:20px;">0</h3>
+                    </div>
+                    <div style="flex:1; border-left:1px solid #e9d5ff;">
+                        <p style="color: var(--text-muted); font-size: 11px; margin: 0; text-transform:uppercase; font-weight:600;">Total Winnings</p>
+                        <h3 id="profile-total-winnings" style="margin:5px 0; color:var(--primary); font-size:20px;">₹0</h3>
+                    </div>
+                </div>
             </div>
-            <div class="glass-card" style="padding:0; overflow: hidden;">
-                <div style="padding:16px; border-bottom:1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;" onclick="showInfo('support')">
+
+            <div class="glass-card" style="padding:0; overflow: hidden; text-align:left;">
+                <!-- MY MATCHES LIST ITEM -->
+                <div style="padding:16px; border-bottom:1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; cursor:pointer;" onclick="showMyMatchesScreen()">
+                    <span><i class="fa-solid fa-gamepad" style="color:var(--primary); width: 25px;"></i> My Matches</span>
+                    <i class="fa fa-chevron-right" style="font-size: 12px; color: #cbd5e1;"></i>
+                </div>
+                <!-- APP TUTORIAL LIST ITEM -->
+                <div style="padding:16px; border-bottom:1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; cursor:pointer;" onclick="showAppTutorialScreen()">
+                    <span><i class="fa-solid fa-graduation-cap" style="color:var(--primary); width: 25px;"></i> App Tutorial</span>
+                    <i class="fa fa-chevron-right" style="font-size: 12px; color: #cbd5e1;"></i>
+                </div>
+                <!-- SHARE APP LIST ITEM -->
+                <div style="padding:16px; border-bottom:1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; cursor:pointer;" onclick="copyRef()">
+                    <span><i class="fa-solid fa-share-nodes" style="color:var(--primary); width: 25px;"></i> Share App</span>
+                    <i class="fa fa-chevron-right" style="font-size: 12px; color: #cbd5e1;"></i>
+                </div>
+                
+                <div style="padding:16px; border-bottom:1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; cursor:pointer;" onclick="showInfo('support')">
                     <span><i class="fa-solid fa-headset" style="color:var(--primary); width: 25px;"></i> Customer Support</span>
                     <i class="fa fa-chevron-right" style="font-size: 12px; color: #cbd5e1;"></i>
                 </div>
-                <div style="padding:16px; border-bottom:1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;" onclick="showInfo('policy')">
+                <div style="padding:16px; border-bottom:1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; cursor:pointer;" onclick="showInfo('policy')">
                     <span><i class="fa-solid fa-shield-halved" style="color:var(--primary); width: 25px;"></i> Privacy Policy</span>
                     <i class="fa fa-chevron-right" style="font-size: 12px; color: #cbd5e1;"></i>
                 </div>
-                <div style="padding:16px; border-bottom:1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;" onclick="showInfo('faq')">
+                <div style="padding:16px; border-bottom:1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; cursor:pointer;" onclick="showInfo('faq')">
                     <span><i class="fa-solid fa-circle-question" style="color:var(--primary); width: 25px;"></i> FAQ & Terms</span>
                     <i class="fa fa-chevron-right" style="font-size: 12px; color: #cbd5e1;"></i>
                 </div>
-                <div style="padding:16px; display: flex; justify-content: space-between; align-items: center;" onclick="showInfo('about')">
+                <div style="padding:16px; display: flex; justify-content: space-between; align-items: center; cursor:pointer;" onclick="showInfo('about')">
                     <span><i class="fa-solid fa-circle-info" style="color:var(--primary); width: 25px;"></i> About Us</span>
                     <i class="fa fa-chevron-right" style="font-size: 12px; color: #cbd5e1;"></i>
                 </div>
@@ -733,9 +865,11 @@
                 <div id="policy-date-container" style="display:none; font-size:12px; color:var(--primary); margin-bottom:15px; font-weight: 700; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">Last Update: <span id="policy-date"></span></div>
                 <div id="support-btns" style="display:none; text-align:center;">
                     <button class="btn btn-p" style="margin-bottom:15px;" id="s-mail-btn"><i class="fa-solid fa-envelope"></i> Email Support</button>
+                    <!-- YOUTUBE & INSTAGRAM SUPPORT -->
+                    <button class="btn" style="background:#ff0000; color: white; margin-bottom:15px;" id="s-yt-btn"><i class="fa-brands fa-youtube"></i> YouTube Official</button>
                     <button class="btn" style="background:#e4405f; color: white;" id="s-insta-btn"><i class="fa-brands fa-instagram"></i> Instagram Official</button>
                 </div>
-                <div id="info-text" style="line-height:1.7; color:var(--text); white-space: pre-wrap; font-size: 14px;"></div>
+                <div id="info-text" style="line-height:1.7; color:var(--text); white-space: pre-wrap; font-size: 14px; text-align:left;"></div>
             </div>
         </div>
     </div>
@@ -784,16 +918,50 @@
         <button class="btn" style="background:none; color: var(--text-muted);" onclick="closeModal()">Close</button>
     </div></div>
 
+    <!-- WITHDRAW METHOD SELECTION MODAL -->
+    <div id="wd-method-modal" class="modal">
+        <div class="modal-content">
+            <h3>Select Withdrawal Method</h3>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Choose how you want to withdraw your earnings.</p>
+            <div class="glass-card" style="cursor:pointer; display:flex; align-items:center; gap:15px; padding:15px; border:1px solid #e2e8f0; text-align:left;" onclick="openUPIWdModal()">
+                <i class="fa-solid fa-wallet" style="font-size:24px; color:var(--primary);"></i>
+                <div>
+                    <h4 style="margin:0;">UPI / Instant Transfer</h4>
+                    <p style="margin:2px 0 0; font-size:11px; color:var(--text-muted);">Transfer money directly to your UPI ID</p>
+                </div>
+            </div>
+            <div class="glass-card" style="cursor:pointer; display:flex; align-items:center; gap:15px; padding:15px; border:1px solid #e2e8f0; margin-top:12px; text-align:left;" onclick="openRedeemCodeWdModal()">
+                <i class="fa-brands fa-google-play" style="font-size:24px; color:#34a853;"></i>
+                <div>
+                    <h4 style="margin:0;">Google Play Redeem Code</h4>
+                    <p style="margin:2px 0 0; font-size:11px; color:var(--text-muted);">Get Google Play redeem code package</p>
+                </div>
+            </div>
+            <button class="btn" style="background:none; color: var(--text-muted); margin-top: 10px;" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- WITHDRAW TO UPI MODAL -->
     <div id="withdraw-modal" class="modal"><div class="modal-content">
         <h3>Request Withdrawal</h3>
         <input type="number" id="wd-amt" placeholder="Enter Amount (₹)">
         <p style="font-size:12px; color:var(--primary); font-weight: 700; margin-top: -5px;">Minimum: ₹<span id="min-wd-txt">0</span></p>
         <input type="text" id="wd-upi" placeholder="UPI ID (Ex: user@upi)">
         <p id="wd-error" style="color:#ef4444; font-size:11px; margin-top:-10px; margin-bottom:15px; display:none;">Please enter a valid UPI ID to proceed</p>
-        <p style="font-size:11px; color:var(--text-muted); margin-top: 5px; line-height: 1.5;">Withdrawals are processed within 24 hours after admin verification.</p>
+        <p style="font-size:11px; color:var(--text-muted); margin-top: 5px; line-height: 1.5; text-align:left;">Withdrawals are processed within 24 hours after admin verification.</p>
         <button class="btn btn-p" id="wd-submit-btn" onclick="submitWithdraw()">Submit Withdrawal</button>
         <button class="btn" style="background:none; color: var(--text-muted);" onclick="closeModal()">Close</button>
     </div></div>
+
+    <!-- GOOGLE PLAY REDEEM CODE PACKAGES MODAL -->
+    <div id="redeem-code-modal" class="modal">
+        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+            <h3>Google Play Redeem Code Packages</h3>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Select a package from the list below. Your request will be processed by the admin.</p>
+            <div id="redeem-packages-list" style="display:grid; grid-template-columns:1fr; gap:10px;"></div>
+            <button class="btn" style="background:none; color: var(--text-muted); margin-top: 15px;" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
 
     <div id="profile-edit-modal" class="modal"><div class="modal-content">
         <h3>Edit Game Details</h3>
@@ -811,9 +979,16 @@
         <button class="btn" style="background:none; color: var(--text-muted);" onclick="closeModal()">Cancel</button>
     </div></div>
 
+    <!-- FLOATING CENTER TROPHY ICON BOTTOM NAV -->
     <div class="bottom-nav" id="bot-nav" style="display:none">
         <div class="nav-item active-nav" onclick="showScreen('home-screen')"><i class="fa fa-home"></i><br>Home</div>
         <div class="nav-item" onclick="showScreen('wallet-screen')"><i class="fa fa-wallet"></i><br>Wallet</div>
+        <div class="nav-item" style="position: relative; top: -15px;" onclick="showScreen('leaderboard-screen')">
+            <div style="background: linear-gradient(135deg, var(--primary), #a855f7); width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 4px 10px rgba(124, 58, 237, 0.4); border: 4px solid #ffffff;">
+                <i class="fa fa-trophy" style="color: white; font-size: 20px; margin-bottom: 0;"></i>
+            </div>
+            <span style="font-size: 11px; color: #94a3b8; display: block; margin-top: 2px;">Leaderboard</span>
+        </div>
         <div class="nav-item" onclick="showScreen('refer-screen')"><i class="fa fa-users-viewfinder"></i><br>Refer</div>
         <div class="nav-item" onclick="showScreen('profile-screen')"><i class="fa-solid fa-circle-user"></i><br>Profile</div>
     </div>
@@ -1002,8 +1177,8 @@
             currentActiveScreenId = id;
 
             if (!isFromPopState) {
-                const isTab = ['wallet-screen', 'refer-screen', 'profile-screen'].includes(id);
-                const isPrevTab = ['wallet-screen', 'refer-screen', 'profile-screen'].includes(prevScreenId);
+                const isTab = ['wallet-screen', 'refer-screen', 'profile-screen', 'leaderboard-screen'].includes(id);
+                const isPrevTab = ['wallet-screen', 'refer-screen', 'profile-screen', 'leaderboard-screen'].includes(prevScreenId);
 
                 if (id === 'home-screen') {
                     if (isPrevTab) {
@@ -1028,14 +1203,21 @@
             const nav = document.getElementById('bot-nav');
             if(id === 'auth-screen' || (userObj && userObj.isBanned)) {
                 nav.style.display = 'none';
-            } else if(['home-screen', 'wallet-screen', 'refer-screen', 'profile-screen'].includes(id)) {
+            } else if(['home-screen', 'wallet-screen', 'refer-screen', 'profile-screen', 'leaderboard-screen'].includes(id)) {
                 nav.style.display = 'flex';
             }
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
             if(id=='home-screen') document.querySelectorAll('.nav-item')[0]?.classList.add('active-nav');
             if(id=='wallet-screen') document.querySelectorAll('.nav-item')[1]?.classList.add('active-nav');
-            if(id=='refer-screen') document.querySelectorAll('.nav-item')[2]?.classList.add('active-nav');
-            if(id=='profile-screen') document.querySelectorAll('.nav-item')[3]?.classList.add('active-nav');
+            if(id=='leaderboard-screen') {
+                // Raise the Trophy circular nav item visually if active
+            }
+            if(id=='refer-screen') document.querySelectorAll('.nav-item')[3]?.classList.add('active-nav');
+            if(id=='profile-screen') document.querySelectorAll('.nav-item')[4]?.classList.add('active-nav');
+
+            if(id === 'leaderboard-screen') {
+                loadLeaderboard();
+            }
 
             firstScreenReady = true;
             tryRemoveSplash();
@@ -1125,7 +1307,7 @@
         window.handleBackBtnClick = () => {
             if (['deposit-screen'].includes(currentActiveScreenId)) {
                 window.showScreen('wallet-screen');
-            } else if (['info-screen'].includes(currentActiveScreenId)) {
+            } else if (['info-screen', 'my-matches-screen', 'app-tutorial-screen'].includes(currentActiveScreenId)) {
                 if (userObj && userObj.isBanned) {
                     window.showScreen('home-screen');
                 } else {
@@ -1209,6 +1391,7 @@
         let recovered_pass = ""; 
         let selectedPosition = null;
         let currentJoinMode = 'solo'; 
+        let currentSelectedCategoryName = "";
 
         onAuthStateChanged(auth, (user) => {
             if(user) {
@@ -1232,6 +1415,11 @@
                         document.getElementById('u-email').innerText = userObj.email;
                         document.getElementById('u-ffname-display').innerText = userObj.ffName || "Not set";
                         document.getElementById('u-ffuid-display').innerText = userObj.ffUid || "Not set";
+                        
+                        // Profile Joined matches count & total winning count
+                        document.getElementById('profile-total-winnings').innerText = "₹" + (userObj.totalWinnings || 0);
+                        getJoinedMatchesCount(user.uid);
+
                         if(userObj.profilePic) document.getElementById('u-dp').src = userObj.profilePic;
                         document.getElementById('bot-nav').style.display = 'flex';
                         
@@ -1252,6 +1440,30 @@
                 checkUpdate();
             }
         });
+
+        async function getJoinedMatchesCount(uid) {
+            try {
+                const snap = await get(ref(db, 'matches'));
+                const matches = snap.val() || {};
+                let count = 0;
+                for(let mid in matches) {
+                    const m = matches[mid];
+                    if(m.participants && m.participants[uid]) {
+                        count++;
+                    } else if(m.teams) {
+                        for(let tCode in m.teams) {
+                            if(m.teams[tCode].members && m.teams[tCode].members[uid]) {
+                                count++;
+                                break;
+                            }
+                        }
+                    }
+                }
+                document.getElementById('profile-joined-count').innerText = count;
+            } catch (e) {
+                console.error(e);
+            }
+        }
 
         window.syncMatchSubscriptions = async (uid) => {
             if (!window.AndroidInterface || !window.AndroidInterface.subscribeToTopic) return;
@@ -1387,7 +1599,8 @@
                 if(!users) return;
                 for(let id in users) if(users[id].referredBy === code) total++;
                 document.getElementById('ref-total').innerText = total;
-                document.getElementById('ref-success').innerText = total;
+                const bonusPerReferral = parseInt(adminObj.referBonus || 0);
+                document.getElementById('ref-success').innerText = "₹" + (total * bonusPerReferral);
             });
         };
 
@@ -1400,13 +1613,29 @@
             document.getElementById('ref-tc-txt').innerText = adminObj.referTerms || "No terms available.";
             document.getElementById('g-cost').innerText = adminObj.groupCost || 0;
             document.getElementById('rename-cost-txt').innerText = adminObj.renameFee || 0;
+            
+            // Announcement Card configuration
+            const announceCard = document.getElementById('announcement-card');
+            const announceText = document.getElementById('announcement-text');
+            if(adminObj.announcement && adminObj.announcementActive !== false) {
+                announceText.innerText = adminObj.announcement;
+                announceCard.style.display = 'flex';
+            } else {
+                announceCard.style.display = 'none';
+            }
+
             const wrapper = document.getElementById('slider-wrapper');
             if(wrapper) {
                 wrapper.innerHTML = "";
                 const banners = adminObj.bannerUrl ? adminObj.bannerUrl.split(',') : [];
-                banners.forEach(url => wrapper.innerHTML += `<img src="${url.trim()}" class="slide-img" onerror="handleImageError(this)">`);
+                const links = adminObj.bannerLinks ? adminObj.bannerLinks.split(',') : [];
+                banners.forEach((url, index) => {
+                    const link = links[index] ? links[index].trim() : '';
+                    wrapper.innerHTML += `<img src="${url.trim()}" class="slide-img" onerror="handleImageError(this)" onclick="${link ? `window.open('${link}', '_blank')` : ''}" style="${link ? 'cursor:pointer;' : ''}">`;
+                });
                 initInteractiveSlider(banners.length);
             }
+            loadCategoriesList();
             loadMatchesData();
         });
 
@@ -1440,13 +1669,47 @@
         window.setCategory = (cat) => { activeCategory = cat; document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active-cat')); document.getElementById('cat-' + cat)?.classList.add('active-cat'); loadMatchesData(); };
         window.copyOne = (txt, label) => { if(!txt || txt == 'Wait') return alert("Available shortly"); navigator.clipboard.writeText(txt).then(() => alert(label + " Copied!")); };
 
+        // CATEGORIES SYSTEM
+        function loadCategoriesList() {
+            onValue(ref(db, 'categories'), (snap) => {
+                const container = document.getElementById('categories-container');
+                if(!container) return;
+                container.innerHTML = "";
+                const data = snap.val() || {
+                    "classic": { name: "Classic BR", image: "https://images.unsplash.com/photo-1542751371-adc38448a05e" },
+                    "cs": { name: "Clash Squad", image: "https://images.unsplash.com/photo-1511512578047-dfb367046420" }
+                };
+                for(let id in data) {
+                    const cat = data[id];
+                    container.innerHTML += `<div class="glass-card" style="padding: 0; overflow: hidden; border-radius: 18px; cursor: pointer; box-shadow: var(--shadow); border: 1px solid var(--border);" onclick="filterMatchesByCategory('${cat.name}')">
+                        <img src="${cat.image}" style="width: 100%; height: 110px; object-fit: cover;" onerror="handleImageError(this)">
+                        <div style="padding: 10px; text-align: center; font-weight: 700; font-size: 14px; color: var(--text);">${cat.name}</div>
+                    </div>`;
+                }
+            });
+        }
+
+        window.filterMatchesByCategory = (catName) => {
+            currentSelectedCategoryName = catName;
+            document.getElementById('categories-section').style.display = 'none';
+            document.getElementById('current-category-title').innerText = catName;
+            document.getElementById('category-matches-view').style.display = 'block';
+            loadMatchesData();
+        };
+
+        window.exitCategoryMatches = () => {
+            currentSelectedCategoryName = "";
+            document.getElementById('category-matches-view').style.display = 'none';
+            document.getElementById('categories-section').style.display = 'block';
+        };
+
         function loadMatchesData() {
             onValue(ref(db, 'matches'), (snap) => {
                 const container = document.getElementById('match-container'); if(!container) return;
                 container.innerHTML = ""; const data = snap.val(); 
                 
                 if(!data) { 
-                    container.innerHTML = `<div style="text-align:center; padding:60px 20px; color:#94a3b8;"><i class="fa-solid fa-ghost" style="font-size:40px; margin-bottom:15px; opacity:0.5;"></i><br><h3 style="margin:0; font-size:16px;">No matches available at the moment</h3><p style="font-size:12px;">Check back later for new tournaments!</p></div>`;
+                    container.innerHTML = `<div style="text-align:center; padding:60px 20px; color:#94a3b8;"><i class="fa-solid fa-ghost" style="font-size:40px; margin-bottom:15px; opacity:0.5;"></i><br><h3 style="margin:0; font-size:16px;">No matches available</h3></div>`;
                     return; 
                 }
                 
@@ -1474,6 +1737,9 @@
                     if(activeCategory === 'upcoming' && (mStatus === 'completed' || mStatus === 'started')) return;
                     if(activeCategory === 'my' && !joined) return;
                     if(activeCategory === 'completed' && mStatus !== 'completed') return;
+
+                    // Filter by Category if actively selected
+                    if(currentSelectedCategoryName && m.category !== currentSelectedCategoryName) return;
 
                     matchCounter++;
 
@@ -1538,7 +1804,7 @@
                                         <span>${mUid === team.leader ? '<i class="fa fa-flag leader-flag"></i>' : ''} ${member.ffName} <small style="color:#94a3b8">(${member.ffUid})</small></span>
                                         <div style="display:flex; gap:10px;">
                                             ${isLeader && mUid !== auth.currentUser.uid ? `<i class="fa-solid fa-user-minus action-btn" style="color:#ef4444" onclick="kickMember('${id}', '${tCode}', '${mUid}')"></i>` : ''}
-                                            ${mUid === auth.currentUser.uid ? `<i class="fa-solid fa-right-from-bracket action-btn" style="colororange" onclick="leaveTeam('${id}', '${tCode}')"></i>` : ''}
+                                            ${mUid === auth.currentUser.uid ? `<i class="fa-solid fa-right-from-bracket action-btn" style="color:orange" onclick="leaveTeam('${id}', '${tCode}')"></i>` : ''}
                                         </div>
                                     </div>`;
                                 }
@@ -1552,14 +1818,339 @@
 
                     const currentTeamType = m.teamMode || 'Solo';
                     
-                    container.innerHTML += `<div class="glass-card m-card"><img src="${m.image}" class="m-img" onerror="handleImageError(this)"><div style="padding:15px"><div class="team-type-badge">${currentTeamType}</div><h3>${m.title}</h3><div class="m-grid"><span><i class="fa-solid fa-gamepad"></i> Mode: <b>${m.gameMode || 'Classic'}</b></span><span><i class="fa-solid fa-map-location-dot"></i> Map: <b>${m.map || 'Bermuda'}</b></span><span><i class="fa-solid fa-users-rectangle"></i> Team: <b>${m.teamMode || 'Solo'}</b></span><span><i class="fa-solid fa-trophy"></i> Prize Pool: <b>₹${m.prize}</b></span><span><i class="fa-solid fa-ticket"></i> Fee: <b>₹${m.fee}</b></span><span><i class="fa-solid fa-skull"></i> Kill: <b>₹${m.perKill || 0}</b></span><span style="grid-column: span 2;"><i class="fa-solid fa-clock"></i> Time: <b>${m.time || 'Check Details'}</b></span></div><div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b; margin-top:5px;"><span>Players Filled</span><span style="color:var(--primary); font-weight:700;">${count} / ${m.totalSlots}</span></div><div class="p-bar-container"><div class="p-bar-fill" style="width: ${fillPerc}%"></div></div>${roomUI}${noticeUI}<button class="btn ${btnClass}" onclick="${clickAction}">${btnTxt}</button>${teamUI}</div></div>`;
+                    // Added premium More Details button in top right of details section
+                    let moreDetailsBtn = `<button class="btn" style="background:#f5f3ff; color:var(--primary); border:1px solid #ddd6fe; padding:6px 12px; font-size:12px; width:auto; position:absolute; top:15px; right:15px; z-index:10; font-weight:700;" onclick="openMoreDetails('${id}')"><i class="fa-solid fa-circle-info"></i> More Details</button>`;
+
+                    container.innerHTML += `<div class="glass-card m-card" style="position:relative;"><img src="${m.image}" class="m-img" onerror="handleImageError(this)">${moreDetailsBtn}<div style="padding:15px; text-align:left;"><div class="team-type-badge">${currentTeamType}</div><h3>${m.title}</h3><div class="m-grid"><span><i class="fa-solid fa-gamepad"></i> Mode: <b>${m.gameMode || 'Classic'}</b></span><span><i class="fa-solid fa-map-location-dot"></i> Map: <b>${m.map || 'Bermuda'}</b></span><span><i class="fa-solid fa-users-rectangle"></i> Team: <b>${m.teamMode || 'Solo'}</b></span><span><i class="fa-solid fa-trophy"></i> Prize Pool: <b>₹${m.prize}</b></span><span><i class="fa-solid fa-ticket"></i> Fee: <b>₹${m.fee}</b></span><span><i class="fa-solid fa-skull"></i> Kill: <b>₹${m.perKill || 0}</b></span><span style="grid-column: span 2;"><i class="fa-solid fa-clock"></i> Time: <b>${m.time || 'Check Details'}</b></span></div><div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b; margin-top:5px;"><span>Players Filled</span><span style="color:var(--primary); font-weight:700;">${count} / ${m.totalSlots}</span></div><div class="p-bar-container"><div class="p-bar-fill" style="width: ${fillPerc}%"></div></div>${roomUI}${noticeUI}<button class="btn ${btnClass}" onclick="${clickAction}">${btnTxt}</button>${teamUI}</div></div>`;
                 });
 
                 if (matchCounter === 0) {
-                    container.innerHTML = `<div style="text-align:center; padding:60px 20px; color:#94a3b8;"><i class="fa-solid fa-ghost" style="font-size:40px; margin-bottom:15px; opacity:0.5;"></i><br><h3 style="margin:0; font-size:16px;">No matches available at the moment</h3><p style="font-size:12px;">Check back later for new tournaments!</p></div>`;
+                    container.innerHTML = `<div style="text-align:center; padding:60px 20px; color:#94a3b8;"><i class="fa-solid fa-ghost" style="font-size:40px; margin-bottom:15px; opacity:0.5;"></i><br><h3 style="margin:0; font-size:16px;">No matches available</h3></div>`;
                 }
             });
         }
+
+        // LEADERBOARD RENDER SYSTEM
+        window.loadLeaderboard = () => {
+            const container = document.getElementById('leaderboard-container');
+            if(!container) return;
+            container.innerHTML = "<p style='color:var(--primary); text-align:center; font-weight:600;'>Loading Rankings...</p>";
+            
+            get(ref(db, 'users')).then(snap => {
+                const users = snap.val();
+                if(!users) {
+                    container.innerHTML = "<p style='color:var(--text-muted); text-align:center;'>No leaderboard data available</p>";
+                    return;
+                }
+                
+                let list = [];
+                for(let uid in users) {
+                    const u = users[uid];
+                    list.push({
+                        name: u.name || "User",
+                        ffName: u.ffName || "Not Set",
+                        ffUid: u.ffUid || "N/A",
+                        wins: parseInt(u.wins || 0),
+                        regDate: u.regDate || 1767225600000 // default to Jan 1 2026 if empty
+                    });
+                }
+
+                list.sort((a, b) => {
+                    if (b.wins !== a.wins) {
+                        return b.wins - a.wins;
+                    }
+                    return a.regDate - b.regDate; // older registration date is top
+                });
+
+                let top10 = list.slice(0, 10);
+                container.innerHTML = "";
+                
+                top10.forEach((p, idx) => {
+                    const rank = idx + 1;
+                    let badgeColor = "var(--text-muted)";
+                    let badgeIcon = "";
+                    
+                    if(rank === 1) { badgeColor = "#eab308"; badgeIcon = '<i class="fa-solid fa-crown" style="color:#eab308"></i> '; }
+                    else if(rank === 2) { badgeColor = "#cbd5e1"; }
+                    else if(rank === 3) { badgeColor = "#b45309"; }
+
+                    container.innerHTML += `<div class="glass-card" style="display:flex; align-items:center; gap:15px; padding:15px; border-color: ${rank <= 3 ? badgeColor : 'var(--border)'}; text-align:left;">
+                        <div style="font-size: 18px; font-weight: 800; color: ${badgeColor}; width:30px; text-align:center;">#${rank}</div>
+                        <div style="flex:1;">
+                            <h4 style="margin:0; font-size:14px; color:var(--text);">${badgeIcon}${p.name}</h4>
+                            <p style="margin:2px 0 0; font-size:11px; color:var(--text-muted);">FF: ${p.ffName} | UID: ${p.ffUid}</p>
+                        </div>
+                        <div style="text-align:right;">
+                            <span style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:600; display:block;">Total Wins</span>
+                            <strong style="font-size:15px; color:var(--primary);">${p.wins} Wins</strong>
+                        </div>
+                    </div>`;
+                });
+            });
+        };
+
+        // MORE DETAILS SYSTEM
+        let currentMDMatch = null;
+        let activeMDTab = "desc";
+        window.openMoreDetails = async (mid) => {
+            setGlobalLoading(true);
+            const snap = await get(ref(db, `matches/${mid}`));
+            currentMDMatch = { id: mid, ...snap.val() };
+            setGlobalLoading(false);
+
+            document.getElementById('md-title').innerText = currentMDMatch.title;
+            document.getElementById('md-match-image').src = currentMDMatch.image;
+            document.getElementById('md-match-name').innerText = currentMDMatch.title;
+            document.getElementById('md-mode').innerText = currentMDMatch.gameMode || 'Classic';
+            document.getElementById('md-map').innerText = currentMDMatch.map || 'Bermuda';
+            document.getElementById('md-team').innerText = currentMDMatch.teamMode || 'Solo';
+            document.getElementById('md-time').innerText = currentMDMatch.time || 'Check Details';
+            document.getElementById('md-fee').innerText = "₹" + currentMDMatch.fee;
+            document.getElementById('md-prize').innerText = "₹" + currentMDMatch.prize;
+            document.getElementById('md-perkill').innerText = "₹" + (currentMDMatch.perKill || 0);
+
+            // Populate exact requested Rules Text
+            document.getElementById('md-rules-box').innerText = `## NOVA BATTLE TOURNAMENT RULES & REGULATIONS
+
+📌 Joining Instructions
+- ⚠️ Mandatory Match Recording: Screen recording is strictly compulsory from the moment you join the custom room until the match starts. Failure to provide video proof when requested will result in a direct ban with no excuses.
+- Enter Correct Account Name: Please enter your exact Free Fire MAX in-game name (IGN) during registration. No changes will be allowed later, and mismatched names will not be permitted to play.
+- Match Room ID & Password: The room ID and password will be provided in the app 5–10 minutes before the scheduled match time.
+- Refund Policy: No refunds will be issued for missed matches or late arrivals.
+
+🎮 Eligibility Rules
+- Level Requirement: Only players with a Free Fire MAX account level of 40 or higher are eligible to join.
+- Headshot Rate: To ensure fair play, your BR career headshot rate must not exceed 70%.
+- Device Requirement: Only mobile devices (Android / iOS) and tablets are allowed. Emulator (PC/Laptop) players are strictly prohibited.
+
+🚫 Prohibited Behavior
+Engaging in any of the following activities will lead to immediate disqualification and a permanent ban without any prize distribution:
+- Using Aimbot, No Recoil, Wallhacks, or any other form of hacking.
+- Utilizing game-modifying tools, third-party config files, bugs, or glitches.
+- Teaming up with opponents during the match.
+- Inviting unregistered players into the custom room.
+- Banned Weapons: The use of Double Vector and the M79 (Launcher) gun is strictly prohibited.
+
+📋 Gameplay Requirements & Important Notes
+- Prize Adjustment: Prizes are subject to adjustment if the tournament slots are not completely filled.
+- Report Issues: Any complaints regarding hackers or rule violations must be reported to Customer Support with proper video proof within 1 hour of the match ending.
+- Nova Battle Rights: Nova Battle reserves the right to modify the prize pool, match timings, and rules at any given time.`;
+
+            setMDTab('desc');
+            showScreen('more-details-screen');
+        };
+
+        window.setMDTab = (tab) => {
+            activeMDTab = tab;
+            document.getElementById('md-tab-desc').classList.remove('active-cat');
+            document.getElementById('md-tab-joined').classList.remove('active-cat');
+            document.getElementById('md-tab-' + tab).classList.add('active-cat');
+
+            if(tab === 'desc') {
+                document.getElementById('md-desc-content').style.display = 'block';
+                document.getElementById('md-joined-content').style.display = 'none';
+            } else {
+                document.getElementById('md-desc-content').style.display = 'none';
+                document.getElementById('md-joined-content').style.display = 'block';
+                loadMDJoinedList();
+            }
+        };
+
+        window.loadMDJoinedList = () => {
+            const list = document.getElementById('md-joined-list');
+            list.innerHTML = "<p style='color:var(--primary); text-align:center;'>Loading joined players...</p>";
+            
+            get(ref(db, `matches/${currentMDMatch.id}`)).then(snap => {
+                const m = snap.val();
+                list.innerHTML = "";
+                let count = 0;
+                
+                const renderPlayerItem = (ffName, ffUid) => {
+                    count++;
+                    list.innerHTML += `<div class="glass-card" style="padding:12px 15px; display:flex; align-items:center; gap:15px; border-radius:15px;">
+                        <div style="font-size:14px; font-weight:800; color:var(--primary); width:24px;">#${count}</div>
+                        <div>
+                            <h4 style="margin:0; font-size:14px; color:var(--text);">${ffName}</h4>
+                            <p style="margin:2px 0 0; font-size:11px; color:var(--text-muted);">UID: ${ffUid}</p>
+                        </div>
+                    </div>`;
+                };
+
+                if(m.teamMode === 'Solo' || !m.teams) {
+                    for(let uid in m.participants) {
+                        renderPlayerItem(m.participants[uid].ffName, m.participants[uid].ffUid);
+                    }
+                } else {
+                    for(let tCode in m.teams) {
+                        const team = m.teams[tCode];
+                        for(let mUid in team.members) {
+                            renderPlayerItem(team.members[mUid].ffName, team.members[mUid].ffUid);
+                        }
+                    }
+                }
+
+                if(count === 0) {
+                    list.innerHTML = "<p style='color:var(--text-muted); text-align:center;'>No players have joined yet</p>";
+                }
+            });
+        };
+
+        // WITHDRAW SYSTEM
+        window.openWdMethodModal = () => {
+            document.getElementById('wd-method-modal').style.display = 'flex';
+        };
+
+        window.openUPIWdModal = () => {
+            closeModal();
+            document.getElementById('withdraw-modal').style.display = 'flex';
+        };
+
+        window.openRedeemCodeWdModal = () => {
+            closeModal();
+            const container = document.getElementById('redeem-packages-list');
+            container.innerHTML = "<p style='color:var(--primary); text-align:center;'>Loading Packages...</p>";
+            document.getElementById('redeem-code-modal').style.display = 'flex';
+
+            get(ref(db, 'admin_settings/redeem_packages')).then(snap => {
+                const packs = snap.val();
+                container.innerHTML = "";
+                
+                const defaultPacks = [
+                    { price: 10, title: "₹10 Google Play Gift Card" },
+                    { price: 20, title: "₹20 Google Play Gift Card" },
+                    { price: 50, title: "₹50 Google Play Gift Card" },
+                    { price: 100, title: "₹100 Google Play Gift Card" },
+                    { price: 250, title: "₹250 Google Play Gift Card" }
+                ];
+
+                const activePacks = packs ? Object.keys(packs).map(k => ({ id: k, ...packs[k] })) : defaultPacks;
+                
+                activePacks.forEach(p => {
+                    container.innerHTML += `<div class="glass-card" style="display:flex; justify-content:space-between; align-items:center; padding:15px; border:1px solid var(--border); border-radius:15px; text-align:left;">
+                        <div>
+                            <h4 style="margin:0; color:var(--text);">${p.title}</h4>
+                            <p style="margin:2px 0 0; font-size:11px; color:var(--text-muted);">Required Coins: ₹${p.price}</p>
+                        </div>
+                        <button class="btn btn-p" style="width:auto; padding:8px 15px; font-size:12px;" onclick="requestRedeemCodePackage(${p.price})">Claim</button>
+                    </div>`;
+                });
+            });
+        };
+
+        window.requestRedeemCodePackage = async (price) => {
+            if(parseInt(userObj.coins) < price) return alert("Insufficient balance to buy this package!");
+            setGlobalLoading(true);
+            
+            const newTxnRef = push(ref(db, 'requests/withdrawals'));
+            const txnKey = newTxnRef.key;
+            const timeString = new Date().toLocaleString();
+            
+            await update(ref(db, `users/${auth.currentUser.uid}`), { coins: parseInt(userObj.coins) - price });
+            await set(ref(db, `requests/withdrawals/${txnKey}`), { 
+                uid: auth.currentUser.uid, 
+                amount: price, 
+                upi: "Google Play Redeem Code Request", 
+                type: "redeem_code", 
+                status: "pending", 
+                timestamp: Date.now(), 
+                notified: false 
+            });
+            await set(ref(db, `users/${auth.currentUser.uid}/history/${txnKey}`), { 
+                title: "Redeem Code Request", 
+                amount: "-"+price, 
+                date: timeString, 
+                reason: "Google Play Card Code", 
+                status: "pending", 
+                type: "withdrawal",
+                isRedeem: true
+            });
+            
+            await triggerAdminAlertFCM("New Redeem Code Request! 🎁", `User ${userObj.name} has requested Google Play Redeem Code of ₹${price}`);
+            setGlobalLoading(false);
+            alert("Request Sent Successfully!");
+            closeModal();
+        };
+
+        // MY MATCHES PROFILE LIST SYSTEM
+        let activeMyMatchesTab = 'upcoming';
+        window.showMyMatchesScreen = () => {
+            showScreen('my-matches-screen');
+            loadMyMatches();
+        };
+        window.setMyMatchesTab = (tab) => {
+            activeMyMatchesTab = tab;
+            document.querySelectorAll('[id^="mym-cat-"]').forEach(b => b.classList.remove('active-cat'));
+            document.getElementById('mym-cat-' + tab)?.classList.add('active-cat');
+            loadMyMatches();
+        };
+        window.loadMyMatches = () => {
+            const list = document.getElementById('my-matches-list-container');
+            list.innerHTML = "<p style='color:var(--primary); text-align:center;'>Searching Matches...</p>";
+            get(ref(db, 'matches')).then(snap => {
+                const data = snap.val() || {};
+                list.innerHTML = "";
+                let counter = 0;
+                for(let id in data) {
+                    const m = data[id];
+                    const p = m.participants || {};
+                    let isJoined = false;
+                    if(p[auth.currentUser.uid]) isJoined = true;
+                    else if(m.teams) {
+                        for(let tCode in m.teams) {
+                            if(m.teams[tCode].members && m.teams[tCode].members[auth.currentUser.uid]) {
+                                isJoined = true;
+                                break;
+                            }
+                        }
+                    }
+                    if(!isJoined) continue;
+                    
+                    const mStatus = (m.status || 'upcoming').toLowerCase();
+                    if(activeMyMatchesTab === 'upcoming' && (mStatus === 'started' || mStatus === 'completed')) continue;
+                    if(activeMyMatchesTab === 'ongoing' && mStatus !== 'started') continue;
+                    if(activeMyMatchesTab === 'completed' && mStatus !== 'completed') continue;
+                    
+                    counter++;
+                    list.innerHTML += `<div class="glass-card" style="padding: 15px; display:flex; align-items:center; gap:15px; border:1px solid #e2e8f0; border-radius:18px; text-align:left;">
+                        <img src="${m.image}" style="width:70px; height:70px; border-radius:12px; object-fit:cover;" onerror="handleSquareImageError(this)">
+                        <div style="flex:1;">
+                            <h4 style="margin:0; font-size:14px; color:var(--text);">${m.title}</h4>
+                            <p style="margin:4px 0 0; font-size:11px; color:var(--text-muted);"><i class="fa fa-clock"></i> ${m.time}</p>
+                            <span class="badge" style="background:var(--primary)15; color:var(--primary); margin-top:5px; display:inline-block; font-size:9px;">${m.teamMode}</span>
+                        </div>
+                        <button class="btn btn-p" style="width:auto; padding:8px 12px; font-size:11px;" onclick="openMoreDetails('${id}')">View</button>
+                    </div>`;
+                }
+                if(counter === 0) {
+                    list.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);">No matches joined in this category.</div>`;
+                }
+            });
+        };
+
+        // APP TUTORIAL SYSTEM
+        window.showAppTutorialScreen = () => {
+            showScreen('app-tutorial-screen');
+            const container = document.getElementById('tutorial-cards-container');
+            container.innerHTML = "<p style='color:var(--primary); text-align:center;'>Loading Tutorials...</p>";
+            get(ref(db, 'app_tutorials')).then(snap => {
+                const data = snap.val();
+                container.innerHTML = "";
+                if(!data) {
+                    container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);">No tutorials available yet.</div>`;
+                    return;
+                }
+                for(let id in data) {
+                    const t = data[id];
+                    container.innerHTML += `<div class="glass-card" style="padding: 0; overflow:hidden; border-radius:20px; border:1px solid #e2e8f0; margin-bottom:20px; text-align:left;">
+                        <img src="${t.image}" onerror="handleImageError(this)" style="width:100%; height:160px; object-fit:cover;">
+                        <div style="padding:15px;">
+                            <h3 style="margin:0 0 10px 0; font-size:16px; color:var(--text);">${t.title}</h3>
+                            <button class="btn btn-p" onclick="window.open('${t.link}', '_blank')">${t.buttonText || "Watch Now"}</button>
+                        </div>
+                    </div>`;
+                }
+            });
+        };
 
         window.handleJoinMatchFlow = async (id) => {
             const snap = await get(ref(db, `matches/${id}`));
@@ -1956,10 +2547,9 @@
                                     bonus = parseInt(adminObj.referBonus || 0); 
                                     await update(ref(db, `users/${id}`), { coins: (parseInt(allUsers[id].coins) || 0) + bonus }); 
                                     break; 
-                                
                                 } 
                             }
-                            await set(ref(db, 'users/'+res.user.uid), { name: n, email: e, ffName: fn, ffUid: fu, coins: bonus, referCode: myCode, referredBy: r||"", pass: p });
+                            await set(ref(db, 'users/'+res.user.uid), { name: n, email: e, ffName: fn, ffUid: fu, coins: bonus, referCode: myCode, referredBy: r||"", pass: p, wins: 0, totalWinnings: 0, regDate: Date.now() });
                             await remove(ref(db, 'otp_requests/' + e_key)); alert("Signup Success!");
                         } else { alert("Invalid OTP!"); }
                     }
@@ -2032,6 +2622,7 @@
         window.submitDeposit = async () => { 
             const u = document.getElementById('utr-input').value.trim(), a = document.getElementById('dep-amt').value; 
             if(!u || !a) return alert("Fill details!"); 
+            if(parseInt(a) < 10) return alert("Minimum deposit amount is ₹10!");
             const utrPattern = /^[A-Za-z0-9]{12,22}$/;
             if (!utrPattern.test(u)) {
                 return alert("Invalid UTR/TXN ID! Please provide between 12 to 22 alphanumeric characters.");
@@ -2090,6 +2681,7 @@
                             
                             let displayStatus = "PENDING", statusColor = '#eab308';
                             const isUserInitiated = t.type === 'deposit' || t.type === 'withdrawal';
+                            let redeemCodeHtml = "";
 
                             if (!isUserInitiated) {
                                 displayStatus = "SUCCESS";
@@ -2102,6 +2694,18 @@
                                 if (['success', 'accepted', 'completed', 'approved', 'paid'].includes(rawStatus)) { 
                                     displayStatus = "SUCCESS"; 
                                     statusColor = '#10b981'; 
+
+                                    // Display copyable Google Play redeem code if transaction is completed and it's a redeem request
+                                    if(t.isRedeem) {
+                                        const wdItem = withdrawalsData[key] || {};
+                                        const rCode = wdItem.redeem_code || "";
+                                        if(rCode) {
+                                            redeemCodeHtml = `<div class="copy-box" style="margin-top:10px; background:#f0fdf4; border-color:#bbf7d0;">
+                                                <span style="font-weight:700; color:#15803d; font-family:monospace; font-size:14px;">Code: ${rCode}</span>
+                                                <i class="fa-solid fa-copy" onclick="copyOne('${rCode}', 'Redeem Code')" style="color:#15803d;"></i>
+                                            </div>`;
+                                        }
+                                    }
                                 } 
                                 else if (['rejected', 'failed', 'cancelled', 'declined'].includes(rawStatus)) { 
                                     displayStatus = "FAILED"; 
@@ -2116,7 +2720,7 @@
                             txnItem.className = 'txn-item';
                             txnItem.innerHTML = `
                                 <div class="txn-main">
-                                    <div style="flex: 1; padding-right: 10px;">
+                                    <div style="flex: 1; padding-right: 10px; text-align:left;">
                                         <div style="font-size:14px; color: var(--text); font-weight: 700; margin-bottom: 2px;">${t.title || 'Transaction'}</div>
                                         <div style="color:var(--text-muted); font-size:11px;">${t.date || 'Recent'}</div>
                                     </div>
@@ -2126,6 +2730,7 @@
                                     </div>
                                 </div>
                                 ${t.reason ? `<div class="txn-reason">${t.reason}</div>` : ''}
+                                ${redeemCodeHtml}
                             `;
                             
                             fragment.appendChild(txnItem);
@@ -2155,7 +2760,7 @@
         window.togglePass = (id, icon) => { 
             const x = document.getElementById(id); 
             if(x.type === "password") { x.type = "text"; icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash', 'eye-active'); } 
-            else { x.type = "password"; icon.classList.remove('fa-eye-slash', 'eye-active'); icon.add('fa-eye'); }
+            else { x.type = "password"; icon.classList.remove('fa-eye-slash', 'eye-active'); icon.classList.add('fa-eye'); }
         };
         
         window.copyRef = async () => { 
@@ -2195,13 +2800,24 @@
         window.showInfo = (type) => { 
             const title = document.getElementById('info-title'), text = document.getElementById('info-text'), btns = document.getElementById('support-btns'), dateField = document.getElementById('policy-date-container'); 
             btns.style.display = "none"; dateField.style.display = "none"; text.innerText = ""; 
-            if(type=='support') { title.innerText="Support"; btns.style.display="block"; document.getElementById('s-mail-btn').onclick = () => window.open("mailto:"+adminObj.supportEmail); document.getElementById('s-insta-btn').onclick = () => window.open(adminObj.instaUrl); } 
+            if(type=='support') { 
+                title.innerText="Support"; 
+                btns.style.display="block"; 
+                document.getElementById('s-mail-btn').onclick = () => window.open("mailto:"+adminObj.supportEmail); 
+                document.getElementById('s-insta-btn').onclick = () => window.open(adminObj.instaUrl); 
+                const ytBtn = document.getElementById('s-yt-btn');
+                if(adminObj.ytUrl) {
+                    ytBtn.style.display = "flex";
+                    ytBtn.onclick = () => window.open(adminObj.ytUrl);
+                } else {
+                    ytBtn.style.display = "none";
+                }
+            } 
             if(type=='policy') { title.innerText="Privacy Policy"; text.innerText = adminObj.privacyPolicy; if(adminObj.policyUpdateDate) { dateField.style.display = "block"; document.getElementById('policy-date').innerText = adminObj.policyUpdateDate; } } 
             if(type=='faq') { title.innerText="FAQ & Terms"; text.innerText = adminObj.faqContent; } 
             if(type=='about') { title.innerText="About Us"; text.innerText = adminObj.aboutUs; } 
             showScreen('info-screen'); 
         };
-        window.openWdModal = () => { document.getElementById('withdraw-modal').style.display='flex'; };
 
         // 6-Digit Custom OTP Box Controller (Compatible with Existing Flows)
         function setupOTPAutoVerification(containerId, hiddenInputId, onCompleteCallback) {
