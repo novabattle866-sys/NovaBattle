@@ -272,7 +272,7 @@
             transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); 
             user-select: none;
         }
-        .slide-img { min-width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        .slide-img { min-width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
 
         .slider-wrapper:empty {
             display: flex;
@@ -1114,6 +1114,12 @@
             }
         };
 
+        window.openBannerLink = (link) => {
+            if (link && link.trim() !== "") {
+                window.open(link, '_blank');
+            }
+        };
+
         window.openFreeFire = function() {
             if (window.AndroidInterface) { 
                 window.AndroidInterface.launchFreeFire(); 
@@ -1631,11 +1637,7 @@
                 const links = adminObj.bannerLinks ? adminObj.bannerLinks.split(',') : [];
                 banners.forEach((url, index) => {
                     const link = links[index] ? links[index].trim() : '';
-                    wrapper.innerHTML += `
-                        <div class="slide-item" onclick="${link ? `window.open('${link}', '_blank')` : ''}" style="min-width: 100%; height: 100%; cursor: ${link ? 'pointer' : 'default'}; position: relative;">
-                            <img src="${url.trim()}" class="slide-img" onerror="handleImageError(this)">
-                        </div>
-                    `;
+                    wrapper.innerHTML += `<img src="${url.trim()}" class="slide-img" onerror="handleImageError(this)" onclick="window.openBannerLink('${link}')" style="${link ? 'cursor:pointer;' : ''}">`;
                 });
                 initInteractiveSlider(banners.length);
             }
@@ -1850,18 +1852,17 @@
                 let list = [];
                 for(let uid in users) {
                     const u = users[uid];
-                    const winsCount = parseInt(u.wins || 0);
-                    // Filter: Only add players who have at least 1 win
-                    if (winsCount > 0) {
-                        list.push({
-                            name: u.name || "User",
-                            ffName: u.ffName || "Not Set",
-                            ffUid: u.ffUid || "N/A",
-                            wins: winsCount,
-                            regDate: u.regDate || 1767225600000 // default to Jan 1 2026 if empty
-                        });
-                    }
+                    list.push({
+                        name: u.name || "User",
+                        ffName: u.ffName || "Not Set",
+                        ffUid: u.ffUid || "N/A",
+                        wins: parseInt(u.wins || 0),
+                        regDate: u.regDate || 1767225600000 // default to Jan 1 2026 if empty
+                    });
                 }
+
+                // Only show players with wins > 0
+                list = list.filter(p => p.wins > 0);
 
                 list.sort((a, b) => {
                     if (b.wins !== a.wins) {
@@ -1873,17 +1874,35 @@
                 let top10 = list.slice(0, 10);
                 container.innerHTML = "";
                 
+                if (top10.length === 0) {
+                    container.innerHTML = "<p style='color:var(--text-muted); text-align:center; padding:20px;'>No leaderboard data available. Only players with at least 1 win are listed here.</p>";
+                    return;
+                }
+
                 top10.forEach((p, idx) => {
                     const rank = idx + 1;
-                    let badgeColor = "var(--text-muted)";
+                    let cardStyle = "background: #ffffff; border: 1px solid var(--border);";
+                    let rankColor = "#0f172a"; // default black
                     let badgeIcon = "";
                     
-                    if(rank === 1) { badgeColor = "#eab308"; badgeIcon = '<i class="fa-solid fa-crown" style="color:#eab308"></i> '; }
-                    else if(rank === 2) { badgeColor = "#cbd5e1"; }
-                    else if(rank === 3) { badgeColor = "#b45309"; }
+                    if(rank === 1) { 
+                        cardStyle = "background: #fffbeb; border: 1.5px solid #eab308; box-shadow: 0 4px 12px rgba(234, 179, 8, 0.15);";
+                        rankColor = "#ca8a04"; // gold rank color
+                        badgeIcon = '<i class="fa-solid fa-crown" style="color:#ca8a04"></i> '; 
+                    }
+                    else if(rank === 2) { 
+                        cardStyle = "background: #f8fafc; border: 1.5px solid #94a3b8; box-shadow: 0 4px 12px rgba(148, 163, 184, 0.1);";
+                        rankColor = "#475569"; // silver/slate rank color
+                        badgeIcon = '<i class="fa-solid fa-medal" style="color:#94a3b8"></i> ';
+                    }
+                    else if(rank === 3) { 
+                        cardStyle = "background: #fff5f5; border: 1.5px solid #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);";
+                        rankColor = "#ef4444"; // red rank color
+                        badgeIcon = '<i class="fa-solid fa-medal" style="color:#ef4444"></i> ';
+                    }
 
-                    container.innerHTML += `<div class="glass-card" style="display:flex; align-items:center; gap:15px; padding:15px; border-color: ${rank <= 3 ? badgeColor : 'var(--border)'}; text-align:left;">
-                        <div style="font-size: 18px; font-weight: 800; color: ${badgeColor}; width:30px; text-align:center;">#${rank}</div>
+                    container.innerHTML += `<div class="glass-card" style="display:flex; align-items:center; gap:15px; padding:15px; ${cardStyle} text-align:left;">
+                        <div style="font-size: 18px; font-weight: 800; color: ${rankColor}; width:30px; text-align:center;">#${rank}</div>
                         <div style="flex:1;">
                             <h4 style="margin:0; font-size:14px; color:var(--text);">${badgeIcon}${p.name}</h4>
                             <p style="margin:2px 0 0; font-size:11px; color:var(--text-muted);">FF: ${p.ffName} | UID: ${p.ffUid}</p>
@@ -1920,7 +1939,29 @@
             // Populate exact requested Rules Text
             document.getElementById('md-rules-box').innerText = `## NOVA BATTLE TOURNAMENT RULES & REGULATIONS
 
-... (All other codes remain identical) ...`;
+📌 Joining Instructions
+- ⚠️ Mandatory Match Recording: Screen recording is strictly compulsory from the moment you join the custom room until the match starts. Failure to provide video proof when requested will result in a direct ban with no excuses.
+- Enter Correct Account Name: Please enter your exact Free Fire MAX in-game name (IGN) during registration. No changes will be allowed later, and mismatched names will not be permitted to play.
+- Match Room ID & Password: The room ID and password will be provided in the app 5–10 minutes before the scheduled match time.
+- Refund Policy: No refunds will be issued for missed matches or late arrivals.
+
+🎮 Eligibility Rules
+- Level Requirement: Only players with a Free Fire MAX account level of 40 or higher are eligible to join.
+- Headshot Rate: To ensure fair play, your BR career headshot rate must not exceed 70%.
+- Device Requirement: Only mobile devices (Android / iOS) and tablets are allowed. Emulator (PC/Laptop) players are strictly prohibited.
+
+🚫 Prohibited Behavior
+Engaging in any of the following activities will lead to immediate disqualification and a permanent ban without any prize distribution:
+- Using Aimbot, No Recoil, Wallhacks, or any other form of hacking.
+- Utilizing game-modifying tools, third-party config files, bugs, or glitches.
+- Teaming up with opponents during the match.
+- Inviting unregistered players into the custom room.
+- Banned Weapons: The use of Double Vector and the M79 (Launcher) gun is strictly prohibited.
+
+📋 Gameplay Requirements & Important Notes
+- Prize Adjustment: Prizes are subject to adjustment if the tournament slots are not completely filled.
+- Report Issues: Any complaints regarding hackers or rule violations must be reported to Customer Support with proper video proof within 1 hour of the match ending.
+- Nova Battle Rights: Nova Battle reserves the right to modify the prize pool, match timings, and rules at any given time.`;
 
             setMDTab('desc');
             showScreen('more-details-screen');
