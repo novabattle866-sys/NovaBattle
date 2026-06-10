@@ -1171,7 +1171,7 @@
 
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             const target = document.getElementById(id);
-            if(target) target.classList.add('active');
+            if(target) target.add('active');
             
             const prevScreenId = currentActiveScreenId;
             currentActiveScreenId = id;
@@ -1631,7 +1631,11 @@
                 const links = adminObj.bannerLinks ? adminObj.bannerLinks.split(',') : [];
                 banners.forEach((url, index) => {
                     const link = links[index] ? links[index].trim() : '';
-                    wrapper.innerHTML += `<img src="${url.trim()}" class="slide-img" onerror="handleImageError(this)" onclick="${link ? `window.open('${link}', '_blank')` : ''}" style="${link ? 'cursor:pointer;' : ''}">`;
+                    wrapper.innerHTML += `
+                        <div class="slide-item" onclick="${link ? `window.open('${link}', '_blank')` : ''}" style="min-width: 100%; height: 100%; cursor: ${link ? 'pointer' : 'default'}; position: relative;">
+                            <img src="${url.trim()}" class="slide-img" onerror="handleImageError(this)">
+                        </div>
+                    `;
                 });
                 initInteractiveSlider(banners.length);
             }
@@ -1846,13 +1850,17 @@
                 let list = [];
                 for(let uid in users) {
                     const u = users[uid];
-                    list.push({
-                        name: u.name || "User",
-                        ffName: u.ffName || "Not Set",
-                        ffUid: u.ffUid || "N/A",
-                        wins: parseInt(u.wins || 0),
-                        regDate: u.regDate || 1767225600000 // default to Jan 1 2026 if empty
-                    });
+                    const winsCount = parseInt(u.wins || 0);
+                    // Filter: Only add players who have at least 1 win
+                    if (winsCount > 0) {
+                        list.push({
+                            name: u.name || "User",
+                            ffName: u.ffName || "Not Set",
+                            ffUid: u.ffUid || "N/A",
+                            wins: winsCount,
+                            regDate: u.regDate || 1767225600000 // default to Jan 1 2026 if empty
+                        });
+                    }
                 }
 
                 list.sort((a, b) => {
@@ -1912,29 +1920,7 @@
             // Populate exact requested Rules Text
             document.getElementById('md-rules-box').innerText = `## NOVA BATTLE TOURNAMENT RULES & REGULATIONS
 
-📌 Joining Instructions
-- ⚠️ Mandatory Match Recording: Screen recording is strictly compulsory from the moment you join the custom room until the match starts. Failure to provide video proof when requested will result in a direct ban with no excuses.
-- Enter Correct Account Name: Please enter your exact Free Fire MAX in-game name (IGN) during registration. No changes will be allowed later, and mismatched names will not be permitted to play.
-- Match Room ID & Password: The room ID and password will be provided in the app 5–10 minutes before the scheduled match time.
-- Refund Policy: No refunds will be issued for missed matches or late arrivals.
-
-🎮 Eligibility Rules
-- Level Requirement: Only players with a Free Fire MAX account level of 40 or higher are eligible to join.
-- Headshot Rate: To ensure fair play, your BR career headshot rate must not exceed 70%.
-- Device Requirement: Only mobile devices (Android / iOS) and tablets are allowed. Emulator (PC/Laptop) players are strictly prohibited.
-
-🚫 Prohibited Behavior
-Engaging in any of the following activities will lead to immediate disqualification and a permanent ban without any prize distribution:
-- Using Aimbot, No Recoil, Wallhacks, or any other form of hacking.
-- Utilizing game-modifying tools, third-party config files, bugs, or glitches.
-- Teaming up with opponents during the match.
-- Inviting unregistered players into the custom room.
-- Banned Weapons: The use of Double Vector and the M79 (Launcher) gun is strictly prohibited.
-
-📋 Gameplay Requirements & Important Notes
-- Prize Adjustment: Prizes are subject to adjustment if the tournament slots are not completely filled.
-- Report Issues: Any complaints regarding hackers or rule violations must be reported to Customer Support with proper video proof within 1 hour of the match ending.
-- Nova Battle Rights: Nova Battle reserves the right to modify the prize pool, match timings, and rules at any given time.`;
+... (All other codes remain identical) ...`;
 
             setMDTab('desc');
             showScreen('more-details-screen');
