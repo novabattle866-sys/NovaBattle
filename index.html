@@ -1390,6 +1390,34 @@
             }
         }
 
+        // Sends instant push notification to a specific user on their UID topic
+        async function triggerUserFCM(uid, title, message) {
+            try {
+                const realGoogleToken = await getGoogleAccessToken();
+                const jsonPayload = {
+                    "message": {
+                        "topic": `user_${uid}`,
+                        "data": {
+                            "title": title,
+                            "body": message,
+                            "notification_id": String(Date.now())
+                        }
+                    }
+                };
+
+                await fetch("https://fcm.googleapis.com/v1/projects/novabattle-99eb9/messages:send", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + realGoogleToken
+                    },
+                    body: JSON.stringify(jsonPayload)
+                });
+            } catch (err) {
+                console.error("FCM user sending issue: ", err);
+            }
+        }
+
         let userObj = null, adminObj = {}, isSignUp = false, selectedMatch = null, activeCategory = 'upcoming', isOtpSent = false;
         let fp_otp_generated = null;
         let fp_email_stored = "";
@@ -2445,6 +2473,15 @@ Engaging in any of the following activities will lead to immediate disqualificat
 
                 if (window.AndroidInterface && window.AndroidInterface.subscribeToTopic) {
                     window.AndroidInterface.subscribeToTopic(`match_${selectedMatch.id}`);
+                }
+
+                // Send target notification to all existing players in the team (the leader and any other team members)
+                if (team.members) {
+                    for (let memberUid in team.members) {
+                        if (memberUid !== auth.currentUser.uid) {
+                            await triggerUserFCM(memberUid, "New Player Joined! 🎮", `${n} has joined your team ${team.teamName || code} in Slot ${team.slot}`);
+                        }
+                    }
                 }
 
                 alert("Successfully joined Team " + (team.teamName || code));
