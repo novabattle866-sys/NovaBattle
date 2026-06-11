@@ -1398,6 +1398,62 @@
         let currentJoinMode = 'solo'; 
         let currentSelectedCategoryName = "";
 
+        // Referral checking function on successful deposit detection
+        async function checkAndProcessReferral(uid, uObj) {
+            if (uObj && uObj.referredBy && !uObj.referralRewardClaimed) {
+                try {
+                    const depSnap = await get(ref(db, 'requests/deposits'));
+                    const deposits = depSnap.val() || {};
+                    let hasSuccessfulDeposit = false;
+                    for (let depKey in deposits) {
+                        const dep = deposits[depKey];
+                        if (dep.uid === uid && ['success', 'accepted', 'completed', 'approved', 'paid'].includes((dep.status || '').toLowerCase())) {
+                            hasSuccessfulDeposit = true;
+                            break;
+                        }
+                    }
+                    if (hasSuccessfulDeposit) {
+                        const referrerCode = uObj.referredBy;
+                        const usersSnap = await get(ref(db, 'users'));
+                        const users = usersSnap.val() || {};
+                        let referrerUid = null;
+                        let referrerObj = null;
+                        for (let uId in users) {
+                            if (users[uId].referCode === referrerCode) {
+                                referrerUid = uId;
+                                referrerObj = users[uId];
+                                break;
+                            }
+                        }
+                        if (referrerUid && referrerObj) {
+                            const referBonus = parseInt(adminObj.referBonus || 0);
+                            const currentReferrerCoins = parseInt(referrerObj.coins || 0);
+                            const referrerHistoryRef = push(ref(db, `users/${referrerUid}/history`));
+                            const timeString = new Date().toLocaleString();
+                            
+                            const updates = {};
+                            updates[`users/${referrerUid}/coins`] = currentReferrerCoins + referBonus;
+                            updates[`users/${referrerUid}/history/${referrerHistoryRef.key}`] = {
+                                title: "Referral Reward",
+                                amount: "+" + referBonus,
+                                date: timeString,
+                                reason: "Referral bonus for " + uObj.name,
+                                status: "success"
+                            };
+                            updates[`users/${uid}/referralRewardClaimed`] = true;
+                            
+                            await update(ref(db), updates);
+                            await triggerAdminAlertFCM("New Referral Reward! 🎁", `User ${referrerObj.name} rewarded ₹${referBonus} for referral of ${uObj.name}`);
+                        } else {
+                            await update(ref(db, `users/${uid}`), { referralRewardClaimed: true });
+                        }
+                    }
+                } catch(e) {
+                    console.error("Referral process error: ", e);
+                }
+            }
+        }
+
         onAuthStateChanged(auth, (user) => {
             if(user) {
                 if (window.AndroidInterface && window.AndroidInterface.subscribeToTopic) {
@@ -1433,6 +1489,9 @@
                         updateReferralStats(userObj.referCode);
                         loadHistory(user.uid);
                         
+                        // Check if referral code is present and if we can trigger the reward
+                        checkAndProcessReferral(user.uid, userObj);
+
                         setCategory('upcoming');
                         showScreen('home-screen');
                     }
@@ -1636,7 +1695,7 @@
                 const links = adminObj.bannerLinks ? adminObj.bannerLinks.split(',') : [];
                 banners.forEach((url, index) => {
                     const link = links[index] ? links[index].trim() : '';
-                    wrapper.innerHTML += `<img src="${url.trim()}" class="slide-img" onerror="handleImageError(this)" onclick="window.openBannerLink('${link}')" style="${link ? 'cursor:pointer;' : ''}">`;
+                    wrapper.innerHTML += `<img src="${url.trim()}" class="slide-img" draggable="false" onerror="handleImageError(this)" onclick="window.openBannerLink('${link}')" style="${link ? 'cursor:pointer;' : ''}">`;
                 });
                 initInteractiveSlider(banners.length);
             }
@@ -1657,17 +1716,18 @@
             const startAutoSlide = () => { clearInterval(sliderTimer); sliderTimer = setInterval(() => { slideIdx = (slideIdx + 1) % count; updateSliderPosition(); }, 4000); };
             const updateSliderPosition = () => { currentTranslate = slideIdx * -100; prevTranslate = currentTranslate; wrapper.style.transform = `translateX(${currentTranslate}%)`; };
             container.addEventListener('mousedown', dragStart);
-            container.addEventListener('touchstart', dragStart);
+            container.addEventListener('touchstart', dragStart, { passive: true });
             container.addEventListener('mouseup', dragEnd);
             container.addEventListener('touchend', dragEnd);
+            container.addEventListener('touchcancel', dragEnd);
             container.addEventListener('mousemove', dragMove);
-            container.addEventListener('touchmove', dragMove);
+            container.addEventListener('touchmove', dragMove, { passive: true });
             container.addEventListener('mouseenter', () => clearInterval(sliderTimer));
-            container.addEventListener('mouseleave', startAutoSlide);
+            container.addEventListener('mouseleave', () => { dragEnd(); startAutoSlide(); });
             function dragStart(e) { isDragging = true; startX = getPositionX(e); clearInterval(sliderTimer); wrapper.style.transition = 'none'; }
             function dragMove(e) { if (!isDragging) return; const currentX = getPositionX(e); const diff = ((currentX - startX) / container.offsetWidth) * 100; wrapper.style.transform = `translateX(${prevTranslate + diff}%)`; }
-            function dragEnd() { isDragging = false; wrapper.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'; const movedBy = (parseFloat(wrapper.style.transform.replace('translateX(', '')) || 0) - prevTranslate; if (movedBy < -15 && slideIdx < count - 1) slideIdx++; else if (movedBy > 15 && slideIdx > 0) slideIdx--; updateSliderPosition(); startAutoSlide(); }
-            function getPositionX(e) { return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX; }
+            function dragEnd() { if (!isDragging) return; isDragging = false; wrapper.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'; const movedBy = (parseFloat(wrapper.style.transform.replace('translateX(', '')) || 0) - prevTranslate; if (movedBy < -15 && slideIdx < count - 1) slideIdx++; else if (movedBy > 15 && slideIdx > 0) slideIdx--; updateSliderPosition(); startAutoSlide(); }
+            function getPositionX(e) { return e.type.includes('mouse') ? e.pageX : (e.touches && e.touches.length ? e.touches[0].clientX : 0); }
             startAutoSlide();
         }
 
@@ -1684,7 +1744,14 @@
                     "classic": { name: "Classic BR", image: "https://images.unsplash.com/photo-1542751371-adc38448a05e" },
                     "cs": { name: "Clash Squad", image: "https://images.unsplash.com/photo-1511512578047-dfb367046420" }
                 };
-                for(let id in data) {
+                const keys = Object.keys(data).sort((a, b) => {
+                    if (data[a].timestamp && data[b].timestamp) {
+                        return data[a].timestamp - data[b].timestamp;
+                    }
+                    return a.localeCompare(b);
+                });
+                for(let i = 0; i < keys.length; i++) {
+                    const id = keys[i];
                     const cat = data[id];
                     container.innerHTML += `<div class="glass-card" style="padding: 0; overflow: hidden; border-radius: 18px; cursor: pointer; box-shadow: var(--shadow); border: 1px solid var(--border);" onclick="filterMatchesByCategory('${cat.name}')">
                         <img src="${cat.image}" style="width: 100%; height: 110px; object-fit: cover;" onerror="handleImageError(this)">
@@ -1957,7 +2024,7 @@ Engaging in any of the following activities will lead to immediate disqualificat
 - Inviting unregistered players into the custom room.
 - Banned Weapons: The use of Double Vector and the M79 (Launcher) gun is strictly prohibited.
 
-📋 Gameplay Requirements & Important Notes
+🚫 Gameplay Requirements & Important Notes
 - Prize Adjustment: Prizes are subject to adjustment if the tournament slots are not completely filled.
 - Report Issues: Any complaints regarding hackers or rule violations must be reported to Customer Support with proper video proof within 1 hour of the match ending.
 - Nova Battle Rights: Nova Battle reserves the right to modify the prize pool, match timings, and rules at any given time.`;
@@ -2100,6 +2167,9 @@ Engaging in any of the following activities will lead to immediate disqualificat
         // MY MATCHES PROFILE LIST SYSTEM
         let activeMyMatchesTab = 'upcoming';
         window.showMyMatchesScreen = () => {
+            activeMyMatchesTab = 'upcoming';
+            document.querySelectorAll('[id^="mym-cat-"]').forEach(b => b.classList.remove('active-cat'));
+            document.getElementById('mym-cat-upcoming')?.classList.add('active-cat');
             showScreen('my-matches-screen');
             loadMyMatches();
         };
@@ -2566,16 +2636,21 @@ Engaging in any of the following activities will lead to immediate disqualificat
                         if(String(requestData.otp).trim() === otp_entered) {
                             const res = await createUserWithEmailAndPassword(auth, e, p);
                             const myCode = n.substring(0,4).toUpperCase() + Math.floor(1000+Math.random()*9000);
-                            let bonus = 0; 
-                            if(r) { 
-                                const allUsers = (await get(ref(db, 'users'))).val(); 
-                                for(let id in allUsers) if(allUsers[id].referCode === r) { 
-                                    bonus = parseInt(adminObj.referBonus || 0); 
-                                    await update(ref(db, `users/${id}`), { coins: (parseInt(allUsers[id].coins) || 0) + bonus }); 
-                                    break; 
-                                } 
-                            }
-                            await set(ref(db, 'users/'+res.user.uid), { name: n, email: e, ffName: fn, ffUid: fu, coins: bonus, referCode: myCode, referredBy: r||"", pass: p, wins: 0, totalWinnings: 0, regDate: Date.now() });
+                            
+                            // Referree starts with 0 coins. Referrer will receive rewards upon first successful deposit.
+                            await set(ref(db, 'users/'+res.user.uid), { 
+                                name: n, 
+                                email: e, 
+                                ffName: fn, 
+                                ffUid: fu, 
+                                coins: 0, 
+                                referCode: myCode, 
+                                referredBy: r||"", 
+                                pass: p, 
+                                wins: 0, 
+                                totalWinnings: 0, 
+                                regDate: Date.now() 
+                            });
                             await remove(ref(db, 'otp_requests/' + e_key)); alert("Signup Success!");
                         } else { alert("Invalid OTP!"); }
                     }
